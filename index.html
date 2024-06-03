@@ -48,43 +48,43 @@
 
                     <h2>Sociodemografi</h2>
                     <div class="form-group">
-                        <label for="alder" class="label">Ålder</label>
-                        <input type="number" id="alder" value="56" class="input">
+                        <label for="AgeAtSurgery" class="label">Ålder</label>
+                        <input type="number" id="AgeAtSurgery" value="56" class="input">
                     </div>
                     <div class="form-group">
                         <label class="label">Kön</label>
                         <div class="input radio-group">
-                            <input type="radio" id="kvinna" name="kon" value="kvinna" checked>
-                            <label for="kvinna">Kvinna</label>
-                            <input type="radio" id="man" name="kon" value="man">
-                            <label for="man">Man</label>
+                            <input type="radio" id="Female1" name="Female" value="1" checked>
+                            <label for="Female1">Kvinna</label>
+                            <input type="radio" id="Female0" name="Female" value="0">
+                            <label for="Female0">Man</label>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="label">Arbetslös</label>
                         <div class="input radio-group">
-                            <input type="radio" id="arbetslosJa" name="arbetslos" value="ja">
-                            <label for="arbetslosJa">Ja</label>
-                            <input type="radio" id="arbetslosNej" name="arbetslos" value="nej" checked>
-                            <label for="arbetslosNej">Nej</label>
+                            <input type="radio" id="IsUnemployed1" name="IsUnemployed" value="1">
+                            <label for="IsUnemployed1">Ja</label>
+                            <input type="radio" id="IsUnemployed0" name="IsUnemployed" value="0" checked>
+                            <label for="IsUnemployed0">Nej</label>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="label">Sjukpension</label>
                         <div class="input radio-group">
-                            <input type="radio" id="sjukpensionJa" name="sjukpension" value="ja">
-                            <label for="sjukpensionJa">Ja, heltid / deltid</label>
-                            <input type="radio" id="sjukpensionNej" name="sjukpension" value="nej" checked>
-                            <label for="sjukpensionNej">Nej</label>
+                            <input type="radio" id="HasSickPension1" name="HasSickPension" value="1">
+                            <label for="HasSickPension1">Ja, heltid / deltid</label>
+                            <input type="radio" id="HasSickPension0" name="HasSickPension" value="0" checked>
+                            <label for="HasSickPension0">Nej</label>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="label">Ålderspension</label>
                         <div class="input radio-group">
-                            <input type="radio" id="alderspensionJa" name="alderspension" value="ja">
-                            <label for="alderspensionJa">Ja, heltid / deltid</label>
-                            <input type="radio" id="alderspensionNej" name="alderspension" value="nej" checked>
-                            <label for="alderspensionNej">Nej</label>
+                            <input type="radio" id="HasAgePension1" name="HasAgePension" value="1">
+                            <label for="HasAgePension1">Ja, heltid / deltid</label>
+                            <input type="radio" id="HasAgePension0" name="HasAgePension" value="0" checked>
+                            <label for="HasAgePension0">Nej</label>
                         </div>
                     </div>
 
@@ -92,34 +92,34 @@
                     <div class="form-group">
                         <label class="label">Rökare</label>
                         <div class="input radio-group">
-                            <input type="radio" id="rokareJa" name="rokare" value="ja">
-                            <label for="rokareJa">Ja</label>
-                            <input type="radio" id="rokareNej" name="rokare" value="nej" checked>
-                            <label for="rokareNej">Nej</label>
+                            <input type="radio" id="IsSmoker1" name="IsSmoker" value="1">
+                            <label for="IsSmoker1">Ja</label>
+                            <input type="radio" id="IsSmoker0" name="IsSmoker" value="0" checked>
+                            <label for="IsSmoker0">Nej</label>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="label">Tidigare ryggop</label>
                         <div class="input radio-group">
-                            <input type="radio" id="ryggopJa" name="ryggop" value="ja">
-                            <label for="ryggopJa">Ja</label>
-                            <input type="radio" id="ryggopNej" name="ryggop" value="nej" checked>
-                            <label for="ryggopNej">Nej</label>
+                            <input type="radio" id="IsPreviouslyOperated1" name="IsPreviouslyOperated" value="1">
+                            <label for="IsPreviouslyOperated1">Ja</label>
+                            <input type="radio" id="IsPreviouslyOperated0" name="IsPreviouslyOperated" value="0" checked>
+                            <label for="IsPreviouslyOperated0">Nej</label>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="label">Samsjuklighet</label>
                         <div class="input radio-group">
-                            <input type="radio" id="samsjuklighetJa" name="samsjuklighet" value="ja">
-                            <label for="samsjuklighetJa">Ja</label>
-                            <input type="radio" id="samsjuklighetNej" name="samsjuklighet" value="nej" checked>
-                            <label for="samsjuklighetNej">Nej</label>
+                            <input type="radio" id="HasOtherIllness1" name="HasOtherIllness" value="1">
+                            <label for="HasOtherIllness1">Ja</label>
+                            <input type="radio" id="HasOtherIllness0" name="HasOtherIllness" value="0" checked>
+                            <label for="HasOtherIllness0">Nej</label>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="eq5d" class="label">EQ5D</label>
-                        <input type="text" id="eq5d-value" value="0.57" class="input">
-                        <input type="range" id="eq5d" min="-0.59" max="1" step="0.01" value="0.57" class="input">
+                        <label for="EQ5DIndex" class="label">EQ5D</label>
+                        <input type="text" id="EQ5DIndex-value" value="0.57" class="input">
+                        <input type="range" id="EQ5DIndex" min="-0.59" max="1" step="0.01" value="0.57" class="input">
                     </div>
                 </div>
 
@@ -128,9 +128,9 @@
                     <div class="form-group">
                         <label for="AbilityWalking" class="label">Promenadsträcka</label>
                         <select id="AbilityWalking" class="input">
-                            <option value="1">0,5-1 kilometer</option>
-                            <option value="2">0-100 meter</option>
-                            <option value="3">100-500 meter</option>
+                            <option value="1">0-100 meter</option>
+                            <option value="2">100-500 meter</option>
+                            <option value="3">0,5-1 kilometer</option>
                             <option value="4" selected>Mer än 1 kilometer</option>
                         </select>
                     </div>

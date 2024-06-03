@@ -32,7 +32,7 @@ function initializeRangeControl(name) {
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
-  initializeRangeControl('eq5d');
+  initializeRangeControl('EQ5DIndex');
   initializeRangeControl('painLevelLeg');
   initializeRangeControl('painLevelBack');
   initializeRangeControl('ODI');
