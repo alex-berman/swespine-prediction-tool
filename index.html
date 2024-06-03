@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dialogstöd inom ryggkirurgi – baserat på Svenska Ryggregistret Swespine</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="left-section">
+            <div class="tabs">
+                <button class="tab-button active" data-tab="basinformation">Basinformation</button>
+                <button class="tab-button" data-tab="ryggspecifik">Ryggspecifik information</button>
+            </div>
+            <div class="tab-content">
+                <div id="basinformation" class="tab-pane active">
+                    <h2>Undergrupp</h2>
+                    <div class="form-group">
+                        <label for="diagnosgrupp" class="label">Diagnosgrupp</label>
+                        <select id="diagnosgrupp" class="input">
+                            <option value="diskbrack">Diskbråck</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Opererade nivåer</label>
+                        <div id="opererade-nivaer" class="input radio-group">
+                            <input type="radio" id="nivaer1" name="nivaer" value="1" checked>
+                            <label for="nivaer1">1</label>
+                            <input type="radio" id="nivaer2" name="nivaer" value="2">
+                            <label for="nivaer2">2</label>
+                            <input type="radio" id="nivaer3" name="nivaer" value="3">
+                            <label for="nivaer3">3</label>
+                            <input type="radio" id="nivaer4" name="nivaer" value="4">
+                            <label for="nivaer4">4</label>
+                            <input type="radio" id="nivaer5" name="nivaer" value="5+">
+                            <label for="nivaer5">5+</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="kliniktyp" class="label">Kliniktyp</label>
+                        <select id="kliniktyp" class="input">
+                            <option>Offentlig</option>
+                            <option>Privat</option>
+                            <option>Universitetssjukhus</option>
+                        </select>
+                    </div>
+
+                    <h2>Sociodemografi</h2>
+                    <div class="form-group">
+                        <label for="alder" class="label">Ålder</label>
+                        <input type="number" id="alder" value="56" class="input">
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Kön</label>
+                        <div class="input radio-group">
+                            <input type="radio" id="kvinna" name="kon" value="kvinna" checked>
+                            <label for="kvinna">Kvinna</label>
+                            <input type="radio" id="man" name="kon" value="man">
+                            <label for="man">Man</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Arbetslös</label>
+                        <div class="input radio-group">
+                            <input type="radio" id="arbetslosJa" name="arbetslos" value="ja">
+                            <label for="arbetslosJa">Ja</label>
+                            <input type="radio" id="arbetslosNej" name="arbetslos" value="nej" checked>
+                            <label for="arbetslosNej">Nej</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Sjukpension</label>
+                        <div class="input radio-group">
+                            <input type="radio" id="sjukpensionJa" name="sjukpension" value="ja">
+                            <label for="sjukpensionJa">Ja, heltid / deltid</label>
+                            <input type="radio" id="sjukpensionNej" name="sjukpension" value="nej" checked>
+                            <label for="sjukpensionNej">Nej</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Ålderspension</label>
+                        <div class="input radio-group">
+                            <input type="radio" id="alderspensionJa" name="alderspension" value="ja">
+                            <label for="alderspensionJa">Ja, heltid / deltid</label>
+                            <input type="radio" id="alderspensionNej" name="alderspension" value="nej" checked>
+                            <label for="alderspensionNej">Nej</label>
+                        </div>
+                    </div>
+
+                    <h2>Hälsoprofil</h2>
+                    <div class="form-group">
+                        <label class="label">Rökare</label>
+                        <div class="input radio-group">
+                            <input type="radio" id="rokareJa" name="rokare" value="ja">
+                            <label for="rokareJa">Ja</label>
+                            <input type="radio" id="rokareNej" name="rokare" value="nej" checked>
+                            <label for="rokareNej">Nej</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Tidigare ryggop</label>
+                        <div class="input radio-group">
+                            <input type="radio" id="ryggopJa" name="ryggop" value="ja">
+                            <label for="ryggopJa">Ja</label>
+                            <input type="radio" id="ryggopNej" name="ryggop" value="nej" checked>
+                            <label for="ryggopNej">Nej</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Samsjuklighet</label>
+                        <div class="input radio-group">
+                            <input type="radio" id="samsjuklighetJa" name="samsjuklighet" value="ja">
+                            <label for="samsjuklighetJa">Ja</label>
+                            <input type="radio" id="samsjuklighetNej" name="samsjuklighet" value="nej" checked>
+                            <label for="samsjuklighetNej">Nej</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="eq5d" class="label">EQ5D</label>
+                        <input type="text" id="eq5d-value" value="0.57" class="input">
+                        <input type="range" id="eq5d" min="-0.59" max="1" step="0.01" value="0.57" class="input">
+                    </div>
+                </div>
+
+                <div id="ryggspecifik" class="tab-pane">
+                    <h2>Hälsoprofil</h2>
+                    <div class="form-group">
+                        <label for="AbilityWalking" class="label">Promenadsträcka</label>
+                        <select id="AbilityWalking" class="input">
+                            <option value="1">0,5-1 kilometer</option>
+                            <option value="2">0-100 meter</option>
+                            <option value="3">100-500 meter</option>
+                            <option value="4" selected>Mer än 1 kilometer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="DurationLegPain" class="label">Smärtduration i ben</label>
+                        <select id="DurationLegPain" class="input">
+                            <option value="0">Ingen smärta</option>
+                            <option value="1">Mindre än 3 månader</option>
+                            <option value="2" selected>3 till 12 månader</option>
+                            <option value="3">1 till 2 år</option>
+                            <option value="4">Mer än 2 år</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="DurationBackPain" class="label">Smärtduration i rygg</label>
+                        <select id="DurationBackPain" class="input">
+                            <option value="0">Ingen smärta</option>
+                            <option value="1">Mindre än 3 månader</option>
+                            <option value="2" selected>3 till 12 månader</option>
+                            <option value="3">1 till 2 år</option>
+                            <option value="4">Mer än 2 år</option>
+                        </select>
+                    </div>
+
+                    <h2>Preop smärta (NRS)</h2>
+                    <div class="form-group">
+                        <label for="painLevelLeg" class="label">Smärta i ben</label>
+                        <input type="text" id="painLevelLeg-value" value="6" class="input">
+                        <input type="range" id="painLevelLeg" min="0" max="10" step="1" value="6" class="input">
+                    </div>
+                    <div class="form-group">
+                        <label for="painLevelBack" class="label">Smärta i rygg</label>
+                        <input type="text" id="painLevelBack-value" value="6" class="input">
+                        <input type="range" id="painLevelBack" min="0" max="10" step="1" value="6" class="input">
+                    </div>
+
+                    <h2>Funktionsnedsättning</h2>
+                    <div class="form-group">
+                        <label for="ODI" class="label">Funktionsnedsättning</label>
+                        <input type="text" id="ODI-value" value="28" class="input">
+                        <input type="range" id="ODI" min="0" max="100" step="1" value="28" class="input">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right-section">
+            <div class="result-section">
+                <h2>Resultat</h2>
+                <div class="result-box">
+                    <h3>Sannolikhet att bli nöjd med operation</h3>
+                    <div class="percentage">84%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

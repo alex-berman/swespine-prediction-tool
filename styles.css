@@ -1,0 +1,130 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    display: flex;
+    width: 80%;
+    margin: auto;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.left-section {
+    flex: 1.5;
+    display: flex;
+    flex-direction: column;
+}
+
+.right-section {
+    flex: 2;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 20px;
+    border-left: 1px solid #ddd;
+}
+
+.tabs {
+    display: flex;
+    background-color: #333;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 15px;
+    color: white;
+    background-color: #333;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+.tab-button.active {
+    background-color: #444;
+}
+
+.tab-button:not(.active) {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.tab-content {
+    padding: 20px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.form-group .label {
+    width: 40%;
+    padding-right: 20px;
+    box-sizing: border-box;
+}
+
+.form-group .input {
+    flex: 1;
+}
+
+.input[type="number"],
+.input select,
+.input[type="range"] {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.input[type="text"] {
+    width: 50px;
+}
+
+.radio-group {
+    display: flex;
+    gap: 10px;
+}
+
+.radio-group label {
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #333;
+}
+
+.radio-group input[type="radio"] {
+    display: none;
+}
+
+.radio-group input[type="radio"] + label {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.radio-group input[type="radio"]:checked + label {
+    background-color: #333;
+    color: #fff;
+}
+
+.result-box {
+    background-color: #f9f9f9;
+    padding: 20px;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
