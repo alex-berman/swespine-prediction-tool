@@ -71,7 +71,7 @@ function updatePrediction() {
   logOdds += getAddendForNominal('AbilityWalking');
   logOdds += getAddendForNominal('DurationBackPain');
   logOdds += getAddendForNominal('DurationLegPain');
-  var prob = 1 / (1 + Math.exp(logOdds));
+  var prob = 1 / (1 + Math.exp(-logOdds));
   var probPerc = Math.round(prob * 100);
   document.getElementById('prediction').innerHTML = probPerc + '%';
 }
