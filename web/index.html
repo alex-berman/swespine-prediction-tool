@@ -157,14 +157,14 @@
 
                     <h2>Preop smärta (NRS)</h2>
                     <div class="form-group">
-                        <label for="painLevelLeg" class="label">Smärta i ben</label>
-                        <input type="text" id="painLevelLeg-value" value="6" class="input">
-                        <input type="range" id="painLevelLeg" min="0" max="10" step="1" value="6" class="input">
+                        <label for="NRSLegPain" class="label">Smärta i ben</label>
+                        <input type="text" id="NRSLegPain-value" value="6" class="input">
+                        <input type="range" id="NRSLegPain" min="0" max="10" step="1" value="6" class="input">
                     </div>
                     <div class="form-group">
-                        <label for="painLevelBack" class="label">Smärta i rygg</label>
-                        <input type="text" id="painLevelBack-value" value="6" class="input">
-                        <input type="range" id="painLevelBack" min="0" max="10" step="1" value="6" class="input">
+                        <label for="NRSBackPain" class="label">Smärta i rygg</label>
+                        <input type="text" id="NRSBackPain-value" value="6" class="input">
+                        <input type="range" id="NRSBackPain" min="0" max="10" step="1" value="6" class="input">
                     </div>
 
                     <h2>Funktionsnedsättning</h2>
@@ -181,11 +181,12 @@
                 <h2>Resultat</h2>
                 <div class="result-box">
                     <h3>Sannolikhet att bli nöjd med operation</h3>
-                    <div class="percentage">84%</div>
+                    <div id="prediction"></div>
                 </div>
             </div>
         </div>
     </div>
+    <script src="satisfaction_disc_herniation_coefs.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
