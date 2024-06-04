@@ -31,10 +31,6 @@ function initializeRangeControl(name) {
     });
 }
 
-function getAddendForScalar(varName) {
-  return parseFloat(document.getElementById(varName).value) * satisfaction_disc_herniation_coefs[varName];
-}
-
 function getAddendForNominal(varName) {
   var coefs = satisfaction_disc_herniation_coefs[varName];
   if(coefs.length == 1) {
@@ -55,22 +51,69 @@ function getAddendForNominal(varName) {
   }
 }
 
+function getScalarValueFromForm(varName) {
+  return parseFloat(document.getElementById(varName).value);
+}
+
+function range(size, startAt = 0) {
+    return [...Array(size).keys()].map(i => i + startAt);
+}
+
+function getNominalValuesFromForm(varName, n) {
+  if(n == 1) {
+    if(document.getElementById(varName + '1').checked) {
+      return [1];
+    } else {
+      return [0];
+    }
+  }
+  else if(n > 1) {
+    var element = document.getElementById(varName);
+    return range(n).map(function(i) { return element.options[i + 1].selected ? 1 : 0; })
+  }
+}
+
+function getRegressorValuesFromForm() {
+  result = {}
+  for(const key in satisfaction_disc_herniation_coefs) {
+    if(key != 'Intercept') {
+      var coef = satisfaction_disc_herniation_coefs[key];
+      if(Array.isArray(coef)) {
+        result[key] = getNominalValuesFromForm(key, coef.length);
+      }
+      else {
+        result[key] = getScalarValueFromForm(key);
+      }
+    }
+  }
+  return result;
+}
+
+function getLogOdds(regressorValues) {
+  var result = 0;
+  for(const key in satisfaction_disc_herniation_coefs) {
+    var coef = satisfaction_disc_herniation_coefs[key];
+    if(key == 'Intercept') {
+      result += coef;
+    }
+    else {
+      if(Array.isArray(coef)) {
+        for(var i = 0; i < coef.length; i++) {
+          result += coef[i] * regressorValues[key][i];
+        }
+      }
+      else {
+        result += coef * regressorValues[key];
+      }
+    }
+  }
+  return result;
+}
+
 function updatePrediction() {
-  var logOdds = satisfaction_disc_herniation_coefs.Intercept;
-  logOdds += getAddendForScalar('AgeAtSurgery');
-  logOdds += getAddendForScalar('EQ5DIndex');
-  logOdds += getAddendForScalar('ODI');
-  logOdds += getAddendForScalar('NRSBackPain');
-  logOdds += getAddendForNominal('Female');
-  logOdds += getAddendForNominal('IsPreviouslyOperated');
-  logOdds += getAddendForNominal('IsSmoker');
-  logOdds += getAddendForNominal('IsUnemployed');
-  logOdds += getAddendForNominal('HasAgePension');
-  logOdds += getAddendForNominal('HasSickPension');
-  logOdds += getAddendForNominal('HasOtherIllness');
-  logOdds += getAddendForNominal('AbilityWalking');
-  logOdds += getAddendForNominal('DurationBackPain');
-  logOdds += getAddendForNominal('DurationLegPain');
+  var regressorValues = getRegressorValuesFromForm();
+  console.log(regressorValues);
+  var logOdds = getLogOdds(regressorValues);
   var prob = 1 / (1 + Math.exp(-logOdds));
   var probPerc = Math.round(prob * 100);
   document.getElementById('prediction').innerHTML = probPerc + '%';
