@@ -116,7 +116,6 @@ function logOddsToProb(logOdds) {
 
 function updatePrediction() {
   var regressorValues = getRegressorValuesFromForm();
-  console.log(regressorValues);
   var logOdds = getLogOdds(regressorValues);
   var prob = logOddsToProb(logOdds);
   var probPerc = Math.round(prob * 100);
@@ -131,6 +130,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
   function handleInputChange(event) {
     updatePrediction();
+    plotFeatureContributions();
   }
   var formElements = document.querySelectorAll("input, select");
   formElements.forEach(function(element) {
@@ -141,9 +141,31 @@ document.addEventListener('DOMContentLoaded', (event) => {
   plotFeatureContributions();
 });
 
+function getLogOddsDifferences(reference, comparison) {
+  var result = {};
+  for(const key in satisfaction_disc_herniation_coefs) {
+    if(key != 'Intercept') {
+      var coef = satisfaction_disc_herniation_coefs[key];
+      if(Array.isArray(coef)) {
+        result[key] = 0;
+        for(var i = 0; i < coef.length; i++) {
+          result[key] += coef[i] * (comparison[key][i] - reference[key][i]);
+        }
+      }
+      else {
+        result[key] = coef * (comparison[key] - reference[key]);
+      }
+    }
+  }
+  return result;
+}
+
 function plotFeatureContributions() {
   var meanLogOdds = getLogOdds(mean_disc_herniation);
   var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
+  var regressorValues = getRegressorValuesFromForm();
+  var logOddsDiffs = getLogOddsDifferences(mean_disc_herniation, regressorValues);
+  console.log(logOddsDiffs);
   Plotly.newPlot('featureContributions', {
     data: [{
       y: [
