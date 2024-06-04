@@ -91,4 +91,50 @@ document.addEventListener('DOMContentLoaded', (event) => {
   });
 
   updatePrediction();
+  plotFeatureContributions();
 });
+
+function plotFeatureContributions() {
+  Plotly.newPlot('featureContributions', {
+    data: [{
+      y: [
+        'totalt (89%)',
+        'äldre än genomsnittet',
+        'kvinna',
+        'genomsnittlig<br />diskbråckspatient (86%)',
+      ],
+      x: [
+        1.9,
+        -0.15,
+        0.86,
+        1.8208186,
+      ],
+      type: 'bar',
+      orientation: 'h',
+      marker: {
+        color: '#C8A2C8',
+        line: {
+          width: 2.5
+        }
+      }
+    }],
+    layout: {
+        margin: {
+            t: 50,
+            b: 50,
+            l: 170,
+            r: 50
+        },
+        xaxis: {
+          showgrid: true,
+          zeroline: true,
+          visible: false
+        },
+        showlegend: false
+    },
+    config: {
+        staticPlot: true,
+        responsive: true
+    }
+  });
+}

@@ -179,13 +179,21 @@
         <div class="right-section">
             <div class="prediction-section">
                 <h2>Förutsägelse</h2>
-                <div class="prediction-box">
+                <div class="box">
                     <h3>Sannolikhet att bli nöjd med operation</h3>
                     <div id="prediction"></div>
                 </div>
             </div>
+
+            <div class="explanation-section">
+                <h2>Förklaring</h2>
+                <div class="box">
+                    <div id="featureContributions"></div>
+                </div>
+            </div>
         </div>
     </div>
+    <script src="plotly-2.11.1.min.js"></script>
     <script src="satisfaction_disc_herniation_coefs.js"></script>
     <script src="script.js"></script>
 </body>

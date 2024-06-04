@@ -24,10 +24,9 @@ body {
 .right-section {
     flex: 2;
     display: flex;
-    align-items: flex-start;
-    justify-content: center;
     padding: 20px;
     border-left: 1px solid #ddd;
+    flex-direction: column;
 }
 
 .tabs {
@@ -121,7 +120,7 @@ body {
     color: #fff;
 }
 
-.prediction-box {
+.box {
     background-color: #f9f9f9;
     padding: 20px;
     text-align: center;
