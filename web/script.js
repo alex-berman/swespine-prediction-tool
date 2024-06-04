@@ -110,11 +110,15 @@ function getLogOdds(regressorValues) {
   return result;
 }
 
+function logOddsToProb(logOdds) {
+  return 1 / (1 + Math.exp(-logOdds));
+}
+
 function updatePrediction() {
   var regressorValues = getRegressorValuesFromForm();
   console.log(regressorValues);
   var logOdds = getLogOdds(regressorValues);
-  var prob = 1 / (1 + Math.exp(-logOdds));
+  var prob = logOddsToProb(logOdds);
   var probPerc = Math.round(prob * 100);
   document.getElementById('prediction').innerHTML = probPerc + '%';
 }
@@ -138,13 +142,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 function plotFeatureContributions() {
+  var meanLogOdds = getLogOdds(mean_disc_herniation);
+  var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
   Plotly.newPlot('featureContributions', {
     data: [{
       y: [
         'totalt (89%)',
         'äldre än genomsnittet',
         'kvinna',
-        'genomsnittlig<br />diskbråckspatient (86%)',
+        'genomsnittlig<br />diskbråckspatient (' + meanProbPerc + '%)',
       ],
       x: [
         1.9,
