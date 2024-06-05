@@ -114,12 +114,15 @@ function logOddsToProb(logOdds) {
   return 1 / (1 + Math.exp(-logOdds));
 }
 
+var predictedProbPerc;
+var predictedLogOdds;
+var regressorValues;
+
 function updatePrediction() {
   var regressorValues = getRegressorValuesFromForm();
-  var logOdds = getLogOdds(regressorValues);
-  var prob = logOddsToProb(logOdds);
-  var probPerc = Math.round(prob * 100);
-  document.getElementById('prediction').innerHTML = probPerc + '%';
+  predictedLogOdds = getLogOdds(regressorValues);
+  predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
+  document.getElementById('prediction').innerHTML = predictedProbPerc + '%';
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
@@ -141,45 +144,140 @@ document.addEventListener('DOMContentLoaded', (event) => {
   plotFeatureContributions();
 });
 
-function getLogOddsDifferences(reference, comparison) {
+function getLogOddsDeltas(reference, comparison) {
   var result = {};
   for(const key in satisfaction_disc_herniation_coefs) {
+    var delta = 0;
     if(key != 'Intercept') {
       var coef = satisfaction_disc_herniation_coefs[key];
       if(Array.isArray(coef)) {
-        result[key] = 0;
         for(var i = 0; i < coef.length; i++) {
-          result[key] += coef[i] * (comparison[key][i] - reference[key][i]);
+          delta += coef[i] * (comparison[key][i] - reference[key][i]);
         }
       }
       else {
-        result[key] = coef * (comparison[key] - reference[key]);
+        delta = coef * (comparison[key] - reference[key]);
       }
+    }
+    if(delta != 0) {
+      result[key] = delta;
     }
   }
   return result;
 }
 
+function getCheckedValue(name) {
+  var i = 0;
+  while(true) {
+    var element = document.getElementById(name + i);
+    if(element == null) {
+      return null;
+    }
+    if(element.checked) {
+      return i;
+    }
+    i++;
+  }
+}
+
+function getLabelByFor(forId) {
+  const labels = document.querySelectorAll("label");
+  for (let i = 0; i < labels.length; i++) {
+    const label = labels[i];
+    const labelFor = label.getAttribute("for");
+    if (labelFor === forId) {
+      return label;
+    }
+  }
+}
+
+function getCheckedLabel(name) {
+  const checkedValue = getCheckedValue(name);
+  const labelElement = getLabelByFor(name + checkedValue);
+  return labelElement.innerHTML;
+}
+
+function getNominalValue(regressor, valuesForAllRegressors) {
+  const values = valuesForAllRegressors[regressor];
+  for(var i = 0; i < values.length; i++) {
+    if(values[i] == 1) {
+      return i + 1;
+    }
+  }
+  return 0;
+}
+
+function getNominalLabel(regressor) {
+  if(regressor == 'AbilityWalking') { return 'Promenadsträcka'; }
+  if(regressor == 'DurationLegPain') { return 'Smärtduration i ben'; }
+  if(regressor == 'DurationBackPain') { return 'Smärtduration i rygg'; }
+}
+
+function generateFeatureDescription(regressor, delta) {
+  var coef = satisfaction_disc_herniation_coefs[regressor];
+  if(Array.isArray(coef)) {
+    if(coef.length == 1) {
+      if(regressor == 'Female') {
+        return getCheckedLabel(regressor);
+      }
+      else {
+        const value = getCheckedValue(regressor);
+        if(regressor == 'IsUnemployed') { return value ? 'Arbetslös' : 'Inte arbetslös'; }
+        if(regressor == 'HasSickPension') { return value ? 'Sjukpension' : 'Ingen sjukpension'; }
+        if(regressor == 'HasAgePension') { return value ? 'Ålderspension' : 'Ingen ålderspension'; }
+        if(regressor == 'IsSmoker') { return value ? 'Rökare' : 'Inte rökare'; }
+        if(regressor == 'IsPreviouslyOperated') { return value ? 'Tidigare ryggop' : 'Inte tidigare ryggop'; }
+        if(regressor == 'HasOtherIllness') { return value ? 'Samsjuklighet' : 'Ingen samsjuklighet'; }
+      }
+    }
+    else if(coef.length > 1) {
+      meanValue = getNominalValue(regressor, mean_disc_herniation);
+      value = getNominalValue(regressor, regressorValues);
+      const label = getNominalLabel(regressor);
+      return label + '<br />' + ((value < meanValue) ? 'lägre' : 'högre') + ' än genomsnittet';
+    }
+  }
+  else {
+    logOddsDelta = delta / coef;
+    if(regressor == 'AgeAtSurgery') {
+      return (logOddsDelta < 0) ? 'Ålder lägre än genomsnitt' : 'Ålder högre än genomsnitt';
+    }
+    if(regressor == 'EQ5DIndex') {
+      return (logOddsDelta < 0) ? 'EQ5D lägre än genomsnitt' : 'EQ5D högre än genomsnitt';
+    }
+    if(regressor == 'ODI') {
+      return (logOddsDelta < 0) ? 'Funktionsnedsättning<br />lägre än genomsnitt' : 'Funktionsnedsättning<br />högre än genomsnitt';
+    }
+    if(regressor == 'NRSBackPain') {
+      return (logOddsDelta < 0) ? 'Smärta i rygg<br />lägre än genomsnitt' : 'Smärta i rygg<br /> högre än genomsnitt';
+    }
+  }
+}
+
+const sortByValue = (obj) => {
+  const entries = Object.entries(obj);
+  entries.sort((a, b) => Math.abs(a[1]) - Math.abs(b[1]));
+  return Object.fromEntries(entries);
+};
+
 function plotFeatureContributions() {
   var meanLogOdds = getLogOdds(mean_disc_herniation);
   var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
-  var regressorValues = getRegressorValuesFromForm();
-  var logOddsDiffs = getLogOddsDifferences(mean_disc_herniation, regressorValues);
-  console.log(logOddsDiffs);
+  regressorValues = getRegressorValuesFromForm();
+  var logOddsDeltas = sortByValue(getLogOddsDeltas(mean_disc_herniation, regressorValues));
+  var y = ['Sammanlagd<br />förutsägelse: ' + predictedProbPerc + '%'];
+  var x = [predictedLogOdds];
+  for(const regressor in logOddsDeltas) {
+    var delta = logOddsDeltas[regressor];
+    y.push(generateFeatureDescription(regressor, delta));
+    x.push(delta);
+  }
+  y.push('Genomsnittlig<br />diskbråckspatient: ' + meanProbPerc + '%');
+  x.push(meanLogOdds);
   Plotly.newPlot('featureContributions', {
     data: [{
-      y: [
-        'totalt (89%)',
-        'äldre än genomsnittet',
-        'kvinna',
-        'genomsnittlig<br />diskbråckspatient (' + meanProbPerc + '%)',
-      ],
-      x: [
-        1.9,
-        -0.15,
-        0.86,
-        1.8208186,
-      ],
+      y: y,
+      x: x,
       type: 'bar',
       orientation: 'h',
       marker: {
