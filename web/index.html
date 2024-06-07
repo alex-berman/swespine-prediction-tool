@@ -179,18 +179,33 @@
         <div class="right-section">
             <div class="prediction-section">
                 <h2>Förutsägelse</h2>
-                <div class="box">
+                <div class="box" style="text-align: center;">
                     <h3>Sannolikhet att bli nöjd med operation</h3>
                     <div id="prediction"></div>
                 </div>
             </div>
 
             <div class="explanation-section">
-                <h2 class="header-container" id="toggle-clickable"><div class="square" id="toggle-button">+</div> Förklaring</h2>
-                <div class="collapsible-container">
-                    <div class="collapsible-content" id="collapsible-content">
-                        <div class="box" class="">
+                <h2 class="header-container" id="toggle-clickable-local-explanation">
+                    <div class="square" id="toggle-button-local-explanation">+</div> Förklaring för den specifika förutsägelsen</h2>
+                <div id="collapsible-container-local-explanation" class="collapsible-container">
+                    <div id="collapsible-content-local-explanation">
+                        <div class="box">
                             <div id="featureContributions"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="explanation-section">
+                <h2 class="header-container" id="toggle-clickable-global-explanation">
+                    <div class="square" id="toggle-button-global-explanation">+</div> Förklaring för modellen i allmänhet</h2>
+                <div id="collapsible-container-global-explanation" class="collapsible-container">
+                    <div id="collapsible-content-global-explanation">
+                        <div class="box" style="text-align: left;">
+                            Modellen som förutsäger nöjdhet utnyttjar en stor mängd data från alla kliniker i Sverige under en tioårsperiod, och uppdateras varje år.
+                            Hur de olika parametrarna (ålder, kön etc.) i allmänhet påverkar bedömd nöjdhet framgår nedan.
+                            <div id="globalExplanationTable"></div>
                         </div>
                     </div>
                 </div>

@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initializeRangeControl('NRSLegPain');
   initializeRangeControl('NRSBackPain');
   initializeRangeControl('ODI');
-  initializeCollapsible();
+  initializeCollapsibles();
 
   function handleInputChange(event) {
     updatePrediction();
@@ -143,13 +143,19 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
   updatePrediction();
   plotFeatureContributions();
+  generateGlobalExplanationTable();
 });
 
-function initializeCollapsible() {
-    const toggleClickable = document.getElementById('toggle-clickable');
-    const toggleButton = document.getElementById('toggle-button');
-    const collapsibleContent = document.getElementById('collapsible-content');
-    const collapsibleContainer = document.querySelector('.collapsible-container');
+function initializeCollapsibles() {
+  initializeCollapsible('local-explanation');
+  initializeCollapsible('global-explanation');
+}
+
+function initializeCollapsible(id) {
+    const toggleClickable = document.getElementById('toggle-clickable-' + id);
+    const toggleButton = document.getElementById('toggle-button-' + id);
+    const collapsibleContent = document.getElementById('collapsible-content-' + id);
+    const collapsibleContainer = document.getElementById('collapsible-container-' + id);
 
     toggleClickable.addEventListener('click', function() {
         if (collapsibleContainer.style.maxHeight === '0px' || collapsibleContainer.style.maxHeight === '') {
@@ -327,4 +333,121 @@ function plotFeatureContributions() {
         responsive: true
     }
   });
+}
+
+function formElementRangeSize(name) {
+  var rangeElement = document.getElementById(name);
+  return rangeElement.max - rangeElement.min;
+}
+
+function generateGlobalExplanationTable() {
+  const coefs = satisfaction_disc_herniation_coefs;
+  let content = '<table>';
+
+  function addRow(header, cellContent) {
+    content += '<tr>';
+    content += '<td class="tableHeader">' + header + '</td>';
+    content += '<td class="tableContent">' + cellContent + '</td>';
+    content += '</tr>';
+  }
+
+  function addNominal(header, name) {
+    addRow(
+      header,
+      generateOptionNounPhrase(name, getIndexOfMaxCoef(name)) + ' bedöms ha högst sannolikhet att bli nöjda. ' +
+      generateOptionNounPhrase(name, getIndexOfMinCoef(name)) + ' bedöms ha lägst sannolikhet att bli nöjda. ' +
+      'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefsGroupRangeSize(coefs[name])) + '.');
+  }
+
+  function coefToPercentageDelta(coef, digits) {
+    let formattedFloat = Math.abs(coef / 4 * 100).toFixed(digits);
+    return '<b>' + formattedFloat + '</b> ' + (formattedFloat.endsWith('1') ? 'procentenhet' : 'procentenheter');
+  }
+
+  function toLeadingLowercase(str) {
+    return str.charAt(0).toLowerCase() + str.slice(1);
+  }
+
+  function getIndexOfMaxCoef(name) {
+    let coefsToCompare = [0].concat(coefs[name]);
+    return coefsToCompare.reduce((maxIndex, currentValue, currentIndex, array) => {
+      return currentValue > array[maxIndex] ? currentIndex : maxIndex;
+    }, 0);
+  }
+
+  function getIndexOfMinCoef(name) {
+    let coefsToCompare = [0].concat(coefs[name]);
+    return coefsToCompare.reduce((maxIndex, currentValue, currentIndex, array) => {
+      return currentValue < array[maxIndex] ? currentIndex : maxIndex;
+    }, 0);
+  }
+
+  function generateOptionNounPhrase(name, optionIndex) {
+    if(name == 'AbilityWalking') {
+      let optionText = document.getElementById(name).options[optionIndex].innerHTML;
+      return 'Patienter som kan gå ' + toLeadingLowercase(optionText);
+    }
+    if(name == 'DurationLegPain' || name == 'DurationBackPain') {
+      if(optionIndex == 0) {
+        return 'Patienter utan smärta';
+      }
+      else {
+        let optionText = document.getElementById(name).options[optionIndex].innerHTML;
+        return 'Patienter som upplevt smärta i ' + toLeadingLowercase(optionText);
+      }
+    }
+  }
+
+  function coefsGroupRangeSize(coefsGroup) {
+    let coefsToCompare = [0].concat(coefsGroup);
+    return Math.max(...coefsToCompare) - Math.min(...coefsToCompare);
+  }
+  
+  addRow(
+    'Ålder',
+    'Ju högre ålder, desto ' + (coefs.AgeAtSurgery < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten att bli nöjd. ' +
+    'Som mest påverkas sannolikheten med ' + coefToPercentageDelta(coefs.AgeAtSurgery*10, 1) + ' per tiotal år.');
+  addRow(
+    'Kön',
+    'Kvinnor bedöms ha ' + (coefs.Female < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
+    'Skillnaden mellan kvinnor och män kan vara upp till ' + coefToPercentageDelta(coefs.Female) + '.');
+  addRow(
+    'Tidigare ryggop',
+    'Patienter som tidigare ryggopererats bedöms ha ' + (coefs.IsPreviouslyOperated < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
+    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.IsPreviouslyOperated) + '.');
+  addRow(
+    'Rökare',
+    'Rökare bedöms ha ' + (coefs.IsSmoker < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
+    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.IsSmoker) + '.');
+  addRow(
+    'Arbetslös',
+    'Arbetslösa bedöms ha ' + (coefs.IsUnemployed < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
+    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.IsUnemployed) + '.');
+  addRow(
+    'Ålderspension',
+    'Patienter med ålderspension bedöms ha ' + (coefs.HasAgePension < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
+    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.HasAgePension) + '.');
+  addRow(
+    'Sjukpension',
+    'Patienter med sjukpension bedöms ha ' + (coefs.HasSickPension < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
+    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.HasSickPension) + '.');
+  addRow(
+    'Samsjuklighet',
+    'Patienter med andra sjukdomar bedöms ha ' + (coefs.HasOtherIllness < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
+    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.HasOtherIllness) + '.');
+  addRow(
+    'EQ5D',
+    'Ju högre EQ5D, desto ' + (coefs.EQ5DIndex < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten att bli nöjd. ' +
+    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.EQ5DIndex * formElementRangeSize('EQ5DIndex')) + '.');
+  addNominal('Promenadsträcka', 'AbilityWalking');
+  addNominal('Smärtduration i ben', 'DurationLegPain');
+  addNominal('Smärtduration i rygg', 'DurationBackPain');
+  addRow(
+    'Smärta i rygg',
+    'Ju mer ryggsmärta, desto ' + (coefs.NRSBackPain < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten att bli nöjd. ' +
+    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.NRSBackPain * formElementRangeSize('NRSBackPain')) + '.');
+
+  content += '</table>';
+  const table = document.getElementById('globalExplanationTable');
+  table.innerHTML = content;
 }

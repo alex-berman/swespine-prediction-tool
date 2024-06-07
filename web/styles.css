@@ -123,7 +123,6 @@ body {
 .box {
     background-color: #f9f9f9;
     padding: 20px;
-    text-align: center;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
@@ -158,6 +157,15 @@ body {
     transition: max-height 0.1s ease-out;
 }
 
-.collapsible-content {
-    padding: 0 0;
+.tableHeader {
+  padding: 10px;
+  font-weight: bold;
+  vertical-align: top;
+  text-align: left;
+}
+
+.tableContent {
+  padding: 10px;
+  vertical-align: top;
+  text-align: left;
 }
