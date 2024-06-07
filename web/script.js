@@ -288,7 +288,7 @@ function plotFeatureContributions() {
   var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
   regressorValues = getRegressorValuesFromForm();
   var logOddsDeltas = sortByValue(getLogOddsDeltas(mean_disc_herniation, regressorValues));
-  var y = ['Sammanlagd<br />förutsägelse: ' + predictedProbPerc + '%'];
+  var y = ['Sammanlagd<br />förutsägelse: <b>' + predictedProbPerc + '%</b>'];
   var x = [predictedLogOdds];
   for(const regressor in logOddsDeltas) {
     var delta = logOddsDeltas[regressor];
