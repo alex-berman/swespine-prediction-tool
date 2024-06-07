@@ -130,6 +130,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initializeRangeControl('NRSLegPain');
   initializeRangeControl('NRSBackPain');
   initializeRangeControl('ODI');
+  initializeCollapsible();
 
   function handleInputChange(event) {
     updatePrediction();
@@ -143,6 +144,26 @@ document.addEventListener('DOMContentLoaded', (event) => {
   updatePrediction();
   plotFeatureContributions();
 });
+
+function initializeCollapsible() {
+    const toggleClickable = document.getElementById('toggle-clickable');
+    const toggleButton = document.getElementById('toggle-button');
+    const collapsibleContent = document.getElementById('collapsible-content');
+    const collapsibleContainer = document.querySelector('.collapsible-container');
+
+    toggleClickable.addEventListener('click', function() {
+        if (collapsibleContainer.style.maxHeight === '0px' || collapsibleContainer.style.maxHeight === '') {
+            collapsibleContainer.style.maxHeight = collapsibleContent.scrollHeight + 'px';
+            toggleButton.innerHTML = '&ndash;';
+        } else {
+            collapsibleContainer.style.maxHeight = '0px';
+            toggleButton.innerHTML = '+';
+        }
+    });
+
+    // Initialize with collapsed state
+    collapsibleContainer.style.maxHeight = '0px';
+};
 
 function getLogOddsDeltas(reference, comparison) {
   var result = {};
