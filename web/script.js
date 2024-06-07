@@ -12,21 +12,17 @@ function initializeRangeControl(name) {
     const slider = document.getElementById(name);
     const valueElement = document.getElementById(name + '-value');
 
-    // Update the text box value when the slider value changes
     slider.addEventListener('input', () => {
         valueElement.value = slider.value;
     });
 
-    // Update the slider value when the text box value changes
     valueElement.addEventListener('input', () => {
-        // Parse the value to ensure it's within the slider's range
         let parsedValue = parseFloat(valueElement.value);
         if (parsedValue < parseFloat(slider.min)) {
             parsedValue = parseFloat(slider.min);
         } else if (parsedValue > parseFloat(slider.max)) {
             parsedValue = parseFloat(slider.max);
         }
-        // Update the slider value
         slider.value = parsedValue;
     });
 }
