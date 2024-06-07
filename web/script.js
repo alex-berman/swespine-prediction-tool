@@ -236,6 +236,14 @@ function getNominalLabel(regressor) {
   if(regressor == 'DurationBackPain') { return 'Smärtduration i rygg'; }
 }
 
+function toLeadingLowercase(str) {
+  return str.charAt(0).toLowerCase() + str.slice(1);
+}
+
+function generateAdjective(isLow, name) {
+  return isLow ? 'kort' : 'lång';
+}
+
 function generateFeatureDescription(regressor, delta) {
   var coef = satisfaction_disc_herniation_coefs[regressor];
   if(Array.isArray(coef)) {
@@ -257,22 +265,22 @@ function generateFeatureDescription(regressor, delta) {
       meanValue = getNominalValue(regressor, mean_disc_herniation);
       value = getNominalValue(regressor, regressorValues);
       const label = getNominalLabel(regressor);
-      return label + '<br />' + ((value < meanValue) ? 'lägre' : 'högre') + ' än genomsnittet';
+      return 'Relativt ' + generateAdjective(value < meanValue, regressor) + '<br />' + toLeadingLowercase(label);
     }
   }
   else {
     logOddsDelta = delta / coef;
     if(regressor == 'AgeAtSurgery') {
-      return (logOddsDelta < 0) ? 'Ålder lägre än genomsnitt' : 'Ålder högre än genomsnitt';
+      return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + ' ålder';
     }
     if(regressor == 'EQ5DIndex') {
-      return (logOddsDelta < 0) ? 'EQ5D lägre än genomsnitt' : 'EQ5D högre än genomsnitt';
+      return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + ' EQ5D';
     }
     if(regressor == 'ODI') {
-      return (logOddsDelta < 0) ? 'Funktionsnedsättning<br />lägre än genomsnitt' : 'Funktionsnedsättning<br />högre än genomsnitt';
+      return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + '<br />funktionsnedsättning';
     }
     if(regressor == 'NRSBackPain') {
-      return (logOddsDelta < 0) ? 'Smärta i rygg<br />lägre än genomsnitt' : 'Smärta i rygg<br /> högre än genomsnitt';
+      return 'Relativt ' + (logOddsDelta < 0 ? 'lite' : 'mycket') + ' ryggsmärta';
     }
   }
 }
@@ -358,10 +366,6 @@ function generateGlobalExplanationTable() {
   function coefToPercentageDelta(coef, digits) {
     let formattedFloat = Math.abs(coef / 4 * 100).toFixed(digits);
     return '<b>' + formattedFloat + '</b> ' + (formattedFloat.endsWith('1') ? 'procentenhet' : 'procentenheter');
-  }
-
-  function toLeadingLowercase(str) {
-    return str.charAt(0).toLowerCase() + str.slice(1);
   }
 
   function getIndexOfMaxCoef(name) {
