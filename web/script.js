@@ -446,6 +446,10 @@ function generateGlobalExplanationTable() {
     'Smärta i rygg',
     'Ju mer ryggsmärta, desto ' + (coefs.NRSBackPain < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten att bli nöjd. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.NRSBackPain * formElementRangeSize('NRSBackPain')) + '.');
+  addRow(
+    'Funktionsnedsättning',
+    'Ju högre funktionsnedsättning, desto ' + (coefs.ODI < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten att bli nöjd. ' +
+    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.ODI * formElementRangeSize('ODI')) + '.');
 
   content += '</table>';
   const table = document.getElementById('globalExplanationTable');
