@@ -406,7 +406,7 @@ function generateGlobalExplanationTable() {
   addRow(
     'Ålder',
     'Ju högre ålder, desto ' + (coefs.AgeAtSurgery < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten att bli nöjd. ' +
-    'Som mest påverkas sannolikheten med ' + coefToPercentageDelta(coefs.AgeAtSurgery*10, 1) + ' per tiotal år.');
+    'Sannolikheten påverkas med upp till ' + coefToPercentageDelta(coefs.AgeAtSurgery*10, 1) + ' per tiotal år.');
   addRow(
     'Kön',
     'Kvinnor bedöms ha ' + (coefs.Female < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
