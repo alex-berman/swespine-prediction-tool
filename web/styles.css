@@ -153,7 +153,7 @@ body {
 
 .collapsible-container {
     width: 100%;
-    overflow: hidden;
+    overflow-y: auto;
     transition: max-height 0.1s ease-out;
 }
 
