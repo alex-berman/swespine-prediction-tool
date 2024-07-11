@@ -29,6 +29,12 @@ body {
     flex-direction: column;
 }
 
+.right-section-divider {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-top: 2px solid #888;
+}
+
 .tabs {
     display: flex;
     background-color: #333;
@@ -127,14 +133,16 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-#prediction {
+.prediction {
   font-size: x-large;
 }
 
 .header-container {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
   cursor: pointer;
+  font-size: 1em;
+  margin-top: 5px;
 }
 
 .square {

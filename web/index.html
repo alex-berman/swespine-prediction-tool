@@ -177,35 +177,67 @@
             </div>
         </div>
         <div class="right-section">
+            <h2>Förutsägelse</h2>
             <div class="prediction-section">
-                <h2>Förutsägelse</h2>
                 <div class="box" style="text-align: center;">
                     <h3>Sannolikhet att bli nöjd med operation</h3>
-                    <div id="prediction"></div>
+                    <div id="prediction_satisfaction" class="prediction"></div>
                 </div>
             </div>
-
             <div class="explanation-section">
-                <h2 class="header-container" id="toggle-clickable-local-explanation">
-                    <div class="square" id="toggle-button-local-explanation">+</div> Förklaring för den specifika förutsägelsen</h2>
-                <div id="collapsible-container-local-explanation" class="collapsible-container">
-                    <div id="collapsible-content-local-explanation">
+                <div class="header-container" id="toggle-clickable-local-explanation-satisfaction">
+                    <div class="square" id="toggle-button-local-explanation-satisfaction">+</div> Förklaring för den specifika förutsägelsen</div>
+                <div id="collapsible-container-local-explanation-satisfaction" class="collapsible-container">
+                    <div id="collapsible-content-local-explanation-satisfaction">
                         <div class="box">
-                            <div id="featureContributions"></div>
+                            <div id="featureContributions_satisfaction"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="explanation-section">
+                <div class="header-container" id="toggle-clickable-global-explanation-satisfaction">
+                    <div class="square" id="toggle-button-global-explanation-satisfaction">+</div> Förklaring för modellen i allmänhet</div>
+                <div id="collapsible-container-global-explanation-satisfaction" class="collapsible-container">
+                    <div id="collapsible-content-global-explanation-satisfaction">
+                        <div class="box" style="text-align: left;">
+                            Modellen som förutsäger nöjdhet utnyttjar en stor mängd data från alla kliniker i Sverige under en tioårsperiod, och uppdateras varje år.
+                            Hur de olika parametrarna (ålder, kön etc.) i allmänhet påverkar bedömd nöjdhet framgår nedan.
+                            <div id="globalExplanationTable_satisfaction"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <div class="right-section-divider"></div>
+
+            <div class="prediction-section">
+                <div class="box" style="text-align: center;">
+                    <h3>Sannolikhet för lyckat utfall<br />
+                        <span style="font-weight:normal; font-size:80%;">(smärtan helt försvunnen eller mycket förbättrad efter 1 år)</span></h3>
+                    <div id="prediction_outcome" class="prediction"></div>
+                </div>
+            </div>
             <div class="explanation-section">
-                <h2 class="header-container" id="toggle-clickable-global-explanation">
-                    <div class="square" id="toggle-button-global-explanation">+</div> Förklaring för modellen i allmänhet</h2>
-                <div id="collapsible-container-global-explanation" class="collapsible-container">
-                    <div id="collapsible-content-global-explanation">
+                <div class="header-container" id="toggle-clickable-local-explanation-outcome">
+                    <div class="square" id="toggle-button-local-explanation-outcome">+</div> Förklaring för den specifika förutsägelsen</div>
+                <div id="collapsible-container-local-explanation-outcome" class="collapsible-container">
+                    <div id="collapsible-content-local-explanation-outcome">
+                        <div class="box">
+                            <div id="featureContributions_outcome"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="explanation-section">
+                <div class="header-container" id="toggle-clickable-global-explanation-outcome">
+                    <div class="square" id="toggle-button-global-explanation-outcome">+</div> Förklaring för modellen i allmänhet</div>
+                <div id="collapsible-container-global-explanation-outcome" class="collapsible-container">
+                    <div id="collapsible-content-global-explanation-outcome">
                         <div class="box" style="text-align: left;">
-                            Modellen som förutsäger nöjdhet utnyttjar en stor mängd data från alla kliniker i Sverige under en tioårsperiod, och uppdateras varje år.
-                            Hur de olika parametrarna (ålder, kön etc.) i allmänhet påverkar bedömd nöjdhet framgår nedan.
-                            <div id="globalExplanationTable"></div>
+                            Modellen som förutsäger utfall utnyttjar en stor mängd data från alla kliniker i Sverige under en tioårsperiod, och uppdateras varje år.
+                            Hur de olika parametrarna (ålder, kön etc.) i allmänhet påverkar bedömt utfall framgår nedan.
+                            <div id="globalExplanationTable_outcome"></div>
                         </div>
                     </div>
                 </div>
@@ -214,6 +246,7 @@
     </div>
     <script src="plotly-2.11.1.min.js"></script>
     <script src="satisfaction_disc_herniation_coefs.js"></script>
+    <script src="outcome_disc_herniation_coefs.js"></script>
     <script src="mean_disc_herniation.js"></script>
     <script src="script.js"></script>
 </body>

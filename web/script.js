@@ -27,26 +27,6 @@ function initializeRangeControl(name) {
     });
 }
 
-function getAddendForNominal(varName) {
-  var coefs = satisfaction_disc_herniation_coefs[varName];
-  if(coefs.length == 1) {
-    if(document.getElementById(varName + '1').checked) {
-      return coefs[0];
-    } else {
-      return 0;
-    }
-  }
-  else if(coefs.length > 1) {
-    var element = document.getElementById(varName);
-    for(let i = 0; i < coefs.length; i++) {
-      if(element.options[i+1].selected) {
-        return coefs[i];
-      }
-    }
-    return 0;
-  }
-}
-
 function getScalarValueFromForm(varName) {
   return parseFloat(document.getElementById(varName).value);
 }
@@ -69,11 +49,11 @@ function getNominalValuesFromForm(varName, n) {
   }
 }
 
-function getRegressorValuesFromForm() {
+function getRegressorValuesFromForm(coefs) {
   result = {}
-  for(const key in satisfaction_disc_herniation_coefs) {
+  for(const key in coefs) {
     if(key != 'Intercept') {
-      var coef = satisfaction_disc_herniation_coefs[key];
+      var coef = coefs[key];
       if(Array.isArray(coef)) {
         result[key] = getNominalValuesFromForm(key, coef.length);
       }
@@ -85,10 +65,10 @@ function getRegressorValuesFromForm() {
   return result;
 }
 
-function getLogOdds(regressorValues) {
+function getLogOdds(regressorValues, coefs) {
   var result = 0;
-  for(const key in satisfaction_disc_herniation_coefs) {
-    var coef = satisfaction_disc_herniation_coefs[key];
+  for(const key in coefs) {
+    var coef = coefs[key];
     if(key == 'Intercept') {
       result += coef;
     }
@@ -110,15 +90,11 @@ function logOddsToProb(logOdds) {
   return 1 / (1 + Math.exp(-logOdds));
 }
 
-var predictedProbPerc;
-var predictedLogOdds;
-var regressorValues;
-
-function updatePrediction() {
-  var regressorValues = getRegressorValuesFromForm();
-  predictedLogOdds = getLogOdds(regressorValues);
-  predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
-  document.getElementById('prediction').innerHTML = predictedProbPerc + '%';
+function updatePrediction(id, coefs) {
+  var regressorValues = getRegressorValuesFromForm(coefs);
+  var predictedLogOdds = getLogOdds(regressorValues, coefs);
+  var predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
+  document.getElementById(`prediction_${id}`).innerHTML = predictedProbPerc + '%';
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
@@ -129,22 +105,29 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initializeCollapsibles();
 
   function handleInputChange(event) {
-    updatePrediction();
-    plotFeatureContributions();
+    updatePrediction('satisfaction', satisfaction_disc_herniation_coefs);
+    plotFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs);
+    updatePrediction('outcome', outcome_disc_herniation_coefs);
+    plotFeatureContributions('outcome', outcome_disc_herniation_coefs);
   }
   var formElements = document.querySelectorAll("input, select");
   formElements.forEach(function(element) {
       element.addEventListener("input", handleInputChange);
   });
 
-  updatePrediction();
-  plotFeatureContributions();
-  generateGlobalExplanationTable();
+  updatePrediction('satisfaction', satisfaction_disc_herniation_coefs);
+  plotFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs);
+  generateGlobalExplanationTable('satisfaction', satisfaction_disc_herniation_coefs);
+  updatePrediction('outcome', outcome_disc_herniation_coefs);
+  plotFeatureContributions('outcome', outcome_disc_herniation_coefs);
+  generateGlobalExplanationTable('outcome', outcome_disc_herniation_coefs);
 });
 
 function initializeCollapsibles() {
-  initializeCollapsible('local-explanation');
-  initializeCollapsible('global-explanation');
+  initializeCollapsible('local-explanation-satisfaction');
+  initializeCollapsible('global-explanation-satisfaction');
+  initializeCollapsible('local-explanation-outcome');
+  initializeCollapsible('global-explanation-outcome');
 }
 
 function initializeCollapsible(id) {
@@ -167,12 +150,12 @@ function initializeCollapsible(id) {
     collapsibleContainer.style.maxHeight = '0px';
 };
 
-function getLogOddsDeltas(reference, comparison) {
+function getLogOddsDeltas(reference, comparison, coefs) {
   var result = {};
-  for(const key in satisfaction_disc_herniation_coefs) {
+  for(const key in coefs) {
     var delta = 0;
     if(key != 'Intercept') {
-      var coef = satisfaction_disc_herniation_coefs[key];
+      var coef = coefs[key];
       if(Array.isArray(coef)) {
         for(var i = 0; i < coef.length; i++) {
           delta += coef[i] * (comparison[key][i] - reference[key][i]);
@@ -244,8 +227,8 @@ function generateAdjective(isLow, name) {
   return isLow ? 'kort' : 'lång';
 }
 
-function generateFeatureDescription(regressor, delta) {
-  var coef = satisfaction_disc_herniation_coefs[regressor];
+function generateFeatureDescription(regressor, delta, coefs) {
+  var coef = coefs[regressor];
   if(Array.isArray(coef)) {
     if(coef.length == 1) {
       if(regressor == 'Female') {
@@ -291,21 +274,23 @@ const sortByValue = (obj) => {
   return Object.fromEntries(entries);
 };
 
-function plotFeatureContributions() {
-  var meanLogOdds = getLogOdds(mean_disc_herniation);
+function plotFeatureContributions(id, coefs) {
+  var meanLogOdds = getLogOdds(mean_disc_herniation, coefs);
   var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
-  regressorValues = getRegressorValuesFromForm();
-  var logOddsDeltas = sortByValue(getLogOddsDeltas(mean_disc_herniation, regressorValues));
+  var regressorValues = getRegressorValuesFromForm(coefs);
+  var logOddsDeltas = sortByValue(getLogOddsDeltas(mean_disc_herniation, regressorValues, coefs));
+  var predictedLogOdds = getLogOdds(regressorValues, coefs);
+  var predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
   var y = ['Sammanlagd<br />förutsägelse: <b>' + predictedProbPerc + '%</b>'];
   var x = [predictedLogOdds];
   for(const regressor in logOddsDeltas) {
     var delta = logOddsDeltas[regressor];
-    y.push(generateFeatureDescription(regressor, delta));
+    y.push(generateFeatureDescription(regressor, delta, coefs));
     x.push(delta);
   }
   y.push('Genomsnittlig<br />diskbråckspatient: ' + meanProbPerc + '%');
   x.push(meanLogOdds);
-  Plotly.newPlot('featureContributions', {
+  Plotly.newPlot(`featureContributions_${id}`, {
     data: [{
       y: y,
       x: x,
@@ -344,22 +329,33 @@ function formElementRangeSize(name) {
   return rangeElement.max - rangeElement.min;
 }
 
-function generateGlobalExplanationTable() {
-  const coefs = satisfaction_disc_herniation_coefs;
+function generateGlobalExplanationTable(id, coefs) {
   let content = '<table>';
 
-  function addRow(header, cellContent) {
-    content += '<tr>';
-    content += '<td class="tableHeader">' + header + '</td>';
-    content += '<td class="tableContent">' + cellContent + '</td>';
-    content += '</tr>';
+  var probabilityObjectSingular;
+  var probabilityObjectPlural;
+  if(id == 'satisfaction') {
+    probabilityObjectSingular = 'att bli nöjd';
+    probabilityObjectPlural = 'att bli nöjda';
+  }
+  else if(id == 'outcome') {
+    probabilityObjectSingular = probabilityObjectPlural = 'för lyckat utfall';
+  }
+
+  function addRow(name, header, cellContent) {
+    if(name in coefs) {
+      content += '<tr>';
+      content += '<td class="tableHeader">' + header + '</td>';
+      content += '<td class="tableContent">' + cellContent + '</td>';
+      content += '</tr>';
+    }
   }
 
   function addNominal(header, name) {
     addRow(
       header,
-      generateOptionNounPhrase(name, getIndexOfMaxCoef(name)) + ' bedöms ha högst sannolikhet att bli nöjda. ' +
-      generateOptionNounPhrase(name, getIndexOfMinCoef(name)) + ' bedöms ha lägst sannolikhet att bli nöjda. ' +
+      generateOptionNounPhrase(name, getIndexOfMaxCoef(name)) + ' bedöms ha högst sannolikhet ' + probabilityObjectPlural + '. ' +
+      generateOptionNounPhrase(name, getIndexOfMinCoef(name)) + ' bedöms ha lägst sannolikhet ' + probabilityObjectPlural + '. ' +
       'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefsGroupRangeSize(coefs[name])) + '.');
   }
 
@@ -404,54 +400,65 @@ function generateGlobalExplanationTable() {
   }
   
   addRow(
+    'AgeAtSurgery',
     'Ålder',
-    'Ju högre ålder, desto ' + (coefs.AgeAtSurgery < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten att bli nöjd. ' +
+    'Ju högre ålder, desto ' + (coefs.AgeAtSurgery < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten ' + probabilityObjectSingular + '. ' +
     'Sannolikheten påverkas med upp till ' + coefToPercentageDelta(coefs.AgeAtSurgery*10, 1) + ' per tiotal år.');
   addRow(
+    'Female',
     'Kön',
-    'Kvinnor bedöms ha ' + (coefs.Female < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
+    'Kvinnor bedöms ha ' + (coefs.Female < 0 ? 'lägre' : 'högre') + ' sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden mellan kvinnor och män kan vara upp till ' + coefToPercentageDelta(coefs.Female) + '.');
   addRow(
+    'IsPreviouslyOperated',
     'Tidigare ryggop',
-    'Patienter som tidigare ryggopererats bedöms ha ' + (coefs.IsPreviouslyOperated < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
+    'Patienter som tidigare ryggopererats bedöms ha ' + (coefs.IsPreviouslyOperated < 0 ? 'lägre' : 'högre') + ' sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.IsPreviouslyOperated) + '.');
   addRow(
+    'IsSmoker',
     'Rökare',
-    'Rökare bedöms ha ' + (coefs.IsSmoker < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
+    'Rökare bedöms ha ' + (coefs.IsSmoker < 0 ? 'lägre' : 'högre') + ' sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.IsSmoker) + '.');
   addRow(
+    'IsUnemployed',
     'Arbetslös',
-    'Arbetslösa bedöms ha ' + (coefs.IsUnemployed < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
+    'Arbetslösa bedöms ha ' + (coefs.IsUnemployed < 0 ? 'lägre' : 'högre') + ' sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.IsUnemployed) + '.');
   addRow(
+    'HasAgePension',
     'Ålderspension',
-    'Patienter med ålderspension bedöms ha ' + (coefs.HasAgePension < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
+    'Patienter med ålderspension bedöms ha ' + (coefs.HasAgePension < 0 ? 'lägre' : 'högre') + ' sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.HasAgePension) + '.');
   addRow(
+    'HasSickPension',
     'Sjukpension',
-    'Patienter med sjukpension bedöms ha ' + (coefs.HasSickPension < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
+    'Patienter med sjukpension bedöms ha ' + (coefs.HasSickPension < 0 ? 'lägre' : 'högre') + ' sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.HasSickPension) + '.');
   addRow(
+    'HasOtherIllness',
     'Samsjuklighet',
-    'Patienter med andra sjukdomar bedöms ha ' + (coefs.HasOtherIllness < 0 ? 'lägre' : 'högre') + ' sannolikhet att bli nöjda. ' +
+    'Patienter med andra sjukdomar bedöms ha ' + (coefs.HasOtherIllness < 0 ? 'lägre' : 'högre') + ' sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.HasOtherIllness) + '.');
   addRow(
+    'EQ5DIndex',
     'EQ5D',
-    'Ju högre EQ5D, desto ' + (coefs.EQ5DIndex < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten att bli nöjd. ' +
+    'Ju högre EQ5D, desto ' + (coefs.EQ5DIndex < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten ' + probabilityObjectSingular + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.EQ5DIndex * formElementRangeSize('EQ5DIndex')) + '.');
   addNominal('Promenadsträcka', 'AbilityWalking');
   addNominal('Smärtduration i ben', 'DurationLegPain');
   addNominal('Smärtduration i rygg', 'DurationBackPain');
   addRow(
+    'NRSBackPain',
     'Smärta i rygg',
-    'Ju mer ryggsmärta, desto ' + (coefs.NRSBackPain < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten att bli nöjd. ' +
+    'Ju mer ryggsmärta, desto ' + (coefs.NRSBackPain < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten ' + probabilityObjectSingular + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.NRSBackPain * formElementRangeSize('NRSBackPain')) + '.');
   addRow(
+    'ODI',
     'Funktionsnedsättning',
-    'Ju högre funktionsnedsättning, desto ' + (coefs.ODI < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten att bli nöjd. ' +
+    'Ju högre funktionsnedsättning, desto ' + (coefs.ODI < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten ' + probabilityObjectSingular + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.ODI * formElementRangeSize('ODI')) + '.');
 
   content += '</table>';
-  const table = document.getElementById('globalExplanationTable');
+  const table = document.getElementById(`globalExplanationTable_${id}`);
   table.innerHTML = content;
 }
