@@ -1,9 +1,19 @@
-document.querySelectorAll('.tab-button').forEach(button => {
+document.querySelectorAll('.tab-button-patient-data').forEach(button => {
     button.addEventListener('click', () => {
-        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-button-patient-data').forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
 
-        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        document.querySelectorAll('.tab-pane-patient-data').forEach(pane => pane.classList.remove('active'));
+        document.getElementById(button.dataset.tab).classList.add('active');
+    });
+});
+
+document.querySelectorAll('.tab-button-prediction').forEach(button => {
+    button.addEventListener('click', () => {
+        document.querySelectorAll('.tab-button-prediction').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+
+        document.querySelectorAll('.tab-pane-prediction').forEach(pane => pane.classList.remove('active'));
         document.getElementById(button.dataset.tab).classList.add('active');
     });
 });

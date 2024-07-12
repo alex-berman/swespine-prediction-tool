@@ -10,11 +10,11 @@
     <div class="container">
         <div class="left-section">
             <div class="tabs">
-                <button class="tab-button active" data-tab="basinformation">Basinformation</button>
-                <button class="tab-button" data-tab="ryggspecifik">Ryggspecifik information</button>
+                <button class="tab-button tab-button-patient-data active" data-tab="basinformation">Basinformation</button>
+                <button class="tab-button tab-button-patient-data" data-tab="ryggspecifik">Ryggspecifik information</button>
             </div>
             <div class="tab-content">
-                <div id="basinformation" class="tab-pane active">
+                <div id="basinformation" class="tab-pane tab-pane-patient-data active">
                     <h2>Undergrupp</h2>
                     <div class="form-group">
                         <label for="diagnosgrupp" class="label">Diagnosgrupp</label>
@@ -123,7 +123,7 @@
                     </div>
                 </div>
 
-                <div id="ryggspecifik" class="tab-pane">
+                <div id="ryggspecifik" class="tab-pane tab-pane-patient-data">
                     <h2>Hälsoprofil</h2>
                     <div class="form-group">
                         <label for="AbilityWalking" class="label">Promenadsträcka</label>
@@ -177,67 +177,70 @@
             </div>
         </div>
         <div class="right-section">
-            <h2>Förutsägelse</h2>
-            <div class="prediction-section">
-                <div class="box" style="text-align: center;">
-                    <h3>Sannolikhet att bli nöjd med operation</h3>
-                    <div id="prediction_satisfaction" class="prediction"></div>
-                </div>
+            <div class="tabs">
+                <button class="tab-button tab-button-prediction active" data-tab="satisfaction">Nöjdhet</button>
+                <button class="tab-button tab-button-prediction" data-tab="outcome">Utfall</button>
             </div>
-            <div class="explanation-section">
-                <div class="header-container" id="toggle-clickable-local-explanation-satisfaction">
-                    <div class="square" id="toggle-button-local-explanation-satisfaction">+</div> Förklaring för den specifika förutsägelsen</div>
-                <div id="collapsible-container-local-explanation-satisfaction" class="collapsible-container">
-                    <div id="collapsible-content-local-explanation-satisfaction">
-                        <div class="box">
-                            <div id="featureContributions_satisfaction"></div>
+            <div class="tab-content">
+                <div id="satisfaction" class="tab-pane tab-pane-prediction active">
+                    <div class="box" style="text-align: center;">
+                        <h3>Sannolikhet att bli nöjd med operation</h3>
+                        <div id="prediction_satisfaction" class="prediction"></div>
+                    </div>
+                    <div class="explanation-section">
+                        <div class="header-container" id="toggle-clickable-local-explanation-satisfaction">
+                            <div class="square" id="toggle-button-local-explanation-satisfaction">+</div> Förklaring för den specifika förutsägelsen</div>
+                        <div id="collapsible-container-local-explanation-satisfaction" class="collapsible-container">
+                            <div id="collapsible-content-local-explanation-satisfaction">
+                                <div class="box">
+                                    <div id="featureContributions_satisfaction"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="explanation-section">
+                        <div class="header-container" id="toggle-clickable-global-explanation-satisfaction">
+                            <div class="square" id="toggle-button-global-explanation-satisfaction">+</div> Förklaring för modellen i allmänhet</div>
+                        <div id="collapsible-container-global-explanation-satisfaction" class="collapsible-container">
+                            <div id="collapsible-content-global-explanation-satisfaction">
+                                <div class="box" style="text-align: left;">
+                                    Modellen som förutsäger nöjdhet utnyttjar en stor mängd data från alla kliniker i Sverige under en tioårsperiod, och uppdateras varje år.
+                                    Hur de olika parametrarna (ålder, kön etc.) i allmänhet påverkar bedömd nöjdhet framgår nedan.
+                                    <div id="globalExplanationTable_satisfaction"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="explanation-section">
-                <div class="header-container" id="toggle-clickable-global-explanation-satisfaction">
-                    <div class="square" id="toggle-button-global-explanation-satisfaction">+</div> Förklaring för modellen i allmänhet</div>
-                <div id="collapsible-container-global-explanation-satisfaction" class="collapsible-container">
-                    <div id="collapsible-content-global-explanation-satisfaction">
-                        <div class="box" style="text-align: left;">
-                            Modellen som förutsäger nöjdhet utnyttjar en stor mängd data från alla kliniker i Sverige under en tioårsperiod, och uppdateras varje år.
-                            Hur de olika parametrarna (ålder, kön etc.) i allmänhet påverkar bedömd nöjdhet framgår nedan.
-                            <div id="globalExplanationTable_satisfaction"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="right-section-divider"></div>
-
-            <div class="prediction-section">
-                <div class="box" style="text-align: center;">
-                    <h3>Sannolikhet för lyckat utfall<br />
-                        <span style="font-weight:normal; font-size:80%;">(smärtan helt försvunnen eller mycket förbättrad efter 1 år)</span></h3>
-                    <div id="prediction_outcome" class="prediction"></div>
-                </div>
-            </div>
-            <div class="explanation-section">
-                <div class="header-container" id="toggle-clickable-local-explanation-outcome">
-                    <div class="square" id="toggle-button-local-explanation-outcome">+</div> Förklaring för den specifika förutsägelsen</div>
-                <div id="collapsible-container-local-explanation-outcome" class="collapsible-container">
-                    <div id="collapsible-content-local-explanation-outcome">
-                        <div class="box">
-                            <div id="featureContributions_outcome"></div>
+                <div id="outcome" class="tab-pane tab-pane-prediction">
+                    <div class="box" style="text-align: center;">
+                        <h3>Sannolikhet för lyckat utfall<br />
+                            <span style="font-weight:normal; font-size:80%;">(smärtan helt försvunnen eller mycket förbättrad efter 1 år)</span></h3>
+                        <div id="prediction_outcome" class="prediction"></div>
+                    </div>
+                    <div class="explanation-section">
+                        <div class="header-container" id="toggle-clickable-local-explanation-outcome">
+                            <div class="square" id="toggle-button-local-explanation-outcome">+</div> Förklaring för den specifika förutsägelsen</div>
+                        <div id="collapsible-container-local-explanation-outcome" class="collapsible-container">
+                            <div id="collapsible-content-local-explanation-outcome">
+                                <div class="box">
+                                    <div id="featureContributions_outcome"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="explanation-section">
-                <div class="header-container" id="toggle-clickable-global-explanation-outcome">
-                    <div class="square" id="toggle-button-global-explanation-outcome">+</div> Förklaring för modellen i allmänhet</div>
-                <div id="collapsible-container-global-explanation-outcome" class="collapsible-container">
-                    <div id="collapsible-content-global-explanation-outcome">
-                        <div class="box" style="text-align: left;">
-                            Modellen som förutsäger utfall utnyttjar en stor mängd data från alla kliniker i Sverige under en tioårsperiod, och uppdateras varje år.
-                            Hur de olika parametrarna (ålder, kön etc.) i allmänhet påverkar bedömt utfall framgår nedan.
-                            <div id="globalExplanationTable_outcome"></div>
+                    <div class="explanation-section">
+                        <div class="header-container" id="toggle-clickable-global-explanation-outcome">
+                            <div class="square" id="toggle-button-global-explanation-outcome">+</div> Förklaring för modellen i allmänhet</div>
+                        <div id="collapsible-container-global-explanation-outcome" class="collapsible-container">
+                            <div id="collapsible-content-global-explanation-outcome">
+                                <div class="box" style="text-align: left;">
+                                    Modellen som förutsäger utfall utnyttjar en stor mängd data från alla kliniker i Sverige under en tioårsperiod, och uppdateras varje år.
+                                    Hur de olika parametrarna (ålder, kön etc.) i allmänhet påverkar bedömt utfall framgår nedan.
+                                    <div id="globalExplanationTable_outcome"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
