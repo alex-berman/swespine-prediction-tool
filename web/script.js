@@ -240,7 +240,7 @@ function generateAdjective(isLow, name) {
   return isLow ? 'kort' : 'lång';
 }
 
-function generateFeatureDescription(regressor, delta, coefs) {
+function generateFeatureDescription(regressor, delta, coefs, regressorValues) {
   var coef = coefs[regressor];
   if(Array.isArray(coef)) {
     if(coef.length == 1) {
@@ -298,7 +298,7 @@ function plotFeatureContributions(id, coefs) {
   var x = [predictedLogOdds];
   for(const regressor in logOddsDeltas) {
     var delta = logOddsDeltas[regressor];
-    y.push(generateFeatureDescription(regressor, delta, coefs));
+    y.push(generateFeatureDescription(regressor, delta, coefs, regressorValues));
     x.push(delta);
   }
   y.push('Genomsnittlig<br />diskbråckspatient: ' + meanProbPerc + '%');
