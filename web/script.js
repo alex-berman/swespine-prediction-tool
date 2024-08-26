@@ -141,6 +141,7 @@ function updatePrediction(id, coefs) {
   var regressorValues = getRegressorValuesFromForm(coefs);
   var predictedLogOdds = getLogOdds(regressorValues, coefs);
   var predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
+  document.getElementById(`tab_prediction_${id}`).innerHTML = predictedProbPerc + '%';
   document.getElementById(`prediction_${id}`).innerHTML = predictedProbPerc + '%';
 }
 

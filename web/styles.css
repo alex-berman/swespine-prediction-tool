@@ -137,6 +137,7 @@ body {
 
 .prediction {
   font-size: x-large;
+  font-weight: bold;
 }
 
 .header-container {
