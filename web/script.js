@@ -1,22 +1,24 @@
-document.querySelectorAll('.tab-button-patient-data').forEach(button => {
-    button.addEventListener('click', () => {
-        document.querySelectorAll('.tab-button-patient-data').forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
+function initializeTabs() {
+  document.querySelectorAll('.tab-button-patient-data').forEach(button => {
+      button.addEventListener('click', () => {
+          document.querySelectorAll('.tab-button-patient-data').forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
 
-        document.querySelectorAll('.tab-pane-patient-data').forEach(pane => pane.classList.remove('active'));
-        document.getElementById(button.dataset.tab).classList.add('active');
-    });
-});
+          document.querySelectorAll('.tab-pane-patient-data').forEach(pane => pane.classList.remove('active'));
+          document.getElementById(button.dataset.tab).classList.add('active');
+      });
+  });
 
-document.querySelectorAll('.tab-button-prediction').forEach(button => {
-    button.addEventListener('click', () => {
-        document.querySelectorAll('.tab-button-prediction').forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
+  document.querySelectorAll('.tab-button-prediction').forEach(button => {
+      button.addEventListener('click', () => {
+          document.querySelectorAll('.tab-button-prediction').forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
 
-        document.querySelectorAll('.tab-pane-prediction').forEach(pane => pane.classList.remove('active'));
-        document.getElementById(button.dataset.tab).classList.add('active');
-    });
-});
+          document.querySelectorAll('.tab-pane-prediction').forEach(pane => pane.classList.remove('active'));
+          document.getElementById(button.dataset.tab).classList.add('active');
+      });
+  });
+}
 
 function initializeRangeControl(name) {
     const slider = document.getElementById(name);
@@ -108,6 +110,7 @@ function updatePrediction(id, coefs) {
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
+  initializeTabs();
   initializeRangeControl('EQ5DIndex');
   initializeRangeControl('NRSLegPain');
   initializeRangeControl('NRSBackPain');
