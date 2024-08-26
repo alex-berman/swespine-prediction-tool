@@ -1,3 +1,38 @@
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomFloat(min, max, precision) {
+    return (Math.random() * (max - min) + min).toFixed(precision);
+}
+
+function setRandomValues() {
+    document.querySelectorAll('select').forEach(select => {
+        const options = select.options;
+        const randomIndex = getRandomInt(0, options.length - 1);
+        select.selectedIndex = randomIndex;
+    });
+
+    document.querySelectorAll('.radio-group').forEach(group => {
+        const radios = group.querySelectorAll('input[type="radio"]');
+        const randomIndex = getRandomInt(0, radios.length - 1);
+        radios[randomIndex].checked = true;
+    });
+
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+        let min = input.min ? parseInt(input.min) : 50;
+        let max = input.max ? parseInt(input.max) : 90;
+        input.value = getRandomInt(min, max);
+    });
+
+    document.querySelectorAll('input[type="range"]').forEach(input => {
+        let min = parseFloat(input.min);
+        let max = parseFloat(input.max);
+        input.value = getRandomFloat(min, max, 2);
+        input.dispatchEvent(new Event('input'));
+    });
+}
+
 function initializeTabs() {
   document.querySelectorAll('.tab-button-patient-data').forEach(button => {
       button.addEventListener('click', () => {
@@ -115,6 +150,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initializeRangeControl('NRSLegPain');
   initializeRangeControl('NRSBackPain');
   initializeRangeControl('ODI');
+  setRandomValues();
   initializeCollapsibles();
 
   function handleInputChange(event) {
