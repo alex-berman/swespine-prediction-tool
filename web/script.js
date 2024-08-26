@@ -298,7 +298,7 @@ function generateFeatureDescription(regressor, delta, coefs, regressorValues) {
       meanValue = getNominalValue(regressor, mean_disc_herniation);
       value = getNominalValue(regressor, regressorValues);
       const label = getNominalLabel(regressor);
-      return 'Relativt ' + generateAdjective(value < meanValue, regressor) + '<br />' + toLeadingLowercase(label);
+      return 'Relativt ' + generateAdjective(value < meanValue, regressor) + ' ' + toLeadingLowercase(label);
     }
   }
   else {
@@ -310,7 +310,7 @@ function generateFeatureDescription(regressor, delta, coefs, regressorValues) {
       return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + ' EQ5D';
     }
     if(regressor == 'ODI') {
-      return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + '<br />funktionsnedsättning';
+      return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + ' funktionsnedsättning';
     }
     if(regressor == 'NRSBackPain') {
       return 'Relativt ' + (logOddsDelta < 0 ? 'lite' : 'mycket') + ' ryggsmärta';
@@ -331,14 +331,14 @@ function plotFeatureContributions(id, coefs) {
   var logOddsDeltas = sortByValue(getLogOddsDeltas(mean_disc_herniation, regressorValues, coefs));
   var predictedLogOdds = getLogOdds(regressorValues, coefs);
   var predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
-  var y = ['Sammanlagd<br />förutsägelse: <b>' + predictedProbPerc + '%</b>'];
+  var y = ['Sammanlagd förutsägelse: <b>' + predictedProbPerc + '%</b>'];
   var x = [predictedLogOdds];
   for(const regressor in logOddsDeltas) {
     var delta = logOddsDeltas[regressor];
     y.push(generateFeatureDescription(regressor, delta, coefs, regressorValues));
     x.push(delta);
   }
-  y.push('Genomsnittlig<br />diskbråckspatient: ' + meanProbPerc + '%');
+  y.push('Genomsnittlig diskbråckspatient: ' + meanProbPerc + '%');
   x.push(meanLogOdds);
   Plotly.newPlot(`featureContributions_${id}`, {
     data: [{
@@ -357,7 +357,7 @@ function plotFeatureContributions(id, coefs) {
         margin: {
             t: 50,
             b: 50,
-            l: 170,
+            l: 250,
             r: 50
         },
         xaxis: {
