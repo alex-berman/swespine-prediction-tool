@@ -25,7 +25,7 @@
                     <div class="form-group">
                         <label class="label">Opererade nivåer</label>
                         <div id="opererade-nivaer" class="input radio-group">
-                            <input type="radio" id="nivaer1" name="nivaer" value="1" checked>
+                            <input type="radio" id="nivaer1" name="nivaer" value="1">
                             <label for="nivaer1">1</label>
                             <input type="radio" id="nivaer2" name="nivaer" value="2">
                             <label for="nivaer2">2</label>
@@ -49,12 +49,12 @@
                     <h2>Sociodemografi</h2>
                     <div class="form-group">
                         <label for="AgeAtSurgery" class="label">Ålder</label>
-                        <input type="number" id="AgeAtSurgery" value="56" class="input">
+                        <input type="number" id="AgeAtSurgery" class="input">
                     </div>
                     <div class="form-group">
                         <label class="label">Kön</label>
                         <div class="input radio-group">
-                            <input type="radio" id="Female1" name="Female" value="1" checked>
+                            <input type="radio" id="Female1" name="Female" value="1">
                             <label for="Female1">Kvinna</label>
                             <input type="radio" id="Female0" name="Female" value="0">
                             <label for="Female0">Man</label>
@@ -65,7 +65,7 @@
                         <div class="input radio-group">
                             <input type="radio" id="IsUnemployed1" name="IsUnemployed" value="1">
                             <label for="IsUnemployed1">Ja</label>
-                            <input type="radio" id="IsUnemployed0" name="IsUnemployed" value="0" checked>
+                            <input type="radio" id="IsUnemployed0" name="IsUnemployed" value="0">
                             <label for="IsUnemployed0">Nej</label>
                         </div>
                     </div>
@@ -74,7 +74,7 @@
                         <div class="input radio-group">
                             <input type="radio" id="HasSickPension1" name="HasSickPension" value="1">
                             <label for="HasSickPension1">Ja, heltid / deltid</label>
-                            <input type="radio" id="HasSickPension0" name="HasSickPension" value="0" checked>
+                            <input type="radio" id="HasSickPension0" name="HasSickPension" value="0">
                             <label for="HasSickPension0">Nej</label>
                         </div>
                     </div>
@@ -83,7 +83,7 @@
                         <div class="input radio-group">
                             <input type="radio" id="HasAgePension1" name="HasAgePension" value="1">
                             <label for="HasAgePension1">Ja, heltid / deltid</label>
-                            <input type="radio" id="HasAgePension0" name="HasAgePension" value="0" checked>
+                            <input type="radio" id="HasAgePension0" name="HasAgePension" value="0">
                             <label for="HasAgePension0">Nej</label>
                         </div>
                     </div>
@@ -94,7 +94,7 @@
                         <div class="input radio-group">
                             <input type="radio" id="IsSmoker1" name="IsSmoker" value="1">
                             <label for="IsSmoker1">Ja</label>
-                            <input type="radio" id="IsSmoker0" name="IsSmoker" value="0" checked>
+                            <input type="radio" id="IsSmoker0" name="IsSmoker" value="0">
                             <label for="IsSmoker0">Nej</label>
                         </div>
                     </div>
@@ -103,7 +103,7 @@
                         <div class="input radio-group">
                             <input type="radio" id="IsPreviouslyOperated1" name="IsPreviouslyOperated" value="1">
                             <label for="IsPreviouslyOperated1">Ja</label>
-                            <input type="radio" id="IsPreviouslyOperated0" name="IsPreviouslyOperated" value="0" checked>
+                            <input type="radio" id="IsPreviouslyOperated0" name="IsPreviouslyOperated" value="0">
                             <label for="IsPreviouslyOperated0">Nej</label>
                         </div>
                     </div>
@@ -112,14 +112,14 @@
                         <div class="input radio-group">
                             <input type="radio" id="HasOtherIllness1" name="HasOtherIllness" value="1">
                             <label for="HasOtherIllness1">Ja</label>
-                            <input type="radio" id="HasOtherIllness0" name="HasOtherIllness" value="0" checked>
+                            <input type="radio" id="HasOtherIllness0" name="HasOtherIllness" value="0">
                             <label for="HasOtherIllness0">Nej</label>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="EQ5DIndex" class="label">EQ5D</label>
-                        <input type="text" id="EQ5DIndex-value" value="0.57" class="input">
-                        <input type="range" id="EQ5DIndex" min="-0.59" max="1" step="0.01" value="0.57" class="input">
+                        <input type="text" id="EQ5DIndex-value" class="input">
+                        <input type="range" id="EQ5DIndex" min="-0.59" max="1" step="0.01" class="input">
                     </div>
                 </div>
 
@@ -131,7 +131,7 @@
                             <option value="1">0-100 meter</option>
                             <option value="2">100-500 meter</option>
                             <option value="3">0,5-1 kilometer</option>
-                            <option value="4" selected>Mer än 1 kilometer</option>
+                            <option value="4">Mer än 1 kilometer</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -139,7 +139,7 @@
                         <select id="DurationLegPain" class="input">
                             <option value="0">Ingen smärta</option>
                             <option value="1">Mindre än 3 månader</option>
-                            <option value="2" selected>3 till 12 månader</option>
+                            <option value="2">3 till 12 månader</option>
                             <option value="3">1 till 2 år</option>
                             <option value="4">Mer än 2 år</option>
                         </select>
@@ -149,7 +149,7 @@
                         <select id="DurationBackPain" class="input">
                             <option value="0">Ingen smärta</option>
                             <option value="1">Mindre än 3 månader</option>
-                            <option value="2" selected>3 till 12 månader</option>
+                            <option value="2">3 till 12 månader</option>
                             <option value="3">1 till 2 år</option>
                             <option value="4">Mer än 2 år</option>
                         </select>
@@ -158,20 +158,20 @@
                     <h2>Preop smärta (NRS)</h2>
                     <div class="form-group">
                         <label for="NRSLegPain" class="label">Smärta i ben</label>
-                        <input type="text" id="NRSLegPain-value" value="6" class="input">
-                        <input type="range" id="NRSLegPain" min="0" max="10" step="1" value="6" class="input">
+                        <input type="text" id="NRSLegPain-value" class="input">
+                        <input type="range" id="NRSLegPain" min="0" max="10" step="1" class="input">
                     </div>
                     <div class="form-group">
                         <label for="NRSBackPain" class="label">Smärta i rygg</label>
-                        <input type="text" id="NRSBackPain-value" value="6" class="input">
-                        <input type="range" id="NRSBackPain" min="0" max="10" step="1" value="6" class="input">
+                        <input type="text" id="NRSBackPain-value" class="input">
+                        <input type="range" id="NRSBackPain" min="0" max="10" step="1" class="input">
                     </div>
 
                     <h2>Funktionsnedsättning</h2>
                     <div class="form-group">
                         <label for="ODI" class="label">Funktionsnedsättning</label>
-                        <input type="text" id="ODI-value" value="28" class="input">
-                        <input type="range" id="ODI" min="0" max="100" step="1" value="28" class="input">
+                        <input type="text" id="ODI-value" class="input">
+                        <input type="range" id="ODI" min="0" max="100" step="1" class="input">
                     </div>
                 </div>
             </div>
