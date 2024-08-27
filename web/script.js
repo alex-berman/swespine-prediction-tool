@@ -360,6 +360,7 @@ function plotFeatureContributions(id, coefs) {
             l: 250,
             r: 50
         },
+        width: 500,
         xaxis: {
           showgrid: true,
           zeroline: true,
