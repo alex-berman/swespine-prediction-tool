@@ -324,6 +324,49 @@ const sortByValue = (obj) => {
   return Object.fromEntries(entries);
 };
 
+function logOddsToColor(logOdds) {
+  function hue() {
+    if(logOdds < 0) {
+      return 0; // red
+    }
+    return 120; // green
+  }
+
+  function hslToRgb(h, s, l) {
+      s /= 100;
+      l /= 100;
+
+      let c = (1 - Math.abs(2 * l - 1)) * s;
+      let x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      let m = l - c / 2;
+      let r = 0, g = 0, b = 0;
+
+      if (0 <= h && h < 60) {
+          r = c; g = x; b = 0;
+      } else if (60 <= h && h < 120) {
+          r = x; g = c; b = 0;
+      } else if (120 <= h && h < 180) {
+          r = 0; g = c; b = x;
+      } else if (180 <= h && h < 240) {
+          r = 0; g = x; b = c;
+      } else if (240 <= h && h < 300) {
+          r = x; g = 0; b = c;
+      } else if (300 <= h && h < 360) {
+          r = c; g = 0; b = x;
+      }
+
+      r = Math.round((r + m) * 255);
+      g = Math.round((g + m) * 255);
+      b = Math.round((b + m) * 255);
+
+      return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  const lightness = 60;
+  const saturation = 40;
+  return hslToRgb(hue(), saturation, lightness);
+}
+
 function plotFeatureContributions(id, coefs) {
   var meanLogOdds = getLogOdds(mean_disc_herniation, coefs);
   var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
@@ -331,15 +374,18 @@ function plotFeatureContributions(id, coefs) {
   var logOddsDeltas = sortByValue(getLogOddsDeltas(mean_disc_herniation, regressorValues, coefs));
   var predictedLogOdds = getLogOdds(regressorValues, coefs);
   var predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
+  var colors = ['#eee'];
   var y = ['Sammanlagd förutsägelse: <b>' + predictedProbPerc + '%</b>'];
   var x = [predictedLogOdds];
   for(const regressor in logOddsDeltas) {
     var delta = logOddsDeltas[regressor];
     y.push(generateFeatureDescription(regressor, delta, coefs, regressorValues));
     x.push(delta);
+    colors.push(logOddsToColor(delta, 30));
   }
   y.push('Genomsnittlig diskbråckspatient: ' + meanProbPerc + '%');
   x.push(meanLogOdds);
+  colors.push('#eee');
   Plotly.newPlot(`featureContributions_${id}`, {
     data: [{
       y: y,
@@ -347,7 +393,7 @@ function plotFeatureContributions(id, coefs) {
       type: 'bar',
       orientation: 'h',
       marker: {
-        color: '#C8A2C8',
+        color: colors,
         line: {
           width: 2.5
         }
