@@ -386,6 +386,39 @@ function plotFeatureContributions(id, coefs) {
   y.push('Genomsnittlig diskbråckspatient: ' + meanProbPerc + '%');
   x.push(meanLogOdds);
   colors.push('#eee');
+
+  const dividers = [
+    {
+      type: 'line',
+      x0: -2,
+      y0: 0.5,
+      x1: 2,
+      y1: 0.5,
+      yref: 'y',
+      xref: 'paper',
+      line: {
+        color: 'lightgray',
+        width: 1
+      }
+    }
+  ];
+  if(y.length > 2) {
+    dividers.push(
+      {
+        type: 'line',
+        x0: -2,
+        y0: y.length - 2 + 0.5,
+        x1: 2,
+        y1: y.length - 2 + 0.5,
+        yref: 'y',
+        xref: 'paper',
+        line: {
+          color: 'lightgray',
+          width: 1
+        }
+      }
+    )
+  }
   Plotly.newPlot(`featureContributions_${id}`, {
     data: [{
       y: y,
@@ -400,6 +433,7 @@ function plotFeatureContributions(id, coefs) {
       }
     }],
     layout: {
+        shapes: dividers,
         margin: {
             t: 50,
             b: 50,
