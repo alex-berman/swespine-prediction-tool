@@ -368,16 +368,30 @@ function logOddsToColor(logOdds) {
 }
 
 function plotFeatureContributions(id, coefs) {
+  const logOddsThreshold = 0.1; // Factors below this log odds delta get grouped under "Other factors"
   var meanLogOdds = getLogOdds(mean_disc_herniation, coefs);
   var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
   var regressorValues = getRegressorValuesFromForm(coefs);
   var logOddsDeltas = sortByValue(getLogOddsDeltas(mean_disc_herniation, regressorValues, coefs));
+
+  function filterLogOddsDeltas(f) {
+    return Object.fromEntries(Object.entries(logOddsDeltas).filter(f));
+  }
+
+  var logOddsDeltasAboveThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) >= logOddsThreshold);
+  var logOddsDeltasBelowThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) < logOddsThreshold);
   var predictedLogOdds = getLogOdds(regressorValues, coefs);
   var predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
   var colors = ['#eee'];
   var y = ['Sammanlagd förutsägelse: <b>' + predictedProbPerc + '%</b>'];
   var x = [predictedLogOdds];
-  for(const regressor in logOddsDeltas) {
+  if(Object.values(logOddsDeltasBelowThreshold).length > 0) {
+    var delta = Object.values(logOddsDeltasBelowThreshold).reduce((acc, curr) => acc + curr, 0);
+    y.push('Övriga faktorer');
+    x.push(delta);
+    colors.push(logOddsToColor(delta, 30));
+  }
+  for(const regressor in logOddsDeltasAboveThreshold) {
     var delta = logOddsDeltas[regressor];
     y.push(generateFeatureDescription(regressor, delta, coefs, regressorValues));
     x.push(delta);
