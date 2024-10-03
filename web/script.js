@@ -521,6 +521,7 @@ function generateGlobalExplanationTable(id, coefs) {
 
   function addNominal(header, name) {
     addRow(
+      name,
       header,
       generateOptionNounPhrase(name, getIndexOfMaxCoef(name)) + ' bedöms ha högst sannolikhet ' + probabilityObjectPlural + '. ' +
       generateOptionNounPhrase(name, getIndexOfMinCoef(name)) + ' bedöms ha lägst sannolikhet ' + probabilityObjectPlural + '. ' +
