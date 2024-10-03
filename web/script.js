@@ -571,47 +571,47 @@ function generateGlobalExplanationTable(id, coefs) {
   addRow(
     'AgeAtSurgery',
     'Ålder',
-    'Ju högre ålder, desto ' + (coefs.AgeAtSurgery < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten ' + probabilityObjectSingular + '. ' +
+    'Ju ' + (coefs.AgeAtSurgery < 0 ? 'lägre' : 'högre') + ' ålder, desto högre bedöms sannolikheten ' + probabilityObjectSingular + '. ' +
     'Sannolikheten påverkas med upp till ' + coefToPercentageDelta(coefs.AgeAtSurgery*10, 1) + ' per tiotal år.');
   addRow(
     'Female',
     'Kön',
-    'Kvinnor bedöms ha ' + (coefs.Female < 0 ? 'lägre' : 'högre') + ' sannolikhet ' + probabilityObjectPlural + '. ' +
+    (coefs.Female < 0 ? 'Män' : 'Kvinnor') + ' bedöms ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden mellan kvinnor och män kan vara upp till ' + coefToPercentageDelta(coefs.Female) + '.');
   addRow(
     'IsPreviouslyOperated',
     'Tidigare ryggop',
-    'Patienter som tidigare ryggopererats bedöms ha ' + (coefs.IsPreviouslyOperated < 0 ? 'lägre' : 'högre') + ' sannolikhet ' + probabilityObjectPlural + '. ' +
+    'Patienter som ' + (coefs.IsPreviouslyOperated < 0 ? 'inte' : '') + ' tidigare ryggopererats bedöms ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.IsPreviouslyOperated) + '.');
   addRow(
     'IsSmoker',
     'Rökare',
-    'Rökare bedöms ha ' + (coefs.IsSmoker < 0 ? 'lägre' : 'högre') + ' sannolikhet ' + probabilityObjectPlural + '. ' +
+    (coefs.IsSmoker < 0 ? 'Icke-rökare' : 'rökare') + ' bedöms ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.IsSmoker) + '.');
   addRow(
     'IsUnemployed',
     'Arbetslös',
-    'Arbetslösa bedöms ha ' + (coefs.IsUnemployed < 0 ? 'lägre' : 'högre') + ' sannolikhet ' + probabilityObjectPlural + '. ' +
+    (coefs.IsUnemployed < 0 ? 'Icke-arbetslösa' : 'Arbetslösa') + ' bedöms ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.IsUnemployed) + '.');
   addRow(
     'HasAgePension',
     'Ålderspension',
-    'Patienter med ålderspension bedöms ha ' + (coefs.HasAgePension < 0 ? 'lägre' : 'högre') + ' sannolikhet ' + probabilityObjectPlural + '. ' +
+    'Patienter ' + (coefs.HasAgePension < 0 ? 'utan' : 'med') + ' ålderspension bedöms ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.HasAgePension) + '.');
   addRow(
     'HasSickPension',
     'Sjukpension',
-    'Patienter med sjukpension bedöms ha ' + (coefs.HasSickPension < 0 ? 'lägre' : 'högre') + ' sannolikhet ' + probabilityObjectPlural + '. ' +
+    'Patienter ' + (coefs.HasSickPension < 0 ? 'utan' : 'med') + ' sjukpension bedöms ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.HasSickPension) + '.');
   addRow(
     'HasOtherIllness',
     'Samsjuklighet',
-    'Patienter med andra sjukdomar bedöms ha ' + (coefs.HasOtherIllness < 0 ? 'lägre' : 'högre') + ' sannolikhet ' + probabilityObjectPlural + '. ' +
+    'Patienter ' + (coefs.HasOtherIllness < 0 ? 'utan' : 'med') + ' andra sjukdomar bedöms ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.HasOtherIllness) + '.');
   addRow(
     'EQ5DIndex',
     'EQ5D',
-    'Ju högre EQ5D, desto ' + (coefs.EQ5DIndex < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten ' + probabilityObjectSingular + '. ' +
+    'Ju ' + (coefs.EQ5DIndex < 0 ? 'lägre' : 'högre') + ' EQ5D, desto högre bedöms sannolikheten ' + probabilityObjectSingular + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.EQ5DIndex * formElementRangeSize('EQ5DIndex')) + '.');
   addNominal('Promenadsträcka', 'AbilityWalking');
   addNominal('Smärtduration i ben', 'DurationLegPain');
@@ -619,12 +619,12 @@ function generateGlobalExplanationTable(id, coefs) {
   addRow(
     'NRSBackPain',
     'Smärta i rygg',
-    'Ju mer ryggsmärta, desto ' + (coefs.NRSBackPain < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten ' + probabilityObjectSingular + '. ' +
+    'Ju ' + (coefs.NRSBackPain < 0 ? 'mindre' : 'mer') + ' ryggsmärta, desto högre bedöms sannolikheten ' + probabilityObjectSingular + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.NRSBackPain * formElementRangeSize('NRSBackPain')) + '.');
   addRow(
     'ODI',
     'Funktionsnedsättning',
-    'Ju högre funktionsnedsättning, desto ' + (coefs.ODI < 0 ? 'lägre' : 'högre') + ' bedöms sannolikheten ' + probabilityObjectSingular + '. ' +
+    'Ju ' + (coefs.ODI < 0 ? 'lägre' : 'högre') + ' funktionsnedsättning, desto högre bedöms sannolikheten ' + probabilityObjectSingular + '. ' +
     'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.ODI * formElementRangeSize('ODI')) + '.');
 
   content += '</table>';
