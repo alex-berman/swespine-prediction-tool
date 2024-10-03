@@ -6,7 +6,7 @@
     <title>Dialogstöd inom ryggkirurgi – baserat på Svenska Ryggregistret Swespine</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body onLoad="initializeContent()">
     <div class="container">
         <div class="left-section">
             <div class="tabs">
@@ -17,9 +17,9 @@
                 <div id="basinformation" class="tab-pane tab-pane-patient-data active">
                     <h2>Undergrupp</h2>
                     <div class="form-group">
-                        <label for="diagnosgrupp" class="label">Diagnosgrupp</label>
-                        <select id="diagnosgrupp" class="input">
-                            <option value="diskbrack">Diskbråck</option>
+                        <label for="diagnosis" class="label">Diagnosgrupp</label>
+                        <select id="diagnosis" class="input" onchange="initializeContent()">
+                            <option value="disc_herniation">Diskbråck</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -204,10 +204,12 @@
                     </div>
                     <div class="explanation-section">
                         <h3 class="header-container" id="toggle-clickable-global-explanation-satisfaction">
-                            <div class="square" id="toggle-button-global-explanation-satisfaction">+</div> Förklaring för modellen i allmänhet</h3>
+                            <div class="square" id="toggle-button-global-explanation-satisfaction">+</div> Allmän förklaring för denna typ av förutsägelse</h3>
                         <div id="collapsible-container-global-explanation-satisfaction" class="collapsible-container">
                             <div id="collapsible-content-global-explanation-satisfaction">
                                 <div class="box" style="text-align: left;">
+                                    Fråga i swespine: <ul id="swespine_question_satisfaction"></></ul>
+                                    Definition: <ul id="swespine_definition_satisfaction"></ul>
                                     Modellen som förutsäger nöjdhet utnyttjar en stor mängd data från alla kliniker i Sverige under en tioårsperiod, och uppdateras varje år.
                                     Hur de olika parametrarna (ålder, kön etc.) i allmänhet påverkar bedömd nöjdhet framgår nedan.
                                     <div id="globalExplanationTable_satisfaction"></div>
@@ -236,10 +238,12 @@
                     </div>
                     <div class="explanation-section">
                         <h3 class="header-container" id="toggle-clickable-global-explanation-outcome">
-                            <div class="square" id="toggle-button-global-explanation-outcome">+</div> Förklaring för modellen i allmänhet</h3>
+                            <div class="square" id="toggle-button-global-explanation-outcome">+</div> Allmän förklaring för denna typ av förutsägelse</h3>
                         <div id="collapsible-container-global-explanation-outcome" class="collapsible-container">
                             <div id="collapsible-content-global-explanation-outcome">
                                 <div class="box" style="text-align: left;">
+                                    Fråga i swespine: <ul id="swespine_question_outcome"></></ul>
+                                    Definition: <ul id="swespine_definition_outcome"></ul>
                                     Modellen som förutsäger utfall utnyttjar en stor mängd data från alla kliniker i Sverige under en tioårsperiod, och uppdateras varje år.
                                     Hur de olika parametrarna (ålder, kön etc.) i allmänhet påverkar bedömt utfall framgår nedan.
                                     <div id="globalExplanationTable_outcome"></div>

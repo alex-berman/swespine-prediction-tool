@@ -1,3 +1,26 @@
+QUESTIONNAIRE_CONTENT = {
+  disc_herniation: {
+    satisfaction: {
+      question: "Hur är Din inställning till resultatet av Din genomgångna ryggoperation?",
+      definition: "<li>Nöjd patient: <i>Nöjd</i><li>Missnöjd patient: <i>tveksam</i> eller <i>missnöjd</i>."
+    },
+    outcome: {
+      question: "Hur är Din bensmärta/ischias idag jämfört med före operationen?",
+      definition: "Lyckat utfall: <i>Helt försvunnen</i> eller <i>mycket förbättrad</i>"
+    },
+  }
+}
+
+function initializeContent() {
+  var diagnosis = document.getElementById('diagnosis').value;
+  for(const task of ['satisfaction', 'outcome']) {
+    document.getElementById(`swespine_question_${task}`).innerHTML = QUESTIONNAIRE_CONTENT[
+      diagnosis][task].question;
+    document.getElementById(`swespine_definition_${task}`).innerHTML = QUESTIONNAIRE_CONTENT[
+      diagnosis][task].definition;
+  }
+}
+
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
