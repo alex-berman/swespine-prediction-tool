@@ -510,10 +510,10 @@ function generateGlobalExplanationTable(id, coefs) {
 
   let items = [];
 
-  function addItem(name, header, coef, cellContentTemplate, digits) {
+  function addItem(name, header, coef, cellContentTemplate) {
     if(name in coefs) {
       let coefMagnitude = Math.abs(coef);
-      let cellContent = cellContentTemplate.replace('${P}', coefToPercentageDelta(coefMagnitude, digits));
+      let cellContent = cellContentTemplate.replace('${P}', coefToPercentageDelta(coefMagnitude));
       items.push({header: header, coefMagnitude: coefMagnitude, cellContent: cellContent});
     }
   }
@@ -528,8 +528,10 @@ function generateGlobalExplanationTable(id, coefs) {
       'Skillnaden kan vara upp till ${P}.');
   }
 
-  function coefToPercentageDelta(coefMagnitude, digits) {
-    let formattedFloat = (coefMagnitude / 4 * 100).toFixed(digits);
+  function coefToPercentageDelta(coefMagnitude) {
+    let delta = coefMagnitude / 4 * 100;
+    let digits = (delta < 1) ? 1 : 0;
+    let formattedFloat = delta.toFixed(digits);
     return '<b>' + formattedFloat + '</b> ' + ((
       formattedFloat === '1' || formattedFloat.startsWith('1.')) ? 'procentenhet' : 'procentenheter');
   }
@@ -574,8 +576,7 @@ function generateGlobalExplanationTable(id, coefs) {
     'Ålder',
     coefs.AgeAtSurgery * 10,
     'Ju ' + (coefs.AgeAtSurgery < 0 ? 'lägre' : 'högre') + ' ålder, desto högre beräknas sannolikheten ' + probabilityObjectSingular + '. ' +
-    'Sannolikheten påverkas med upp till ${P} per tiotal år.',
-    1);
+    'Sannolikheten påverkas med upp till ${P} per tiotal år.');
   addItem(
     'Female',
     'Kön',
