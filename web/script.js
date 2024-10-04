@@ -530,7 +530,8 @@ function generateGlobalExplanationTable(id, coefs) {
 
   function coefToPercentageDelta(coefMagnitude, digits) {
     let formattedFloat = (coefMagnitude / 4 * 100).toFixed(digits);
-    return '<b>' + formattedFloat + '</b> ' + (formattedFloat.endsWith('1') ? 'procentenhet' : 'procentenheter');
+    return '<b>' + formattedFloat + '</b> ' + ((
+      formattedFloat === '1' || formattedFloat.startsWith('1.')) ? 'procentenhet' : 'procentenheter');
   }
 
   function getIndexOfMaxCoef(name) {
