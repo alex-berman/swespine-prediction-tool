@@ -510,10 +510,11 @@ function generateGlobalExplanationTable(id, coefs) {
 
   let items = [];
 
-  function addItem(name, header, coefficientMagnitude, cellContentTemplate, digits) {
+  function addItem(name, header, coef, cellContentTemplate, digits) {
     if(name in coefs) {
-      let cellContent = cellContentTemplate.replace('${P}', coefToPercentageDelta(coefficientMagnitude, digits));
-      items.push({header: header, coefficientMagnitude, cellContent: cellContent});
+      let coefMagnitude = Math.abs(coef);
+      let cellContent = cellContentTemplate.replace('${P}', coefToPercentageDelta(coefMagnitude, digits));
+      items.push({header: header, coefMagnitude: coefMagnitude, cellContent: cellContent});
     }
   }
 
@@ -527,8 +528,8 @@ function generateGlobalExplanationTable(id, coefs) {
       'Skillnaden kan vara upp till ${P}.');
   }
 
-  function coefToPercentageDelta(coef, digits) {
-    let formattedFloat = Math.abs(coef / 4 * 100).toFixed(digits);
+  function coefToPercentageDelta(coefMagnitude, digits) {
+    let formattedFloat = (coefMagnitude / 4 * 100).toFixed(digits);
     return '<b>' + formattedFloat + '</b> ' + (formattedFloat.endsWith('1') ? 'procentenhet' : 'procentenheter');
   }
 
@@ -639,6 +640,7 @@ function generateGlobalExplanationTable(id, coefs) {
     'Skillnaden kan vara upp till ${P}.');
 
   let content = '<table>';
+  items.sort((a, b) => b.coefMagnitude - a.coefMagnitude);
   for(const item of items) {
     content += '<tr>';
     content += '<td class="tableHeader">' + item.header + '</td>';
