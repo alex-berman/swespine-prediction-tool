@@ -179,9 +179,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
   function handleInputChange(event) {
     updatePrediction('satisfaction', satisfaction_disc_herniation_coefs);
-    plotFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs);
+    plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs);
     updatePrediction('outcome', outcome_disc_herniation_coefs);
-    plotFeatureContributions('outcome', outcome_disc_herniation_coefs);
+    plotLocalFeatureContributions('outcome', outcome_disc_herniation_coefs);
   }
   var formElements = document.querySelectorAll("input, select");
   formElements.forEach(function(element) {
@@ -189,10 +189,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
   });
 
   updatePrediction('satisfaction', satisfaction_disc_herniation_coefs);
-  plotFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs);
+  plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs);
   generateGlobalExplanationTable('satisfaction', satisfaction_disc_herniation_coefs);
   updatePrediction('outcome', outcome_disc_herniation_coefs);
-  plotFeatureContributions('outcome', outcome_disc_herniation_coefs);
+  plotLocalFeatureContributions('outcome', outcome_disc_herniation_coefs);
   generateGlobalExplanationTable('outcome', outcome_disc_herniation_coefs);
 });
 
@@ -300,47 +300,6 @@ function generateAdjective(isLow, name) {
   return isLow ? 'kort' : 'lång';
 }
 
-function generateFeatureDescription(regressor, delta, coefs, regressorValues) {
-  var coef = coefs[regressor];
-  if(Array.isArray(coef)) {
-    if(coef.length == 1) {
-      if(regressor == 'Female') {
-        return getCheckedLabel(regressor);
-      }
-      else {
-        const value = getCheckedValue(regressor);
-        if(regressor == 'IsUnemployed') { return value ? 'Arbetslös' : 'Inte arbetslös'; }
-        if(regressor == 'HasSickPension') { return value ? 'Sjukpension' : 'Ingen sjukpension'; }
-        if(regressor == 'HasAgePension') { return value ? 'Ålderspension' : 'Ingen ålderspension'; }
-        if(regressor == 'IsSmoker') { return value ? 'Rökare' : 'Inte rökare'; }
-        if(regressor == 'IsPreviouslyOperated') { return value ? 'Tidigare ryggop' : 'Inte tidigare ryggop'; }
-        if(regressor == 'HasOtherIllness') { return value ? 'Samsjuklighet' : 'Ingen samsjuklighet'; }
-      }
-    }
-    else if(coef.length > 1) {
-      meanValue = getNominalValue(regressor, mean_disc_herniation);
-      value = getNominalValue(regressor, regressorValues);
-      const label = getNominalLabel(regressor);
-      return 'Relativt ' + generateAdjective(value < meanValue, regressor) + ' ' + toLeadingLowercase(label);
-    }
-  }
-  else {
-    logOddsDelta = delta / coef;
-    if(regressor == 'AgeAtSurgery') {
-      return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + ' ålder';
-    }
-    if(regressor == 'EQ5DIndex') {
-      return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + ' EQ5D';
-    }
-    if(regressor == 'ODI') {
-      return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + ' funktionsnedsättning';
-    }
-    if(regressor == 'NRSBackPain') {
-      return 'Relativt ' + (logOddsDelta < 0 ? 'lite' : 'mycket') + ' ryggsmärta';
-    }
-  }
-}
-
 const sortByValue = (obj) => {
   const entries = Object.entries(obj);
   entries.sort((a, b) => Math.abs(a[1]) - Math.abs(b[1]));
@@ -390,7 +349,7 @@ function logOddsToColor(logOdds) {
   return hslToRgb(hue(), saturation, lightness);
 }
 
-function plotFeatureContributions(id, coefs) {
+function plotLocalFeatureContributions(id, coefs) {
   const logOddsThreshold = 0.1; // Factors below this log odds delta get grouped under "Other factors"
   var meanLogOdds = getLogOdds(mean_disc_herniation, coefs);
   var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
@@ -401,6 +360,48 @@ function plotFeatureContributions(id, coefs) {
     return Object.fromEntries(Object.entries(logOddsDeltas).filter(f));
   }
 
+  function generateFeatureDescription(regressor) {
+    var delta = logOddsDeltas[regressor];
+    var coef = coefs[regressor];
+    if(Array.isArray(coef)) {
+      if(coef.length == 1) {
+        if(regressor == 'Female') {
+          return getCheckedLabel(regressor);
+        }
+        else {
+          const value = getCheckedValue(regressor);
+          if(regressor == 'IsUnemployed') { return value ? 'Arbetslös' : 'Inte arbetslös'; }
+          if(regressor == 'HasSickPension') { return value ? 'Sjukpension' : 'Ingen sjukpension'; }
+          if(regressor == 'HasAgePension') { return value ? 'Ålderspension' : 'Ingen ålderspension'; }
+          if(regressor == 'IsSmoker') { return value ? 'Rökare' : 'Inte rökare'; }
+          if(regressor == 'IsPreviouslyOperated') { return value ? 'Tidigare ryggop' : 'Inte tidigare ryggop'; }
+          if(regressor == 'HasOtherIllness') { return value ? 'Samsjuklighet' : 'Ingen samsjuklighet'; }
+        }
+      }
+      else if(coef.length > 1) {
+        meanValue = getNominalValue(regressor, mean_disc_herniation);
+        value = getNominalValue(regressor, regressorValues);
+        const label = getNominalLabel(regressor);
+        return 'Relativt ' + generateAdjective(value < meanValue, regressor) + ' ' + toLeadingLowercase(label);
+      }
+    }
+    else {
+      logOddsDelta = delta / coef;
+      if(regressor == 'AgeAtSurgery') {
+        return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + ' ålder';
+      }
+      if(regressor == 'EQ5DIndex') {
+        return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + ' EQ5D';
+      }
+      if(regressor == 'ODI') {
+        return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + ' funktionsnedsättning';
+      }
+      if(regressor == 'NRSBackPain') {
+        return 'Relativt ' + (logOddsDelta < 0 ? 'lite' : 'mycket') + ' ryggsmärta';
+      }
+    }
+  }
+
   var logOddsDeltasAboveThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) >= logOddsThreshold);
   var logOddsDeltasBelowThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) < logOddsThreshold);
   var predictedLogOdds = getLogOdds(regressorValues, coefs);
@@ -408,21 +409,26 @@ function plotFeatureContributions(id, coefs) {
   var colors = ['#eee'];
   var y = ['Sammanlagd förutsägelse: <b>' + predictedProbPerc + '%</b>'];
   var x = [predictedLogOdds];
+  var hovertext = [''];
   if(Object.values(logOddsDeltasBelowThreshold).length > 0) {
     var delta = Object.values(logOddsDeltasBelowThreshold).reduce((acc, curr) => acc + curr, 0);
     y.push('Övriga faktorer');
     x.push(delta);
     colors.push(logOddsToColor(delta, 30));
+    hovertext.push(
+      Object.keys(logOddsDeltasBelowThreshold).map(generateFeatureDescription).join('<br>'));
   }
   for(const regressor in logOddsDeltasAboveThreshold) {
     var delta = logOddsDeltas[regressor];
-    y.push(generateFeatureDescription(regressor, delta, coefs, regressorValues));
+    y.push(generateFeatureDescription(regressor));
     x.push(delta);
     colors.push(logOddsToColor(delta, 30));
+    hovertext.push('')
   }
   y.push('Genomsnittlig diskbråckspatient: ' + meanProbPerc + '%');
   x.push(meanLogOdds);
   colors.push('#eee');
+  hovertext.push('')
 
   const dividers = [
     {
@@ -462,6 +468,12 @@ function plotFeatureContributions(id, coefs) {
       x: x,
       type: 'bar',
       orientation: 'h',
+      hovertext: hovertext,
+      hoverinfo: 'text',
+      hoverlabel: {
+        bgcolor: 'lightgray',
+        bordercolor: 'black',
+      },
       marker: {
         color: colors,
         line: {
@@ -486,7 +498,7 @@ function plotFeatureContributions(id, coefs) {
         showlegend: false
     },
     config: {
-        staticPlot: true,
+        displayModeBar: false,
         responsive: true
     }
   });
