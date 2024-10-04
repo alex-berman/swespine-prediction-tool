@@ -498,8 +498,6 @@ function formElementRangeSize(name) {
 }
 
 function generateGlobalExplanationTable(id, coefs) {
-  let content = '<table>';
-
   var probabilityObjectSingular;
   var probabilityObjectPlural;
   if(id == 'satisfaction') {
@@ -510,22 +508,23 @@ function generateGlobalExplanationTable(id, coefs) {
     probabilityObjectSingular = probabilityObjectPlural = 'för lyckat utfall';
   }
 
-  function addRow(name, header, cellContent) {
+  let items = [];
+
+  function addItem(name, header, coefficientMagnitude, cellContentTemplate, digits) {
     if(name in coefs) {
-      content += '<tr>';
-      content += '<td class="tableHeader">' + header + '</td>';
-      content += '<td class="tableContent">' + cellContent + '</td>';
-      content += '</tr>';
+      let cellContent = cellContentTemplate.replace('${P}', coefToPercentageDelta(coefficientMagnitude, digits));
+      items.push({header: header, coefficientMagnitude, cellContent: cellContent});
     }
   }
 
   function addNominal(header, name) {
-    addRow(
+    addItem(
       name,
       header,
+      coefsGroupRangeSize(coefs[name]),
       generateOptionNounPhrase(name, getIndexOfMaxCoef(name)) + ' beräknas ha högst sannolikhet ' + probabilityObjectPlural + '. ' +
       generateOptionNounPhrase(name, getIndexOfMinCoef(name)) + ' beräknas ha lägst sannolikhet ' + probabilityObjectPlural + '. ' +
-      'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefsGroupRangeSize(coefs[name])) + '.');
+      'Skillnaden kan vara upp till ${P}.');
   }
 
   function coefToPercentageDelta(coef, digits) {
@@ -568,65 +567,84 @@ function generateGlobalExplanationTable(id, coefs) {
     return Math.max(...coefsToCompare) - Math.min(...coefsToCompare);
   }
   
-  addRow(
+  addItem(
     'AgeAtSurgery',
     'Ålder',
+    coefs.AgeAtSurgery * 10,
     'Ju ' + (coefs.AgeAtSurgery < 0 ? 'lägre' : 'högre') + ' ålder, desto högre beräknas sannolikheten ' + probabilityObjectSingular + '. ' +
-    'Sannolikheten påverkas med upp till ' + coefToPercentageDelta(coefs.AgeAtSurgery*10, 1) + ' per tiotal år.');
-  addRow(
+    'Sannolikheten påverkas med upp till ${P} per tiotal år.',
+    1);
+  addItem(
     'Female',
     'Kön',
+    coefs.Female,
     (coefs.Female < 0 ? 'Män' : 'Kvinnor') + ' beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
-    'Skillnaden mellan kvinnor och män kan vara upp till ' + coefToPercentageDelta(coefs.Female) + '.');
-  addRow(
+    'Skillnaden mellan kvinnor och män kan vara upp till ${P}.');
+  addItem(
     'IsPreviouslyOperated',
     'Tidigare ryggop',
+    coefs.IsPreviouslyOperated,
     'Patienter som ' + (coefs.IsPreviouslyOperated < 0 ? 'inte' : '') + ' tidigare ryggopererats beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
-    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.IsPreviouslyOperated) + '.');
-  addRow(
+    'Skillnaden kan vara upp till ${P}.');
+  addItem(
     'IsSmoker',
     'Rökare',
+    coefs.IsSmoker,
     (coefs.IsSmoker < 0 ? 'Icke-rökare' : 'rökare') + ' beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
-    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.IsSmoker) + '.');
-  addRow(
+    'Skillnaden kan vara upp till ${P}.');
+  addItem(
     'IsUnemployed',
     'Arbetslös',
+    coefs.IsUnemployed,
     (coefs.IsUnemployed < 0 ? 'Icke-arbetslösa' : 'Arbetslösa') + ' beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
-    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.IsUnemployed) + '.');
-  addRow(
+    'Skillnaden kan vara upp till ${P}.');
+  addItem(
     'HasAgePension',
     'Ålderspension',
+    coefs.HasAgePension,
     'Patienter ' + (coefs.HasAgePension < 0 ? 'utan' : 'med') + ' ålderspension beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
-    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.HasAgePension) + '.');
-  addRow(
+    'Skillnaden kan vara upp till ${P}.');
+  addItem(
     'HasSickPension',
     'Sjukpension',
+    coefs.HasSickPension,
     'Patienter ' + (coefs.HasSickPension < 0 ? 'utan' : 'med') + ' sjukpension beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
-    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.HasSickPension) + '.');
-  addRow(
+    'Skillnaden kan vara upp till ${P}.');
+  addItem(
     'HasOtherIllness',
     'Samsjuklighet',
+    coefs.HasOtherIllness,
     'Patienter ' + (coefs.HasOtherIllness < 0 ? 'utan' : 'med') + ' andra sjukdomar beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
-    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.HasOtherIllness) + '.');
-  addRow(
+    'Skillnaden kan vara upp till ${P}.');
+  addItem(
     'EQ5DIndex',
     'EQ5D',
+    coefs.EQ5DIndex * formElementRangeSize('EQ5DIndex'),
     'Ju ' + (coefs.EQ5DIndex < 0 ? 'lägre' : 'högre') + ' EQ5D, desto högre beräknas sannolikheten ' + probabilityObjectSingular + '. ' +
-    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.EQ5DIndex * formElementRangeSize('EQ5DIndex')) + '.');
+    'Skillnaden kan vara upp till ${P}.');
   addNominal('Promenadsträcka', 'AbilityWalking');
   addNominal('Smärtduration i ben', 'DurationLegPain');
   addNominal('Smärtduration i rygg', 'DurationBackPain');
-  addRow(
+  addItem(
     'NRSBackPain',
     'Smärta i rygg',
+    coefs.NRSBackPain * formElementRangeSize('NRSBackPain'),
     'Ju ' + (coefs.NRSBackPain < 0 ? 'mindre' : 'mer') + ' ryggsmärta, desto högre beräknas sannolikheten ' + probabilityObjectSingular + '. ' +
-    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.NRSBackPain * formElementRangeSize('NRSBackPain')) + '.');
-  addRow(
+    'Skillnaden kan vara upp till ${P}.');
+  addItem(
     'ODI',
     'Funktionsnedsättning',
+    coefs.ODI * formElementRangeSize('ODI'),
     'Ju ' + (coefs.ODI < 0 ? 'lägre' : 'högre') + ' funktionsnedsättning, desto högre beräknas sannolikheten ' + probabilityObjectSingular + '. ' +
-    'Skillnaden kan vara upp till ' + coefToPercentageDelta(coefs.ODI * formElementRangeSize('ODI')) + '.');
+    'Skillnaden kan vara upp till ${P}.');
 
+  let content = '<table>';
+  for(const item of items) {
+    content += '<tr>';
+    content += '<td class="tableHeader">' + item.header + '</td>';
+    content += '<td class="tableContent">' + item.cellContent + '</td>';
+    content += '</tr>';
+  }
   content += '</table>';
   const table = document.getElementById(`globalExplanationTable_${id}`);
   table.innerHTML = content;
