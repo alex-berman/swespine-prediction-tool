@@ -6,7 +6,7 @@
     <title>Dialogstöd inom ryggkirurgi – baserat på Svenska Ryggregistret Swespine</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body onLoad="initializeContent()">
+<body onLoad="initialize()">
     <div class="container">
         <div class="left-section">
             <div class="tabs">
@@ -261,10 +261,12 @@
             </div>
         </div>
     </div>
+    <script type="module">
+        import { initializeContent } from "./prediction_tool.js";
+        window.initialize = function() {
+          initializeContent();
+        };
+    </script>
     <script src="plotly-2.11.1.min.js"></script>
-    <script src="satisfaction_disc_herniation_coefs.js"></script>
-    <script src="outcome_disc_herniation_coefs.js"></script>
-    <script src="mean_disc_herniation.js"></script>
-    <script src="script.js"></script>
 </body>
 </html>

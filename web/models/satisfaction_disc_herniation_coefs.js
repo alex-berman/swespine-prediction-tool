@@ -1,4 +1,4 @@
-var satisfaction_disc_herniation_coefs = {
+export const satisfaction_disc_herniation_coefs = {
     "Intercept": 2.62984,
     "AgeAtSurgery": -0.00135,
     "Female": [

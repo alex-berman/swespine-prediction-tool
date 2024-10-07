@@ -18,7 +18,7 @@ def csv_to_js(csv_file_path, js_file_path):
 
     with open(js_file_path, mode='w', encoding='utf-8') as js_file:
         constant_name = js_file_path.replace('.js', '')
-        js_file.write('var ' + constant_name + ' = ',)
+        js_file.write('export const ' + constant_name + ' = ',)
         json.dump(data, js_file, indent=4)
         js_file.write(';')
 

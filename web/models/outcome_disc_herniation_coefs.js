@@ -1,4 +1,4 @@
-var outcome_disc_herniation_coefs = {
+export const outcome_disc_herniation_coefs = {
     "Intercept": 4.32725,
     "AgeAtSurgery": -0.01126,
     "HasOtherIllness": [

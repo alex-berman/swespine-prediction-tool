@@ -1,4 +1,8 @@
-QUESTIONNAIRE_CONTENT = {
+import { mean_disc_herniation } from "./models/mean_disc_herniation.js";
+import { outcome_disc_herniation_coefs } from "./models/outcome_disc_herniation_coefs.js";
+import { satisfaction_disc_herniation_coefs } from "./models/satisfaction_disc_herniation_coefs.js";
+
+const QUESTIONNAIRE_CONTENT = {
   disc_herniation: {
     satisfaction: {
       question: "Hur är Din inställning till resultatet av Din genomgångna ryggoperation?",
@@ -11,7 +15,7 @@ QUESTIONNAIRE_CONTENT = {
   }
 }
 
-function initializeContent() {
+export function initializeContent() {
   var diagnosis = document.getElementById('diagnosis').value;
   for(const task of ['satisfaction', 'outcome']) {
     document.getElementById(`swespine_question_${task}`).innerHTML = QUESTIONNAIRE_CONTENT[
@@ -120,7 +124,7 @@ function getNominalValuesFromForm(varName, n) {
 }
 
 function getRegressorValuesFromForm(coefs) {
-  result = {}
+  var result = {}
   for(const key in coefs) {
     if(key != 'Intercept') {
       var coef = coefs[key];
@@ -361,8 +365,8 @@ function plotLocalFeatureContributions(id, coefs) {
   }
 
   function generateFeatureDescription(regressor) {
-    var delta = logOddsDeltas[regressor];
-    var coef = coefs[regressor];
+    const delta = logOddsDeltas[regressor];
+    const coef = coefs[regressor];
     if(Array.isArray(coef)) {
       if(coef.length == 1) {
         if(regressor == 'Female') {
@@ -379,14 +383,14 @@ function plotLocalFeatureContributions(id, coefs) {
         }
       }
       else if(coef.length > 1) {
-        meanValue = getNominalValue(regressor, mean_disc_herniation);
-        value = getNominalValue(regressor, regressorValues);
+        const meanValue = getNominalValue(regressor, mean_disc_herniation);
+        const value = getNominalValue(regressor, regressorValues);
         const label = getNominalLabel(regressor);
         return 'Relativt ' + generateAdjective(value < meanValue, regressor) + ' ' + toLeadingLowercase(label);
       }
     }
     else {
-      logOddsDelta = delta / coef;
+      const logOddsDelta = delta / coef;
       if(regressor == 'AgeAtSurgery') {
         return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + ' ålder';
       }
@@ -402,10 +406,10 @@ function plotLocalFeatureContributions(id, coefs) {
     }
   }
 
-  var logOddsDeltasAboveThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) >= logOddsThreshold);
-  var logOddsDeltasBelowThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) < logOddsThreshold);
-  var predictedLogOdds = getLogOdds(regressorValues, coefs);
-  var predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
+  const logOddsDeltasAboveThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) >= logOddsThreshold);
+  const logOddsDeltasBelowThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) < logOddsThreshold);
+  const predictedLogOdds = getLogOdds(regressorValues, coefs);
+  const predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
   var colors = ['#eee'];
   var y = ['Sammanlagd förutsägelse: <b>' + predictedProbPerc + '%</b>'];
   var x = [predictedLogOdds];

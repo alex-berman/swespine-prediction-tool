@@ -1,4 +1,4 @@
-var mean_disc_herniation = {
+export const mean_disc_herniation = {
     "AgeAtSurgery": 56,
     "Female": [1],
     "IsPreviouslyOperated": [0],
