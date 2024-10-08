@@ -191,6 +191,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initializeCollapsibles();
 
   function handleInputChange(event) {
+    updatePredictionsAndLocalExplanations();
+  }
+
+  function updatePredictionsAndLocalExplanations() {
     updatePrediction('satisfaction', satisfaction_disc_herniation_coefs, 0);
     plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs, 0);
     updatePrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
@@ -201,12 +205,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
       element.addEventListener("input", handleInputChange);
   });
 
-  updatePrediction('satisfaction', satisfaction_disc_herniation_coefs, 0);
-  plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs, 0);
   generateGlobalExplanationTable('satisfaction', satisfaction_disc_herniation_coefs);
-  updatePrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
-  plotLocalFeatureContributions('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
   generateGlobalExplanationTable('outcome', outcome_disc_herniation_coefs);
+  updatePredictionsAndLocalExplanations();
 });
 
 function initializeCollapsibles() {
