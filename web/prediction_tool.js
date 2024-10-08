@@ -2,6 +2,15 @@ import { mean_disc_herniation } from "./models/mean_disc_herniation.js";
 import { outcome_disc_herniation_coefs } from "./models/outcome_disc_herniation_coefs.js";
 import { satisfaction_disc_herniation_coefs } from "./models/satisfaction_disc_herniation_coefs.js";
 
+const OUTCOME_LEVELS = [
+  "Försämrad",
+  "Oförändrad",
+  "Något förbättrad",
+  "Mycket förbättrad",
+  "Helt försvunnen",
+];
+const OUTCOME_BINARIZATION_THRESHOLD = 3;
+
 const QUESTIONNAIRE_CONTENT = {
   disc_herniation: {
     satisfaction: {
@@ -139,12 +148,12 @@ function getRegressorValuesFromForm(coefs) {
   return result;
 }
 
-function getLogOdds(regressorValues, coefs) {
+function getLogOdds(regressorValues, coefs, thresholdLevel) {
   var result = 0;
   for(const key in coefs) {
     var coef = coefs[key];
     if(key == 'Intercept') {
-      result += coef;
+      result += coef[thresholdLevel];
     }
     else {
       if(Array.isArray(coef)) {
@@ -164,9 +173,9 @@ function logOddsToProb(logOdds) {
   return 1 / (1 + Math.exp(-logOdds));
 }
 
-function updatePrediction(id, coefs) {
+function updatePrediction(id, coefs, thresholdLevel) {
   var regressorValues = getRegressorValuesFromForm(coefs);
-  var predictedLogOdds = getLogOdds(regressorValues, coefs);
+  var predictedLogOdds = getLogOdds(regressorValues, coefs, thresholdLevel);
   var predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
   document.getElementById(`tab_prediction_${id}`).innerHTML = predictedProbPerc + '%';
   document.getElementById(`prediction_${id}`).innerHTML = predictedProbPerc + '%';
@@ -182,21 +191,21 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initializeCollapsibles();
 
   function handleInputChange(event) {
-    updatePrediction('satisfaction', satisfaction_disc_herniation_coefs);
-    plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs);
-    updatePrediction('outcome', outcome_disc_herniation_coefs);
-    plotLocalFeatureContributions('outcome', outcome_disc_herniation_coefs);
+    updatePrediction('satisfaction', satisfaction_disc_herniation_coefs, 0);
+    plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs, 0);
+    updatePrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
+    plotLocalFeatureContributions('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
   }
   var formElements = document.querySelectorAll("input, select");
   formElements.forEach(function(element) {
       element.addEventListener("input", handleInputChange);
   });
 
-  updatePrediction('satisfaction', satisfaction_disc_herniation_coefs);
-  plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs);
+  updatePrediction('satisfaction', satisfaction_disc_herniation_coefs, 0);
+  plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs, 0);
   generateGlobalExplanationTable('satisfaction', satisfaction_disc_herniation_coefs);
-  updatePrediction('outcome', outcome_disc_herniation_coefs);
-  plotLocalFeatureContributions('outcome', outcome_disc_herniation_coefs);
+  updatePrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
+  plotLocalFeatureContributions('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
   generateGlobalExplanationTable('outcome', outcome_disc_herniation_coefs);
 });
 
@@ -353,9 +362,9 @@ function logOddsToColor(logOdds) {
   return hslToRgb(hue(), saturation, lightness);
 }
 
-function plotLocalFeatureContributions(id, coefs) {
+function plotLocalFeatureContributions(id, coefs, thresholdLevel) {
   const logOddsThreshold = 0.1; // Factors below this log odds delta get grouped under "Other factors"
-  var meanLogOdds = getLogOdds(mean_disc_herniation, coefs);
+  var meanLogOdds = getLogOdds(mean_disc_herniation, coefs, thresholdLevel);
   var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
   var regressorValues = getRegressorValuesFromForm(coefs);
   var logOddsDeltas = sortByValue(getLogOddsDeltas(mean_disc_herniation, regressorValues, coefs));
@@ -408,7 +417,7 @@ function plotLocalFeatureContributions(id, coefs) {
 
   const logOddsDeltasAboveThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) >= logOddsThreshold);
   const logOddsDeltasBelowThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) < logOddsThreshold);
-  const predictedLogOdds = getLogOdds(regressorValues, coefs);
+  const predictedLogOdds = getLogOdds(regressorValues, coefs, thresholdLevel);
   const predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
   var colors = ['#eee'];
   var y = ['Sammanlagd förutsägelse: <b>' + predictedProbPerc + '%</b>'];

@@ -1,5 +1,11 @@
 export const outcome_disc_herniation_coefs = {
-    "Intercept": 4.32725,
+    /*"Intercept": [4.32725],*/
+    "Intercept": [ /* NOTE: Mock values! (for ordered log. regression) */
+      1,
+      2,
+      4.32725,
+      5
+    ],
     "AgeAtSurgery": -0.01126,
     "HasOtherIllness": [
         -0.41546
