@@ -175,8 +175,12 @@ function logOddsToProb(logOdds) {
 
 function updatePrediction(id, coefs, thresholdLevel) {
   var regressorValues = getRegressorValuesFromForm(coefs);
-  var predictedLogOdds = getLogOdds(regressorValues, coefs, thresholdLevel);
-  var predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
+  var predictedProb = 0;
+  for(let i = thresholdLevel; i <= thresholdLevel; i++) {
+    const predictedLogOdds = getLogOdds(regressorValues, coefs, i);
+    predictedProb += logOddsToProb(predictedLogOdds);
+  }
+  const predictedProbPerc = Math.round(predictedProb * 100);
   document.getElementById(`tab_prediction_${id}`).innerHTML = predictedProbPerc + '%';
   document.getElementById(`prediction_${id}`).innerHTML = predictedProbPerc + '%';
 }
@@ -198,6 +202,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     updatePrediction('satisfaction', satisfaction_disc_herniation_coefs, 0);
     plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs, 0);
     updatePrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
+    plotProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS);
     plotLocalFeatureContributions('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
   }
   var formElements = document.querySelectorAll("input, select");
@@ -678,4 +683,44 @@ function generateGlobalExplanationTable(id, coefs) {
   content += '</table>';
   const table = document.getElementById(`globalExplanationTable_${id}`);
   table.innerHTML = content;
+}
+
+function plotProbabilitiesPieChart(id, coefs, levels) {
+  const regressorValues = getRegressorValuesFromForm(coefs);
+
+  var remainingProbability = 1;
+  var values = []
+  for(let level = 0; level < (levels.length - 1); level++) {
+    const predictedLogOdds = getLogOdds(regressorValues, coefs, level);
+    const probability = logOddsToProb(predictedLogOdds);
+    remainingProbability -= probability;
+    const predictedProbPerc = Math.round(probability * 100);
+    values.push(predictedProbPerc);
+  }
+  values.push(Math.round(remainingProbability * 100));
+
+  var data = [{
+    values: values,
+    labels: levels,
+    type: 'pie'
+  }];
+
+  var layout = {
+    height: 400,
+    width: 500,
+    legend: {
+      traceorder: 'normal'
+    }
+  };
+
+  Plotly.newPlot(
+    `probabilitiesPieChart_${id}`,
+    {
+      data: data,
+      layout: layout,
+      config: {
+          displayModeBar: false,
+          responsive: true
+      }
+    });
 }

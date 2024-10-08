@@ -4,7 +4,7 @@ export const outcome_disc_herniation_coefs = {
       1,
       2,
       4.32725,
-      5
+      4.35
     ],
     "AgeAtSurgery": -0.01126,
     "HasOtherIllness": [
