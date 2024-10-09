@@ -385,7 +385,7 @@ function logOddsToColor(logOdds) {
   return hslToRgb(hue(), saturation, lightness);
 }
 
-function plotLocalFeatureContributions(coefs, thresholdLevel) {
+function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel) {
   const logOddsThreshold = 0.1; // Factors below this log odds delta get grouped under "Other factors"
   var meanLogOdds = getLogOdds(mean_disc_herniation, coefs, thresholdLevel);
   var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
@@ -442,10 +442,12 @@ function plotLocalFeatureContributions(coefs, thresholdLevel) {
   const logOddsDeltasBelowThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) < logOddsThreshold);
   const predictedLogOdds = getLogOdds(regressorValues, coefs, thresholdLevel);
   const predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
+
   var colors = ['#eee'];
-  var y = ['Sammanlagd förutsägelse: <b>' + predictedProbPerc + '%</b>'];
+  var y = ['Sammanlagd sannolikhet för <i>' + positiveLabel + '</i>: <b>' + predictedProbPerc + '%</b>'];
   var x = [predictedLogOdds];
   var hovertext = [''];
+
   if(Object.values(logOddsDeltasBelowThreshold).length > 0) {
     var delta = Object.values(logOddsDeltasBelowThreshold).reduce((acc, curr) => acc + curr, 0);
     y.push('Övriga faktorer');
@@ -781,13 +783,17 @@ function plotPieChart(id, values, levels, colors) {
 function openLocalExplanationPopup(id, level) {
   var text;
   var coefs;
+  var positiveLabel;
+
   if(id == 'satisfaction') {
     coefs = satisfaction_disc_herniation_coefs;
-    text = 'Diagrammet visar hur sannolikheten att bli (ANPASSA) med operation beräknas utifrån sannolikheten att bli (ANPASSA) för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med grön stapel påverkar beräknad sannolikhet positivt, medan faktorer med röd stapel påverkar beräknad sannolikhet negativt.';
+    text = 'Diagrammet visar hur sannolikheten att bli <i>' + (level === 1 ? 'tveksam eller missnöjd' : 'nöjd') + '</i> med operation beräknas utifrån sannolikheten att bli nöjd för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med grön stapel påverkar beräknad sannolikhet att bli nöjd positivt, medan faktorer med röd stapel påverkar beräknad sannolikhet att bli nöjd negativt.';
+    positiveLabel = 'nöjd';
   }
   else if(id == 'outcome') {
     coefs = outcome_disc_herniation_coefs;
     text = 'Diagrammet visar hur sannolikheten för (ANPASSA) av operation beräknas utifrån sannolikheten för (ANPASSA) för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med grön stapel påverkar beräknad sannolikhet positivt, medan faktorer med röd stapel påverkar beräknad sannolikhet negativt.';
+    positiveLabel = 'lyckat utfall';
   }
 
   const popup = document.getElementById('popup');
@@ -795,7 +801,7 @@ function openLocalExplanationPopup(id, level) {
     '<div id="featureContributions"></div>' +
     '<div style="padding-top:10px">' + text + '</div>';
   document.getElementById('close-button').addEventListener('click', closePopup);
-  plotLocalFeatureContributions(coefs, level);
+  plotLocalFeatureContributions(coefs, level, positiveLabel);
   openPopup();
 }
 
