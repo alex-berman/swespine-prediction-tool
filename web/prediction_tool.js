@@ -217,11 +217,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
   function updatePredictionsAndLocalExplanations() {
     updatePrediction('satisfaction', satisfaction_disc_herniation_coefs, 0);
-    plotProbabilitiesPieChart('satisfaction', satisfaction_disc_herniation_coefs, SATISFACTION_LEVELS, SATISFACTION_COLORS);
+    plotBinaryProbabilitiesPieChart(
+      'satisfaction', satisfaction_disc_herniation_coefs, SATISFACTION_LEVELS, SATISFACTION_COLORS);
     plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs, 0);
 
     updatePrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
-    plotProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
+    plotOrderedProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
     plotLocalFeatureContributions('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
   }
   var formElements = document.querySelectorAll("input, select");
@@ -704,7 +705,7 @@ function generateGlobalExplanationTable(id, coefs) {
   table.innerHTML = content;
 }
 
-function plotProbabilitiesPieChart(id, coefs, levels, colors) {
+function plotOrderedProbabilitiesPieChart(id, coefs, levels, colors) {
   const regressorValues = getRegressorValuesFromForm(coefs);
 
   var remainingProbability = 1;
@@ -718,6 +719,24 @@ function plotProbabilitiesPieChart(id, coefs, levels, colors) {
   }
   values.push(Math.round(remainingProbability * 100));
 
+  plotPieChart(id, values, levels, colors);
+}
+
+function plotBinaryProbabilitiesPieChart(id, coefs, levels, colors) {
+  const regressorValues = getRegressorValuesFromForm(coefs);
+
+  const positivePredictedLogOdds = getLogOdds(regressorValues, coefs, 0);
+  const positiveProbability = logOddsToProb(positivePredictedLogOdds);
+  const positiveProbabilityPerc = Math.round(positiveProbability * 100);
+
+  const negativePredictedLogOdds = 1 - positivePredictedLogOdds;
+  const negativeProbability = logOddsToProb(negativePredictedLogOdds);
+  const negativeProbabilityPerc = Math.round(negativeProbability * 100);
+
+  const values = [positiveProbabilityPerc, negativeProbabilityPerc];
+  plotPieChart(id, values, levels, colors);
+}
+function plotPieChart(id, values, levels, colors) {
   var data = [{
     values: values,
     labels: levels,
