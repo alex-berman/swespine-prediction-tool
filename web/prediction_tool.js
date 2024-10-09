@@ -5,7 +5,12 @@ import { satisfaction_disc_herniation_coefs } from "./models/satisfaction_disc_h
 const SATISFACTION_LEVELS = [
   "Nöjd",
   "Tveksam eller missnöjd",
-]
+];
+const SATISFACTION_BINARIZATION_THRESHOLD = 3;
+const SATISFACTION_COLORS = [
+  'rgb(77, 200, 129)',
+  'rgb(243, 126, 119)',
+];
 
 const OUTCOME_LEVELS = [
   "Försämrad",
@@ -15,6 +20,13 @@ const OUTCOME_LEVELS = [
   "Helt försvunnen",
 ];
 const OUTCOME_BINARIZATION_THRESHOLD = 3;
+const OUTCOME_COLORS = [
+  'rgb(243, 126, 119)',
+  'rgb(255, 210, 107)',
+  'rgb(255, 234, 118)',
+  'rgb(197, 229, 209)',
+  'rgb(77, 200, 129)',
+];
 
 const QUESTIONNAIRE_CONTENT = {
   disc_herniation: {
@@ -205,11 +217,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
   function updatePredictionsAndLocalExplanations() {
     updatePrediction('satisfaction', satisfaction_disc_herniation_coefs, 0);
-    plotProbabilitiesPieChart('satisfaction', satisfaction_disc_herniation_coefs, SATISFACTION_LEVELS);
+    plotProbabilitiesPieChart('satisfaction', satisfaction_disc_herniation_coefs, SATISFACTION_LEVELS, SATISFACTION_COLORS);
     plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs, 0);
 
     updatePrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
-    plotProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS);
+    plotProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
     plotLocalFeatureContributions('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
   }
   var formElements = document.querySelectorAll("input, select");
@@ -692,11 +704,11 @@ function generateGlobalExplanationTable(id, coefs) {
   table.innerHTML = content;
 }
 
-function plotProbabilitiesPieChart(id, coefs, levels) {
+function plotProbabilitiesPieChart(id, coefs, levels, colors) {
   const regressorValues = getRegressorValuesFromForm(coefs);
 
   var remainingProbability = 1;
-  var values = []
+  var values = [];
   for(let level = 0; level < (levels.length - 1); level++) {
     const predictedLogOdds = getLogOdds(regressorValues, coefs, level);
     const probability = logOddsToProb(predictedLogOdds);
@@ -709,7 +721,10 @@ function plotProbabilitiesPieChart(id, coefs, levels) {
   var data = [{
     values: values,
     labels: levels,
-    type: 'pie'
+    type: 'pie',
+    marker: {
+      colors: colors,
+    },
   }];
 
   var layout = {
