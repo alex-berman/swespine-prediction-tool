@@ -735,6 +735,7 @@ function plotBinaryProbabilitiesPieChart(id, coefs, levels, colors) {
   const values = [positiveProbabilityPerc, negativeProbabilityPerc];
   plotPieChart(id, values, levels, colors);
 }
+
 function plotPieChart(id, values, levels, colors) {
   var data = [{
     values: values,
@@ -746,10 +747,18 @@ function plotPieChart(id, values, levels, colors) {
   }];
 
   var layout = {
-    height: 400,
+    margin: {
+        t: 0,
+        b: 0,
+        l: 20,
+        r: 50
+    },
     width: 500,
     legend: {
-      traceorder: 'normal'
+      traceorder: 'normal',
+      x: 1,
+      y: 0.5,
+      orientation: 'v',
     }
   };
 
