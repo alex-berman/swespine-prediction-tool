@@ -729,8 +729,7 @@ function plotBinaryProbabilitiesPieChart(id, coefs, levels, colors) {
   const positiveProbability = logOddsToProb(positivePredictedLogOdds);
   const positiveProbabilityPerc = Math.round(positiveProbability * 100);
 
-  const negativePredictedLogOdds = 1 - positivePredictedLogOdds;
-  const negativeProbability = logOddsToProb(negativePredictedLogOdds);
+  const negativeProbability = 1 - positiveProbability;
   const negativeProbabilityPerc = Math.round(negativeProbability * 100);
 
   const values = [positiveProbabilityPerc, negativeProbabilityPerc];
