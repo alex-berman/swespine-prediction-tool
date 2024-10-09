@@ -41,7 +41,7 @@ const QUESTIONNAIRE_CONTENT = {
   }
 }
 
-export function initializeContent() {
+export function initializePredictionTool() {
   var diagnosis = document.getElementById('diagnosis').value;
   for(const task of ['satisfaction', 'outcome']) {
     document.getElementById(`swespine_question_${task}`).innerHTML = QUESTIONNAIRE_CONTENT[
@@ -49,6 +49,7 @@ export function initializeContent() {
     document.getElementById(`swespine_definition_${task}`).innerHTML = QUESTIONNAIRE_CONTENT[
       diagnosis][task].definition;
   }
+  document.getElementById('overlay').addEventListener('click', closePopup);
 }
 
 function getRandomInt(min, max) {
@@ -219,11 +220,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
     updatePrediction('satisfaction', satisfaction_disc_herniation_coefs, 0);
     plotBinaryProbabilitiesPieChart(
       'satisfaction', satisfaction_disc_herniation_coefs, SATISFACTION_LEVELS, SATISFACTION_COLORS);
-    plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs, 0);
 
     updatePrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
     plotOrderedProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
-    plotLocalFeatureContributions('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
   }
   var formElements = document.querySelectorAll("input, select");
   formElements.forEach(function(element) {
@@ -236,9 +235,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 function initializeCollapsibles() {
-  initializeCollapsible('local-explanation-satisfaction');
   initializeCollapsible('global-explanation-satisfaction');
-  initializeCollapsible('local-explanation-outcome');
   initializeCollapsible('global-explanation-outcome');
 }
 
@@ -388,7 +385,7 @@ function logOddsToColor(logOdds) {
   return hslToRgb(hue(), saturation, lightness);
 }
 
-function plotLocalFeatureContributions(id, coefs, thresholdLevel) {
+function plotLocalFeatureContributions(coefs, thresholdLevel) {
   const logOddsThreshold = 0.1; // Factors below this log odds delta get grouped under "Other factors"
   var meanLogOdds = getLogOdds(mean_disc_herniation, coefs, thresholdLevel);
   var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
@@ -501,7 +498,7 @@ function plotLocalFeatureContributions(id, coefs, thresholdLevel) {
       }
     )
   }
-  Plotly.newPlot(`featureContributions_${id}`, {
+  Plotly.newPlot('featureContributions', {
     data: [{
       y: y,
       x: x,
@@ -762,8 +759,9 @@ function plotPieChart(id, values, levels, colors) {
     }
   };
 
+  const divID = `probabilitiesPieChart_${id}`;
   Plotly.newPlot(
-    `probabilitiesPieChart_${id}`,
+    divID,
     {
       data: data,
       layout: layout,
@@ -772,4 +770,41 @@ function plotPieChart(id, values, levels, colors) {
           responsive: true
       }
     });
+
+  const pieChart = document.getElementById(divID);
+  pieChart.on('plotly_click', function(eventData) {
+    const pointIndex = eventData.points[0].pointNumber;
+    openLocalExplanationPopup(id, pointIndex);
+  });
+}
+
+function openLocalExplanationPopup(id, level) {
+  var text;
+  var coefs;
+  if(id == 'satisfaction') {
+    coefs = satisfaction_disc_herniation_coefs;
+    text = 'Diagrammet visar hur sannolikheten att bli (ANPASSA) med operation beräknas utifrån sannolikheten att bli (ANPASSA) för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med grön stapel påverkar beräknad sannolikhet positivt, medan faktorer med röd stapel påverkar beräknad sannolikhet negativt.';
+  }
+  else if(id == 'outcome') {
+    coefs = outcome_disc_herniation_coefs;
+    text = 'Diagrammet visar hur sannolikheten för (ANPASSA) av operation beräknas utifrån sannolikheten för (ANPASSA) för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med grön stapel påverkar beräknad sannolikhet positivt, medan faktorer med röd stapel påverkar beräknad sannolikhet negativt.';
+  }
+
+  const popup = document.getElementById('popup');
+  popup.innerHTML = '<span id="close-button" class="close-button">×</span>' +
+    '<div id="featureContributions"></div>' +
+    '<div style="padding-top:10px">' + text + '</div>';
+  document.getElementById('close-button').addEventListener('click', closePopup);
+  plotLocalFeatureContributions(coefs, level);
+  openPopup();
+}
+
+function openPopup() {
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('popup').style.display = 'block';
+}
+
+function closePopup() {
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('popup').style.display = 'none';
 }

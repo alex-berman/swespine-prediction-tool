@@ -192,19 +192,8 @@
                         <div id="prediction_satisfaction" class="prediction"></div>
                     </div>
                     <div id="probabilitiesPieChart_satisfaction"></div>
-                    <div class="explanation-section">
-                        <h3 class="header-container" id="toggle-clickable-local-explanation-satisfaction">
-                            <div class="square" id="toggle-button-local-explanation-satisfaction">+</div> Förklaring för den specifika förutsägelsen</h3>
-                        <div id="collapsible-container-local-explanation-satisfaction" class="collapsible-container">
-                            <div id="collapsible-content-local-explanation-satisfaction">
-                                <div class="box">
-                                    <div id="featureContributions_satisfaction"></div>
-                                    <div style="padding-top:10px">
-                                        Diagrammet visar hur sannolikheten att bli nöjd med operation beräknas utifrån sannolikheten att bli nöjd för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med grön stapel påverkar beräknad sannolikhet positivt, medan faktorer med röd stapel påverkar beräknad sannolikhet negativt.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div>
+                        Pajdiagrammet visar sannolikheten att bli nöjd respektive tveksam eller missnöjd med en hypotetisk operation, baserat på vald patientprofil. Klicka på respektive pajbit för att få en förklaring till hur sannolikheten beräknas.
                     </div>
                     <div class="explanation-section">
                         <h3 class="header-container" id="toggle-clickable-global-explanation-satisfaction">
@@ -230,19 +219,8 @@
                         <div id="prediction_outcome" class="prediction"></div>
                     </div>
                     <div id="probabilitiesPieChart_outcome"></div>
-                    <div class="explanation-section">
-                        <h3 class="header-container" id="toggle-clickable-local-explanation-outcome">
-                            <div class="square" id="toggle-button-local-explanation-outcome">+</div> Förklaring för den specifika förutsägelsen</h3>
-                        <div id="collapsible-container-local-explanation-outcome" class="collapsible-container">
-                            <div id="collapsible-content-local-explanation-outcome">
-                                <div class="box">
-                                    <div id="featureContributions_outcome"></div>
-                                    <div style="padding-top:10px">
-                                        Diagrammet visar hur sannolikheten för lyckat utfall av operation beräknas utifrån sannolikheten för lyckat utfall för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med grön stapel påverkar beräknad sannolikhet positivt, medan faktorer med röd stapel påverkar beräknad sannolikhet negativt.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div>
+                        Pajdiagrammet visar sannolikheten för olika smärtnivåer (ANPASSA BEROENDE PÅ DIAGNOS!) efter en hypotetisk operation, baserat på vald patientprofil. Klicka på respektive pajbit för att få en förklaring till hur sannolikheten beräknas.
                     </div>
                     <div class="explanation-section">
                         <h3 class="header-container" id="toggle-clickable-global-explanation-outcome">
@@ -263,10 +241,14 @@
             </div>
         </div>
     </div>
+
+    <div id="overlay" class="overlay"></div>
+    <div id="popup" class="popup"></div>
+
     <script type="module">
-        import { initializeContent } from "./prediction_tool.js";
+        import { initializePredictionTool } from "./prediction_tool.js";
         window.initialize = function() {
-          initializeContent();
+          initializePredictionTool();
         };
     </script>
     <script src="plotly-2.11.1.min.js"></script>
