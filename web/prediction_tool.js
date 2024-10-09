@@ -2,6 +2,11 @@ import { mean_disc_herniation } from "./models/mean_disc_herniation.js";
 import { outcome_disc_herniation_coefs } from "./models/outcome_disc_herniation_coefs.js";
 import { satisfaction_disc_herniation_coefs } from "./models/satisfaction_disc_herniation_coefs.js";
 
+const SATISFACTION_LEVELS = [
+  "Nöjd",
+  "Tveksam eller missnöjd",
+]
+
 const OUTCOME_LEVELS = [
   "Försämrad",
   "Oförändrad",
@@ -200,7 +205,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
   function updatePredictionsAndLocalExplanations() {
     updatePrediction('satisfaction', satisfaction_disc_herniation_coefs, 0);
+    plotProbabilitiesPieChart('satisfaction', satisfaction_disc_herniation_coefs, SATISFACTION_LEVELS);
     plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs, 0);
+
     updatePrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
     plotProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS);
     plotLocalFeatureContributions('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
