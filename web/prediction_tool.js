@@ -350,50 +350,7 @@ const sortByValue = (obj) => {
   return Object.fromEntries(entries);
 };
 
-function logOddsToColor(logOdds) {
-  function hue() {
-    if(logOdds < 0) {
-      return 0; // red
-    }
-    return 120; // green
-  }
-
-  function hslToRgb(h, s, l) {
-      s /= 100;
-      l /= 100;
-
-      let c = (1 - Math.abs(2 * l - 1)) * s;
-      let x = c * (1 - Math.abs((h / 60) % 2 - 1));
-      let m = l - c / 2;
-      let r = 0, g = 0, b = 0;
-
-      if (0 <= h && h < 60) {
-          r = c; g = x; b = 0;
-      } else if (60 <= h && h < 120) {
-          r = x; g = c; b = 0;
-      } else if (120 <= h && h < 180) {
-          r = 0; g = c; b = x;
-      } else if (180 <= h && h < 240) {
-          r = 0; g = x; b = c;
-      } else if (240 <= h && h < 300) {
-          r = x; g = 0; b = c;
-      } else if (300 <= h && h < 360) {
-          r = c; g = 0; b = x;
-      }
-
-      r = Math.round((r + m) * 255);
-      g = Math.round((g + m) * 255);
-      b = Math.round((b + m) * 255);
-
-      return `rgb(${r}, ${g}, ${b})`;
-  }
-
-  const lightness = 60;
-  const saturation = 40;
-  return hslToRgb(hue(), saturation, lightness);
-}
-
-function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel) {
+function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel, positiveColor) {
   const logOddsThreshold = 0.1; // Factors below this log odds delta get grouped under "Other factors"
   var meanLogOdds = getLogOdds(mean_disc_herniation, coefs, thresholdLevel);
   var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
@@ -451,7 +408,7 @@ function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel) {
   const predictedLogOdds = getLogOdds(regressorValues, coefs, thresholdLevel);
   const predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
 
-  var colors = ['#eee'];
+  var colors = [positiveColor];
   var y = ['Sammanlagd sannolikhet för <i>' + positiveLabel + '</i>: <b>' + predictedProbPerc + '%</b>'];
   var x = [predictedLogOdds];
   var hovertext = [''];
@@ -460,7 +417,7 @@ function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel) {
     var delta = Object.values(logOddsDeltasBelowThreshold).reduce((acc, curr) => acc + curr, 0);
     y.push('Övriga faktorer');
     x.push(delta);
-    colors.push(logOddsToColor(delta, 30));
+    colors.push('#eee');
     hovertext.push(
       Object.keys(logOddsDeltasBelowThreshold).map(generateFeatureDescription).join('<br>'));
   }
@@ -468,12 +425,12 @@ function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel) {
     var delta = logOddsDeltas[regressor];
     y.push(generateFeatureDescription(regressor));
     x.push(delta);
-    colors.push(logOddsToColor(delta, 30));
+    colors.push('#eee');
     hovertext.push('')
   }
   y.push('Genomsnittlig diskbråckspatient: ' + meanProbPerc + '%');
   x.push(meanLogOdds);
-  colors.push('#eee');
+  colors.push(positiveColor);
   hovertext.push('')
 
   const dividers = [
@@ -810,6 +767,7 @@ function openLocalExplanationPopup(id, level) {
   var content;
   var coefs;
   var positiveLabel;
+  var positiveColor;
   var plot;
 
   if(id == 'satisfaction') {
@@ -818,9 +776,10 @@ function openLocalExplanationPopup(id, level) {
       plot = true;
       content = '<div id="featureContributions"></div>' +
         '<div style="padding-top:10px">' +
-        'Diagrammet visar hur sannolikheten att bli nöjd med operation beräknas utifrån sannolikheten att bli nöjd för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med grön stapel påverkar beräknad sannolikhet att bli nöjd positivt, medan faktorer med röd stapel påverkar beräknad sannolikhet att bli nöjd negativt.' +
+        'Diagrammet visar hur sannolikheten att bli nöjd med operation beräknas utifrån sannolikheten att bli nöjd för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med stapel som pekar åt höger påverkar beräknad sannolikhet att bli nöjd positivt, medan faktorer med stapel som pekar åt vänster påverkar beräknad sannolikhet att bli nöjd negativt.' +
         '</div>';
       positiveLabel = 'nöjd';
+      positiveColor = SATISFACTION_COLORS[0];
     }
     else {
       const percs = getBinaryProbabilityPercs(coefs);
@@ -832,10 +791,11 @@ function openLocalExplanationPopup(id, level) {
       plot = true;
       content = '<div id="featureContributions"></div>' +
         '<div style="padding-top:10px">' +
-        'Diagrammet visar hur sannolikheten för (ANPASSA) av operation beräknas utifrån sannolikheten för (ANPASSA) för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med grön stapel påverkar beräknad sannolikhet positivt, medan faktorer med röd stapel påverkar beräknad sannolikhet negativt.' +
+        'Diagrammet visar hur sannolikheten för (ANPASSA) av operation beräknas utifrån sannolikheten för (ANPASSA) för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med stapel som pekar åt höger påverkar beräknad sannolikhet att bli nöjd positivt, medan faktorer med stapel som pekar åt vänster påverkar beräknad sannolikhet att bli nöjd negativt.' +
         '</div>';
       coefs = outcome_disc_herniation_coefs;
       positiveLabel = 'lyckat utfall';
+      positiveColor = OUTCOME_COLORS[level];
     }
     else {
       content = 'TODO';
@@ -846,7 +806,7 @@ function openLocalExplanationPopup(id, level) {
   popup.innerHTML = '<span id="close-button" class="close-button">×</span>' + content;
   document.getElementById('close-button').addEventListener('click', closePopup);
   if(plot) {
-    plotLocalFeatureContributions(coefs, level, positiveLabel);
+    plotLocalFeatureContributions(coefs, level, positiveLabel, positiveColor);
   }
   openPopup();
 }
