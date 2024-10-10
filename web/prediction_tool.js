@@ -173,7 +173,7 @@ function getProductSum(regressorValues, coefs) {
     if(key == 'Intercept') {
       result += coef[0];
     }
-    else {
+    else if(key != 'Thresholds') {
       if(Array.isArray(coef)) {
         for(var i = 0; i < coef.length; i++) {
           result += coef[i] * regressorValues[key][i];
@@ -201,8 +201,39 @@ function updateLogisticRegressionPrediction(id, coefs) {
 }
 
 function updateOrderedProbitPrediction(id, coefs, binarizationThreshold) {
+  const probs = getOrderedProbitProbabilities(coefs);
+
+  var positiveProbability = 0;
+  for(var y = 0; y < binarizationThreshold; y++) {
+    positiveProbability += probs[y];
+  }
+
+  updatePrediction(id, Math.round(positiveProbability * 100));
+}
+
+function getOrderedProbitProbabilities(coefs) {
   const regressorValues = getRegressorValuesFromForm(coefs);
-  const positivePredictedLogOdds = getProductSum(regressorValues, coefs);
+  const productSum = getProductSum(regressorValues, coefs);
+  const thresholds = coefs.Thresholds;
+
+  function normalCDF(x) { // NOTE: based on unvalidated output from ChatGPT
+    const z = x / Math.sqrt(2);
+    const k = 1 / (1 + 0.2316419 * Math.abs(z));
+    const cdf = 0.5 * (1 + Math.sign(z) *
+      Math.sqrt(1 - Math.exp(-((z * z) / 2) + 0.5 * (k * k * k * k * -1.2655122))));
+
+    return cdf;
+  }
+
+  function getProbability(y) { // NOTE: based on unvalidated output from ChatGPT
+    let lowerBound = (y === 0) ? -Infinity : thresholds[y - 1];
+    let upperBound = (y === thresholds.length) ? Infinity : thresholds[y];
+    let probUpper = normalCDF(upperBound - productSum);
+    let probLower = normalCDF(lowerBound - productSum);
+    return probUpper - probLower;
+  }
+
+  return Array.from({ length: thresholds.length + 1 }, (_, y) => getProbability(y));
 }
 
 function updatePrediction(id, perc) {
@@ -688,19 +719,8 @@ function generateGlobalExplanationTable(id, coefs) {
 }
 
 function plotOrderedProbabilitiesPieChart(id, coefs, levels, colors) {
-  const regressorValues = getRegressorValuesFromForm(coefs);
-
-  var remainingProbability = 1;
-  var values = [];
-  for(let level = 0; level < (levels.length - 1); level++) {
-    const predictedLogOdds = getProductSum(regressorValues, coefs);
-    const probability = logOddsToProb(predictedLogOdds);
-    remainingProbability -= probability;
-    const predictedProbPerc = Math.round(probability * 100);
-    values.push(predictedProbPerc);
-  }
-  values.push(Math.round(remainingProbability * 100));
-
+  const probs = getOrderedProbitProbabilities(coefs);
+  const values = probs.map((prob, _) => Math.round(prob * 100));
   plotPieChart(id, values, levels, colors);
 }
 
