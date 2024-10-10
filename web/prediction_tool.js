@@ -13,19 +13,19 @@ const SATISFACTION_COLORS = [
 ];
 
 const OUTCOME_LEVELS = [
-  "Försämrad",
-  "Oförändrad",
-  "Något förbättrad",
-  "Mycket förbättrad",
   "Helt försvunnen",
+  "Mycket förbättrad",
+  "Något förbättrad",
+  "Oförändrad",
+  "Försämrad",
 ];
-const OUTCOME_BINARIZATION_THRESHOLD = 3;
+const OUTCOME_BINARIZATION_THRESHOLD = 2;
 const OUTCOME_COLORS = [
-  'rgb(243, 126, 119)',
-  'rgb(255, 210, 107)',
-  'rgb(255, 234, 118)',
-  'rgb(197, 229, 209)',
   'rgb(77, 200, 129)',
+  'rgb(197, 229, 209)',
+  'rgb(255, 234, 118)',
+  'rgb(255, 210, 107)',
+  'rgb(243, 126, 119)',
 ];
 
 const QUESTIONNAIRE_CONTENT = {
@@ -192,15 +192,19 @@ function logOddsToProb(logOdds) {
 }
 
 function updatePrediction(id, coefs, thresholdLevel) {
+  const predictedProbPerc = getPredictedProbPerc(id, coefs, thresholdLevel);
+  document.getElementById(`tab_prediction_${id}`).innerHTML = predictedProbPerc + '%';
+  document.getElementById(`prediction_${id}`).innerHTML = predictedProbPerc + '%';
+}
+
+function getPredictedProbPerc(id, coefs, thresholdLevel) {
   var regressorValues = getRegressorValuesFromForm(coefs);
   var predictedProb = 0;
   for(let i = thresholdLevel; i <= thresholdLevel; i++) {
     const predictedLogOdds = getLogOdds(regressorValues, coefs, i);
     predictedProb += logOddsToProb(predictedLogOdds);
   }
-  const predictedProbPerc = Math.round(predictedProb * 100);
-  document.getElementById(`tab_prediction_${id}`).innerHTML = predictedProbPerc + '%';
-  document.getElementById(`prediction_${id}`).innerHTML = predictedProbPerc + '%';
+  return Math.round(predictedProb * 100);
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
@@ -722,6 +726,11 @@ function plotOrderedProbabilitiesPieChart(id, coefs, levels, colors) {
 }
 
 function plotBinaryProbabilitiesPieChart(id, coefs, levels, colors) {
+  const values = getBinaryProbabilityPercs(coefs);
+  plotPieChart(id, values, levels, colors);
+}
+
+function getBinaryProbabilityPercs(coefs) {
   const regressorValues = getRegressorValuesFromForm(coefs);
 
   const positivePredictedLogOdds = getLogOdds(regressorValues, coefs, 0);
@@ -730,9 +739,7 @@ function plotBinaryProbabilitiesPieChart(id, coefs, levels, colors) {
 
   const negativeProbability = 1 - positiveProbability;
   const negativeProbabilityPerc = Math.round(negativeProbability * 100);
-
-  const values = [positiveProbabilityPerc, negativeProbabilityPerc];
-  plotPieChart(id, values, levels, colors);
+  return [positiveProbabilityPerc, negativeProbabilityPerc];
 }
 
 function plotPieChart(id, values, levels, colors) {
@@ -781,27 +788,47 @@ function plotPieChart(id, values, levels, colors) {
 }
 
 function openLocalExplanationPopup(id, level) {
-  var text;
+  var content;
   var coefs;
   var positiveLabel;
+  var plot;
 
   if(id == 'satisfaction') {
     coefs = satisfaction_disc_herniation_coefs;
-    text = 'Diagrammet visar hur sannolikheten att bli <i>' + (level === 1 ? 'tveksam eller missnöjd' : 'nöjd') + '</i> med operation beräknas utifrån sannolikheten att bli nöjd för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med grön stapel påverkar beräknad sannolikhet att bli nöjd positivt, medan faktorer med röd stapel påverkar beräknad sannolikhet att bli nöjd negativt.';
-    positiveLabel = 'nöjd';
+    if(level == 0) {
+      plot = true;
+      content = '<div id="featureContributions"></div>' +
+        '<div style="padding-top:10px">' +
+        'Diagrammet visar hur sannolikheten att bli nöjd med operation beräknas utifrån sannolikheten att bli nöjd för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med grön stapel påverkar beräknad sannolikhet att bli nöjd positivt, medan faktorer med röd stapel påverkar beräknad sannolikhet att bli nöjd negativt.' +
+        '</div>';
+      positiveLabel = 'nöjd';
+    }
+    else {
+      const percs = getBinaryProbabilityPercs(coefs);
+      content = 'Sannolikheten att bli tveksam eller missnöjd med operation beräknas som <ul><i>100% &minus; sannolikheten att bli nöjd</i></ul>För vald patientprofil: <ul><i>100% &minus; ' + percs[0] + '% = <b>' + percs[1] + '%</b></i></ul>.'
+    }
   }
   else if(id == 'outcome') {
-    coefs = outcome_disc_herniation_coefs;
-    text = 'Diagrammet visar hur sannolikheten för (ANPASSA) av operation beräknas utifrån sannolikheten för (ANPASSA) för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med grön stapel påverkar beräknad sannolikhet positivt, medan faktorer med röd stapel påverkar beräknad sannolikhet negativt.';
-    positiveLabel = 'lyckat utfall';
+    if(level < (OUTCOME_LEVELS.length - 1)) {
+      plot = true;
+      content = '<div id="featureContributions"></div>' +
+        '<div style="padding-top:10px">' +
+        'Diagrammet visar hur sannolikheten för (ANPASSA) av operation beräknas utifrån sannolikheten för (ANPASSA) för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med grön stapel påverkar beräknad sannolikhet positivt, medan faktorer med röd stapel påverkar beräknad sannolikhet negativt.' +
+        '</div>';
+      coefs = outcome_disc_herniation_coefs;
+      positiveLabel = 'lyckat utfall';
+    }
+    else {
+      content = 'TODO';
+    }
   }
 
   const popup = document.getElementById('popup');
-  popup.innerHTML = '<span id="close-button" class="close-button">×</span>' +
-    '<div id="featureContributions"></div>' +
-    '<div style="padding-top:10px">' + text + '</div>';
+  popup.innerHTML = '<span id="close-button" class="close-button">×</span>' + content;
   document.getElementById('close-button').addEventListener('click', closePopup);
-  plotLocalFeatureContributions(coefs, level, positiveLabel);
+  if(plot) {
+    plotLocalFeatureContributions(coefs, level, positiveLabel);
+  }
   openPopup();
 }
 
