@@ -240,6 +240,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
   generateGlobalExplanationTable('satisfaction', satisfaction_disc_herniation_coefs);
   generateGlobalExplanationTable('outcome', outcome_disc_herniation_coefs);
   updatePredictionsAndLocalExplanations();
+  for(const layer of document.getElementsByClassName('pielayer')) {
+    layer.style.cursor = 'pointer';
+  }
 });
 
 function initializeCollapsibles() {
