@@ -191,6 +191,10 @@ function logOddsToProb(logOdds) {
   return 1 / (1 + Math.exp(-logOdds));
 }
 
+function probToLogOdds(probability) {
+  return Math.log(probability / (1 - probability));
+}
+
 function updatePrediction(id, coefs, thresholdLevel) {
   const predictedProbPerc = getPredictedProbPerc(id, coefs, thresholdLevel);
   document.getElementById(`tab_prediction_${id}`).innerHTML = predictedProbPerc + '%';
@@ -475,6 +479,20 @@ function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel) {
   const dividers = [
     {
       type: 'line',
+      x0: 0,
+      x1: 0,
+      y0: 0,
+      y1: 1,
+      xref: 'x',
+      yref: 'paper',
+      line: {
+        color: 'black',
+        width: 1
+      },
+      layer: 'below'
+    },
+    {
+      type: 'line',
       x0: -2,
       y0: 0.5,
       x1: 2,
@@ -527,15 +545,16 @@ function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel) {
         shapes: dividers,
         margin: {
             t: 50,
-            b: 50,
+            b: 20,
             l: 250,
             r: 50
         },
-        width: 500,
+        width: 600,
         xaxis: {
           showgrid: true,
           zeroline: true,
-          visible: false
+          visible: false,
+          range: [probToLogOdds(0.05), probToLogOdds(0.95)],
         },
         showlegend: false
     },
