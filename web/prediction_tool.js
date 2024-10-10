@@ -783,7 +783,7 @@ function openLocalExplanationPopup(id, level) {
     }
     else {
       const percs = getBinaryProbabilityPercs(coefs);
-      content = 'Sannolikheten att bli tveksam eller missnöjd med operation beräknas som <ul><i>100% &minus; sannolikheten att bli nöjd</i></ul>För vald patientprofil: <ul><i>100% &minus; ' + percs[0] + '% = <b>' + percs[1] + '%</b></i></ul>.'
+      content = 'Sannolikheten att bli tveksam eller missnöjd</span> med operation beräknas som <ul><i>100% &minus; sannolikheten att bli nöjd</i></ul>För vald patientprofil: <ul><i>100% &minus; <span style="background-color:' + SATISFACTION_COLORS[0] + '">' + percs[0] + '%</span> = <b><span style="background-color:' + SATISFACTION_COLORS[1] + '">' + percs[1] + '%</span></b></i></ul>.'
     }
   }
   else if(id == 'outcome') {
