@@ -153,7 +153,7 @@ function getNominalValuesFromForm(varName, n) {
 function getRegressorValuesFromForm(coefs) {
   var result = {}
   for(const key in coefs) {
-    if(key != 'Intercept') {
+    if(key != 'Intercept' && key != 'Thresholds') {
       var coef = coefs[key];
       if(Array.isArray(coef)) {
         result[key] = getNominalValuesFromForm(key, coef.length);
@@ -166,12 +166,12 @@ function getRegressorValuesFromForm(coefs) {
   return result;
 }
 
-function getLogOdds(regressorValues, coefs, thresholdLevel) {
+function getProductSum(regressorValues, coefs) {
   var result = 0;
   for(const key in coefs) {
     var coef = coefs[key];
     if(key == 'Intercept') {
-      result += coef[thresholdLevel];
+      result += coef[0];
     }
     else {
       if(Array.isArray(coef)) {
@@ -195,20 +195,19 @@ function probToLogOdds(probability) {
   return Math.log(probability / (1 - probability));
 }
 
-function updatePrediction(id, coefs, thresholdLevel) {
-  const predictedProbPerc = getPredictedProbPerc(id, coefs, thresholdLevel);
-  document.getElementById(`tab_prediction_${id}`).innerHTML = predictedProbPerc + '%';
-  document.getElementById(`prediction_${id}`).innerHTML = predictedProbPerc + '%';
+function updateLogisticRegressionPrediction(id, coefs) {
+  const percs = getLogisticRegressionProbabilityPercs(coefs);
+  updatePrediction(id, percs[0]);
 }
 
-function getPredictedProbPerc(id, coefs, thresholdLevel) {
-  var regressorValues = getRegressorValuesFromForm(coefs);
-  var predictedProb = 0;
-  for(let i = thresholdLevel; i <= thresholdLevel; i++) {
-    const predictedLogOdds = getLogOdds(regressorValues, coefs, i);
-    predictedProb += logOddsToProb(predictedLogOdds);
-  }
-  return Math.round(predictedProb * 100);
+function updateOrderedProbitPrediction(id, coefs, binarizationThreshold) {
+  const regressorValues = getRegressorValuesFromForm(coefs);
+  const positivePredictedLogOdds = getProductSum(regressorValues, coefs);
+}
+
+function updatePrediction(id, perc) {
+  document.getElementById(`tab_prediction_${id}`).innerHTML = perc + '%';
+  document.getElementById(`prediction_${id}`).innerHTML = perc + '%';
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
@@ -225,13 +224,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
   }
 
   function updatePredictionsAndLocalExplanations() {
-    updatePrediction('satisfaction', satisfaction_disc_herniation_coefs, 0);
+    updateLogisticRegressionPrediction('satisfaction', satisfaction_disc_herniation_coefs);
     plotBinaryProbabilitiesPieChart(
       'satisfaction', satisfaction_disc_herniation_coefs, SATISFACTION_LEVELS, SATISFACTION_COLORS);
 
-    updatePrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
+    updateOrderedProbitPrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
     plotOrderedProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
   }
+
   var formElements = document.querySelectorAll("input, select");
   formElements.forEach(function(element) {
       element.addEventListener("input", handleInputChange);
@@ -270,11 +270,11 @@ function initializeCollapsible(id) {
     collapsibleContainer.style.maxHeight = '0px';
 };
 
-function getLogOddsDeltas(reference, comparison, coefs) {
+function getProductSumDeltas(reference, comparison, coefs) {
   var result = {};
   for(const key in coefs) {
     var delta = 0;
-    if(key != 'Intercept') {
+    if(key != 'Intercept' && key != 'Thresholds') {
       var coef = coefs[key];
       if(Array.isArray(coef)) {
         for(var i = 0; i < coef.length; i++) {
@@ -355,10 +355,10 @@ const sortByValue = (obj) => {
 
 function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel, positiveColor) {
   const logOddsThreshold = 0.1; // Factors below this log odds delta get grouped under "Other factors"
-  var meanLogOdds = getLogOdds(mean_disc_herniation, coefs, thresholdLevel);
+  var meanLogOdds = getProductSum(mean_disc_herniation, coefs);
   var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
   var regressorValues = getRegressorValuesFromForm(coefs);
-  var logOddsDeltas = sortByValue(getLogOddsDeltas(mean_disc_herniation, regressorValues, coefs));
+  var logOddsDeltas = sortByValue(getProductSumDeltas(mean_disc_herniation, regressorValues, coefs));
 
   function filterLogOddsDeltas(f) {
     return Object.fromEntries(Object.entries(logOddsDeltas).filter(f));
@@ -408,7 +408,7 @@ function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel, pos
 
   const logOddsDeltasAboveThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) >= logOddsThreshold);
   const logOddsDeltasBelowThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) < logOddsThreshold);
-  const predictedLogOdds = getLogOdds(regressorValues, coefs, thresholdLevel);
+  const predictedLogOdds = getProductSum(regressorValues, coefs);
   const predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
 
   var colors = [positiveColor];
@@ -693,7 +693,7 @@ function plotOrderedProbabilitiesPieChart(id, coefs, levels, colors) {
   var remainingProbability = 1;
   var values = [];
   for(let level = 0; level < (levels.length - 1); level++) {
-    const predictedLogOdds = getLogOdds(regressorValues, coefs, level);
+    const predictedLogOdds = getProductSum(regressorValues, coefs);
     const probability = logOddsToProb(predictedLogOdds);
     remainingProbability -= probability;
     const predictedProbPerc = Math.round(probability * 100);
@@ -705,14 +705,14 @@ function plotOrderedProbabilitiesPieChart(id, coefs, levels, colors) {
 }
 
 function plotBinaryProbabilitiesPieChart(id, coefs, levels, colors) {
-  const values = getBinaryProbabilityPercs(coefs);
+  const values = getLogisticRegressionProbabilityPercs(coefs);
   plotPieChart(id, values, levels, colors);
 }
 
-function getBinaryProbabilityPercs(coefs) {
+function getLogisticRegressionProbabilityPercs(coefs) {
   const regressorValues = getRegressorValuesFromForm(coefs);
 
-  const positivePredictedLogOdds = getLogOdds(regressorValues, coefs, 0);
+  const positivePredictedLogOdds = getProductSum(regressorValues, coefs);
   const positiveProbability = logOddsToProb(positivePredictedLogOdds);
   const positiveProbabilityPerc = Math.round(positiveProbability * 100);
 
@@ -785,7 +785,7 @@ function openLocalExplanationPopup(id, level) {
       positiveColor = SATISFACTION_COLORS[0];
     }
     else {
-      const percs = getBinaryProbabilityPercs(coefs);
+      const percs = getLogisticRegressionProbabilityPercs(coefs);
       content = 'Sannolikheten att bli tveksam eller missnöjd</span> med operation beräknas som <ul><i>100% &minus; sannolikheten att bli nöjd</i></ul>För vald patientprofil: <ul><i>100% &minus; <span style="background-color:' + SATISFACTION_COLORS[0] + '">' + percs[0] + '%</span> = <b><span style="background-color:' + SATISFACTION_COLORS[1] + '">' + percs[1] + '%</span></b></i></ul>.'
     }
   }
