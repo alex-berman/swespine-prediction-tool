@@ -10,3 +10,58 @@ function transformThresholdParams(thresholdParams) {
   result.push(Infinity);
   return result;
 }
+
+function predict(coefs, thresholdParams, featureValues) {
+  const thresholds = transformThresholdParams(thresholdParams);
+  const xb = linearPrediction(coefs, featureValues);
+  var result = [];
+  for(var i = 0; i <= thresholdParams.length; i++) {
+    const low = thresholds[i] - xb;
+    const upp = thresholds[i + 1] - xb;
+    const prob = intervalProbability(low, upp);
+    result.push(prob);
+  }
+  return result;
+}
+
+function intervalProbability(low, upp) {
+  return Math.max(normalCDF(upp) - normalCDF(low), 0);
+}
+
+function normalCDF(x) { // NOTE: based on unvalidated output from ChatGPT
+  const z = x / Math.sqrt(2);
+  const k = 1 / (1 + 0.2316419 * Math.abs(z));
+  const cdf = 0.5 * (1 + Math.sign(z) *
+    Math.sqrt(1 - Math.exp(-((z * z) / 2) + 0.5 * (k * k * k * k * -1.2655122))));
+
+  return cdf;
+}
+
+function linearPrediction(coefs, featureValues) {
+  var result = 0;
+  for(var i = 0; i < coefs.length; i++) {
+    result += coefs[i] * featureValues[i];
+  }
+  return result;
+}
+
+function test() {
+  const thresholdParams = [1.2968, 0.1873];
+  console.log(transformThresholdParams(thresholdParams));
+  // output should correspond to array([ -inf, 1.29684541, 2.50285885, inf])
+
+  const coefs = [1.0476, -0.0586, 0.6158];
+  const data = [
+    [0, 0, 3.26],
+    [1, 0, 3.21],
+    [1, 1, 3.94],
+  ];
+  for(datum of data) {
+    console.log(predict(coefs, thresholdParams, datum));
+  }
+  /* output should correspond to
+  array([[0.54884071, 0.35932276, 0.09183653],
+       [0.30558191, 0.47594216, 0.21847593],
+       [0.22938356, 0.47819057, 0.29242587]])
+  */
+}
