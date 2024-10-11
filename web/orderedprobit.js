@@ -28,13 +28,29 @@ function intervalProbability(low, upp) {
   return Math.max(normalCDF(upp) - normalCDF(low), 0);
 }
 
-function normalCDF(x) { // NOTE: based on unvalidated output from ChatGPT
-  const z = x / Math.sqrt(2);
-  const k = 1 / (1 + 0.2316419 * Math.abs(z));
-  const cdf = 0.5 * (1 + Math.sign(z) *
-    Math.sqrt(1 - Math.exp(-((z * z) / 2) + 0.5 * (k * k * k * k * -1.2655122))));
+function erf(x) { // Note: Output from ChatGPT
+    // Constants
+    const a1 =  0.254829592;
+    const a2 = -0.284496736;
+    const a3 =  1.421413741;
+    const a4 = -1.453152027;
+    const a5 =  1.061405429;
+    const p  =  0.3275911;
 
-  return cdf;
+    // Save the sign of x
+    const sign = (x >= 0) ? 1 : -1;
+    x = Math.abs(x);
+
+    // A&S formula 7.1.26 approximation for erf
+    const t = 1.0 / (1.0 + p * x);
+    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+
+    return sign * y;
+}
+
+// Note: Output from ChatGPT
+function normalCDF(x, mean = 0, stdDev = 1) {
+    return 0.5 * (1 + erf((x - mean) / (stdDev * Math.sqrt(2))));
 }
 
 function linearPrediction(coefs, featureValues) {
