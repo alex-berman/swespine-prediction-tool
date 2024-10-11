@@ -49,6 +49,7 @@ function test() {
   // Based on https://www.statsmodels.org/stable/examples/notebooks/generated/ordinal_regression.html#Probit-ordinal-regression:
 
   const thresholdParams = [1.2968, 0.1873];
+  console.log('transformThresholdParams');
   console.log(transformThresholdParams(thresholdParams));
   // output should correspond to array([ -inf, 1.29684541, 2.50285885, inf])
 
@@ -58,10 +59,22 @@ function test() {
     [1, 0, 3.21],
     [1, 1, 3.94],
   ];
+
+  console.log('linearPrediction');
+  for(datum of data) {
+    console.log(linearPrediction(coefs, datum));
+  }
+  /* output should correspond to res_prob.predict(exog=data_student.head(3)[['pared', 'public', 'gpa']], which='linpred'), i.e.
+0    1.167604
+1    1.747806
+2    2.019427
+  */
+
+  console.log('predict');
   for(datum of data) {
     console.log(predict(coefs, thresholdParams, datum));
   }
-  /* output should correspond to
+  /* output should correspond to res_prob.predict(exog=data_student.head(3)[['pared', 'public', 'gpa']], which='prob'), i.e.
 0    0.551417  0.357687  0.090896
 1    0.326009  0.448882  0.225109
 2    0.234969  0.450637  0.314394
