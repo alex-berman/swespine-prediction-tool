@@ -46,6 +46,9 @@ function linearPrediction(coefs, featureValues) {
 }
 
 function test() {
+  // Based on https://www.statsmodels.org/stable/examples/notebooks/generated/ordinal_regression.html#Probit-ordinal-regression:
+  // TODO: The example in the notebook uses distr='logit', but we expect distr='probit'.
+
   const thresholdParams = [1.2968, 0.1873];
   console.log(transformThresholdParams(thresholdParams));
   // output should correspond to array([ -inf, 1.29684541, 2.50285885, inf])
