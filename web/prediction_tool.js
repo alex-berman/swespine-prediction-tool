@@ -806,7 +806,7 @@ function openLocalExplanationPopup(id, level) {
     }
     else {
       const percs = getLogisticRegressionProbabilityPercs(coefs);
-      content = 'Sannolikheten att bli tveksam eller missnöjd</span> med operation beräknas som <ul><i>100% &minus; sannolikheten att bli nöjd</i></ul>För vald patientprofil: <ul><i>100% &minus; <span style="background-color:' + SATISFACTION_COLORS[0] + '">' + percs[0] + '%</span> = <b><span style="background-color:' + SATISFACTION_COLORS[1] + '">' + percs[1] + '%</span></b></i></ul>.'
+      content = 'Sannolikheten att bli tveksam eller missnöjd</span> med operation beräknas som <ul><i>100% &minus; sannolikheten att bli nöjd</i></ul>För vald patientprofil: <ul><i>100% &minus; <span style="background-color:' + SATISFACTION_COLORS[0] + '">' + percs[0] + '%</span> = <b><span style="background-color:' + SATISFACTION_COLORS[1] + '">' + percs[1] + '%</span></b></i></ul>'
     }
   }
   else if(id == 'outcome') {
