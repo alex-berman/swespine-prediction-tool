@@ -1,0 +1,40 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    height: 100%;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    position: relative;
+    width: 500px; /* Fixed width for the plot */
+    height: auto; /* Height will be set dynamically */
+    background: linear-gradient(to right, rgb(243, 126, 119), rgb(77, 200, 129));
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Align items at the top */
+    padding: 20px;
+}
+
+.bar {
+    height: 10px;
+    background-color: lightgray;
+    position: relative;
+    transition: width 0.3s ease; /* Smooth transition for width changes */
+}
+
+.arrow-row {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center;
+    margin: 5px 0; /* Add some vertical spacing between rows */
+    width: 100%; /* Allow rows to take full width of the container */
+}
+
+.arrow {
+    fill: currentColor; /* Use current color for arrows */
+}
