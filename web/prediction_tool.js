@@ -41,6 +41,9 @@ const QUESTIONNAIRE_CONTENT = {
   }
 }
 
+const MAX_SLOPE_LOGISTIC_REGRESSION = 0.25;
+const MAX_SLOPE_ORDERED_PROBIT = -1 / Math.sqrt(2 * Math.PI);
+
 export function initializePredictionTool() {
   var diagnosis = document.getElementById('diagnosis').value;
   for(const task of ['satisfaction', 'outcome']) {
@@ -250,8 +253,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
       element.addEventListener("input", handleInputChange);
   });
 
-  generateGlobalExplanationTable('satisfaction', satisfaction_disc_herniation_coefs);
-  generateGlobalExplanationTable('outcome', outcome_disc_herniation_coefs);
+  generateGlobalExplanationTable('satisfaction', satisfaction_disc_herniation_coefs, MAX_SLOPE_LOGISTIC_REGRESSION);
+  generateGlobalExplanationTable('outcome', outcome_disc_herniation_coefs, MAX_SLOPE_ORDERED_PROBIT);
   updatePredictionsAndLocalExplanations();
   for(const layer of document.getElementsByClassName('pielayer')) {
     layer.style.cursor = 'pointer';
@@ -543,7 +546,7 @@ function formElementRangeSize(name) {
   return rangeElement.max - rangeElement.min;
 }
 
-function generateGlobalExplanationTable(id, coefs) {
+function generateGlobalExplanationTable(id, coefs, maxSlope) {
   var probabilityObjectSingular;
   var probabilityObjectPlural;
   if(id == 'satisfaction') {
@@ -554,6 +557,7 @@ function generateGlobalExplanationTable(id, coefs) {
     probabilityObjectSingular = probabilityObjectPlural = 'för lyckat utfall';
   }
 
+  const slopePolarity = (maxSlope > 0) ? 1 : -1;
   let items = [];
 
   function addItem(name, header, coef, cellContentTemplate) {
@@ -575,7 +579,7 @@ function generateGlobalExplanationTable(id, coefs) {
   }
 
   function coefToPercentageDelta(coefMagnitude) {
-    let delta = coefMagnitude / 4 * 100;
+    let delta = coefMagnitude * Math.abs(maxSlope) * 100;
     let digits = (delta < 1) ? 1 : 0;
     let formattedFloat = delta.toFixed(digits);
     return '<b>' + formattedFloat + '</b> ' + ((
@@ -585,14 +589,14 @@ function generateGlobalExplanationTable(id, coefs) {
   function getIndexOfMaxCoef(name) {
     let coefsToCompare = [0].concat(coefs[name]);
     return coefsToCompare.reduce((maxIndex, currentValue, currentIndex, array) => {
-      return currentValue > array[maxIndex] ? currentIndex : maxIndex;
+      return currentValue * slopePolarity > array[maxIndex] * slopePolarity ? currentIndex : maxIndex;
     }, 0);
   }
 
   function getIndexOfMinCoef(name) {
     let coefsToCompare = [0].concat(coefs[name]);
     return coefsToCompare.reduce((maxIndex, currentValue, currentIndex, array) => {
-      return currentValue < array[maxIndex] ? currentIndex : maxIndex;
+      return currentValue * slopePolarity < array[maxIndex] * slopePolarity ? currentIndex : maxIndex;
     }, 0);
   }
 
@@ -616,60 +620,60 @@ function generateGlobalExplanationTable(id, coefs) {
     let coefsToCompare = [0].concat(coefsGroup);
     return Math.max(...coefsToCompare) - Math.min(...coefsToCompare);
   }
-  
+
   addItem(
     'AgeAtSurgery',
     'Ålder',
     coefs.AgeAtSurgery * 10,
-    'Ju ' + (coefs.AgeAtSurgery < 0 ? 'lägre' : 'högre') + ' ålder, desto högre beräknas sannolikheten ' + probabilityObjectSingular + '. ' +
+    'Ju ' + (coefs.AgeAtSurgery * slopePolarity < 0 ? 'lägre' : 'högre') + ' ålder, desto högre beräknas sannolikheten ' + probabilityObjectSingular + '. ' +
     'Sannolikheten påverkas med upp till ${P} per tiotal år.');
   addItem(
     'Female',
     'Kön',
     coefs.Female,
-    (coefs.Female < 0 ? 'Män' : 'Kvinnor') + ' beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
+    (coefs.Female * slopePolarity < 0 ? 'Män' : 'Kvinnor') + ' beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden mellan kvinnor och män kan vara upp till ${P}.');
   addItem(
     'IsPreviouslyOperated',
     'Tidigare ryggop',
     coefs.IsPreviouslyOperated,
-    'Patienter som ' + (coefs.IsPreviouslyOperated < 0 ? 'inte' : '') + ' tidigare ryggopererats beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
+    'Patienter som ' + (coefs.IsPreviouslyOperated * slopePolarity < 0 ? 'inte' : '') + ' tidigare ryggopererats beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ${P}.');
   addItem(
     'IsSmoker',
     'Rökare',
     coefs.IsSmoker,
-    (coefs.IsSmoker < 0 ? 'Icke-rökare' : 'rökare') + ' beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
+    (coefs.IsSmoker * slopePolarity < 0 ? 'Icke-rökare' : 'rökare') + ' beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ${P}.');
   addItem(
     'IsUnemployed',
     'Arbetslös',
     coefs.IsUnemployed,
-    (coefs.IsUnemployed < 0 ? 'Icke-arbetslösa' : 'Arbetslösa') + ' beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
+    (coefs.IsUnemployed * slopePolarity < 0 ? 'Icke-arbetslösa' : 'Arbetslösa') + ' beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ${P}.');
   addItem(
     'HasAgePension',
     'Ålderspension',
     coefs.HasAgePension,
-    'Patienter ' + (coefs.HasAgePension < 0 ? 'utan' : 'med') + ' ålderspension beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
+    'Patienter ' + (coefs.HasAgePension * slopePolarity < 0 ? 'utan' : 'med') + ' ålderspension beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ${P}.');
   addItem(
     'HasSickPension',
     'Sjukpension',
     coefs.HasSickPension,
-    'Patienter ' + (coefs.HasSickPension < 0 ? 'utan' : 'med') + ' sjukpension beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
+    'Patienter ' + (coefs.HasSickPension * slopePolarity < 0 ? 'utan' : 'med') + ' sjukpension beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ${P}.');
   addItem(
     'HasOtherIllness',
     'Samsjuklighet',
     coefs.HasOtherIllness,
-    'Patienter ' + (coefs.HasOtherIllness < 0 ? 'utan' : 'med') + ' andra sjukdomar beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
+    'Patienter ' + (coefs.HasOtherIllness * slopePolarity < 0 ? 'utan' : 'med') + ' andra sjukdomar beräknas ha högre sannolikhet ' + probabilityObjectPlural + '. ' +
     'Skillnaden kan vara upp till ${P}.');
   addItem(
     'EQ5DIndex',
     'EQ5D',
     coefs.EQ5DIndex * formElementRangeSize('EQ5DIndex'),
-    'Ju ' + (coefs.EQ5DIndex < 0 ? 'lägre' : 'högre') + ' EQ5D, desto högre beräknas sannolikheten ' + probabilityObjectSingular + '. ' +
+    'Ju ' + (coefs.EQ5DIndex * slopePolarity < 0 ? 'lägre' : 'högre') + ' EQ5D, desto högre beräknas sannolikheten ' + probabilityObjectSingular + '. ' +
     'Skillnaden kan vara upp till ${P}.');
   addNominal('Promenadsträcka', 'AbilityWalking');
   addNominal('Smärtduration i ben', 'DurationLegPain');
@@ -678,13 +682,13 @@ function generateGlobalExplanationTable(id, coefs) {
     'NRSBackPain',
     'Smärta i rygg',
     coefs.NRSBackPain * formElementRangeSize('NRSBackPain'),
-    'Ju ' + (coefs.NRSBackPain < 0 ? 'mindre' : 'mer') + ' ryggsmärta, desto högre beräknas sannolikheten ' + probabilityObjectSingular + '. ' +
+    'Ju ' + (coefs.NRSBackPain * slopePolarity < 0 ? 'mindre' : 'mer') + ' ryggsmärta, desto högre beräknas sannolikheten ' + probabilityObjectSingular + '. ' +
     'Skillnaden kan vara upp till ${P}.');
   addItem(
     'ODI',
     'Funktionsnedsättning',
     coefs.ODI * formElementRangeSize('ODI'),
-    'Ju ' + (coefs.ODI < 0 ? 'lägre' : 'högre') + ' funktionsnedsättning, desto högre beräknas sannolikheten ' + probabilityObjectSingular + '. ' +
+    'Ju ' + (coefs.ODI * slopePolarity < 0 ? 'lägre' : 'högre') + ' funktionsnedsättning, desto högre beräknas sannolikheten ' + probabilityObjectSingular + '. ' +
     'Skillnaden kan vara upp till ${P}.');
 
   let content = '<table>';
