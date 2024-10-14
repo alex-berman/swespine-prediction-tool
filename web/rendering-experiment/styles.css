@@ -9,30 +9,32 @@ body, html {
     font-family: Arial, sans-serif;
 }
 
-.container {
-    position: relative;
-    width: 500px; /* Fixed width for the plot */
-    height: auto; /* Height will be set dynamically */
-    background: linear-gradient(to right, rgb(243, 126, 119), rgb(77, 200, 129));
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start; /* Align items at the top */
-    padding: 20px;
+table {
+    width: 600px; /* Total width for the table */
+    border-collapse: collapse; /* Merge borders */
+    margin: 20px auto; /* Center the table */
+}
+
+td {
+    height: 30px; /* Set height for table cells */
+    vertical-align: left; /* Center content vertically in each cell */
+}
+
+td:first-child {
+    width: 200px; /* Width for the label column */
+}
+
+td:last-child {
+    width: 400px; /* Width for the value column */
+    position: relative; /* Position relative to allow absolute positioning of inner elements */
+    background: linear-gradient(to right, rgb(243, 126, 119), rgb(77, 200, 129)); /* Gradient background */
+    text-align: center; /* Center align text in the right column */
 }
 
 .bar {
-    height: 10px;
-    background-color: lightgray;
-    position: relative;
+    height: 20px; /* Set height of the bar to 20px */
     transition: width 0.3s ease; /* Smooth transition for width changes */
-}
-
-.arrow-row {
-    display: flex;
-    justify-content: center; /* Center horizontally */
-    align-items: center;
-    margin: 5px 0; /* Add some vertical spacing between rows */
-    width: 100%; /* Allow rows to take full width of the container */
+    background-color: lightgray; /* Set light gray for bars */
 }
 
 .arrow {
