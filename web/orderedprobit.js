@@ -14,8 +14,12 @@ function transformThresholdParams(thresholdParams) {
 function predict(coefs, thresholdParams, featureValues) {
   const thresholds = transformThresholdParams(thresholdParams);
   const xb = linearPrediction(coefs, featureValues);
+  return probabilitiesGivenLatentVariableAndThresholds(xb, thresholds);
+}
+
+function probabilitiesGivenLatentVariableAndThresholds(xb, thresholds) {
   var result = [];
-  for(var i = 0; i <= thresholdParams.length; i++) {
+  for(var i = 0; i < (thresholds.length - 1); i++) {
     const low = thresholds[i] - xb;
     const upp = thresholds[i + 1] - xb;
     const prob = intervalProbability(low, upp);

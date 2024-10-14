@@ -214,26 +214,8 @@ function updateOrderedProbitPrediction(id, coefs, binarizationThreshold) {
 function getOrderedProbitProbabilities(coefs) {
   const regressorValues = getRegressorValuesFromForm(coefs);
   const productSum = getProductSum(regressorValues, coefs);
-  const thresholds = coefs.Thresholds;
-
-  function normalCDF(x) { // NOTE: based on unvalidated output from ChatGPT
-    const z = x / Math.sqrt(2);
-    const k = 1 / (1 + 0.2316419 * Math.abs(z));
-    const cdf = 0.5 * (1 + Math.sign(z) *
-      Math.sqrt(1 - Math.exp(-((z * z) / 2) + 0.5 * (k * k * k * k * -1.2655122))));
-
-    return cdf;
-  }
-
-  function getProbability(y) { // NOTE: based on unvalidated output from ChatGPT
-    let lowerBound = (y === 0) ? -Infinity : thresholds[y - 1];
-    let upperBound = (y === thresholds.length) ? Infinity : thresholds[y];
-    let probUpper = normalCDF(upperBound - productSum);
-    let probLower = normalCDF(lowerBound - productSum);
-    return probUpper - probLower;
-  }
-
-  return Array.from({ length: thresholds.length + 1 }, (_, y) => getProbability(y));
+  const thresholds = [-Infinity, ...coefs.Thresholds, Infinity];
+  return probabilitiesGivenLatentVariableAndThresholds(productSum, thresholds);
 }
 
 function updatePrediction(id, perc) {
@@ -720,6 +702,7 @@ function generateGlobalExplanationTable(id, coefs) {
 
 function plotOrderedProbabilitiesPieChart(id, coefs, levels, colors) {
   const probs = getOrderedProbitProbabilities(coefs);
+  console.log(probs);
   const values = probs.map((prob, _) => Math.round(prob * 100));
   plotPieChart(id, values, levels, colors);
 }
