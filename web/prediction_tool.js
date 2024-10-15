@@ -1,3 +1,5 @@
+import { dataModel, getDataDefinition } from "./data_model.js";
+import { tabs, getLayoutField } from "./form_layout.js";
 import { mean_disc_herniation } from "./models/mean_disc_herniation.js";
 import { outcome_disc_herniation_coefs } from "./models/outcome_disc_herniation_coefs.js";
 import { satisfaction_disc_herniation_coefs } from "./models/satisfaction_disc_herniation_coefs.js";
@@ -45,7 +47,37 @@ const MAX_SLOPE_LOGISTIC_REGRESSION = 0.25;
 const MAX_SLOPE_ORDERED_PROBIT = -1 / Math.sqrt(2 * Math.PI);
 
 export function initializePredictionTool() {
-  var diagnosis = document.getElementById('diagnosis').value;
+  initializeTabs();
+  initializeForm();
+  setRandomValues();
+  initializeCollapsibles();
+
+  function handleInputChange(event) {
+    updatePredictionsAndLocalExplanations();
+  }
+
+  function updatePredictionsAndLocalExplanations() {
+    updateLogisticRegressionPrediction('satisfaction', satisfaction_disc_herniation_coefs);
+    plotBinaryProbabilitiesPieChart(
+      'satisfaction', satisfaction_disc_herniation_coefs, SATISFACTION_LEVELS, SATISFACTION_COLORS);
+
+    updateOrderedProbitPrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
+    plotOrderedProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
+  }
+
+  var formElements = document.querySelectorAll("input, select");
+  formElements.forEach(function(element) {
+      element.addEventListener("input", handleInputChange);
+  });
+
+  generateGlobalExplanationTable('satisfaction', satisfaction_disc_herniation_coefs, MAX_SLOPE_LOGISTIC_REGRESSION);
+  generateGlobalExplanationTable('outcome', outcome_disc_herniation_coefs, MAX_SLOPE_ORDERED_PROBIT);
+  updatePredictionsAndLocalExplanations();
+  for(const layer of document.getElementsByClassName('pielayer')) {
+    layer.style.cursor = 'pointer';
+  }
+
+  const diagnosis = document.getElementById('diagnosis').value;
   for(const task of ['satisfaction', 'outcome']) {
     document.getElementById(`swespine_question_${task}`).innerHTML = QUESTIONNAIRE_CONTENT[
       diagnosis][task].question;
@@ -91,6 +123,22 @@ function setRandomValues() {
 }
 
 function initializeTabs() {
+  const tabsDiv = document.getElementById('tabs');
+  tabsDiv.innerHTML = '';
+  var firstTab = true;
+  for(const tab of tabs) {
+    var button = document.createElement('button');
+    button.dataset.tab = tab.name;
+    button.classList.add('tab-button');
+    button.classList.add('tab-button-patient-data');
+    if(firstTab) {
+      button.classList.add('active');
+      firstTab = false;
+    }
+    button.innerHTML = tab.label;
+    tabsDiv.appendChild(button);
+  }
+
   document.querySelectorAll('.tab-button-patient-data').forEach(button => {
       button.addEventListener('click', () => {
           document.querySelectorAll('.tab-button-patient-data').forEach(btn => btn.classList.remove('active'));
@@ -112,23 +160,121 @@ function initializeTabs() {
   });
 }
 
-function initializeRangeControl(name) {
-    const slider = document.getElementById(name);
-    const valueElement = document.getElementById(name + '-value');
+function initializeForm() {
+  var tabContent = document.getElementById('tab-content');
+  var firstTab = true;
+  for(const tab of tabs) {
+    var tabDiv = document.createElement('div');
+    tabDiv.id = tab.name;
+    tabDiv.classList.add('tab-pane');
+    tabDiv.classList.add('tab-pane-patient-data');
+    if(firstTab) {
+      tabDiv.classList.add('active');
+      firstTab = false;
+    }
 
-    slider.addEventListener('input', () => {
-        valueElement.value = slider.value;
-    });
+    for(const group of tab.groups) {
+      var h = document.createElement('h2');
+      h.innerHTML = group.header;
+      tabDiv.appendChild(h);
 
-    valueElement.addEventListener('input', () => {
-        let parsedValue = parseFloat(valueElement.value);
-        if (parsedValue < parseFloat(slider.min)) {
-            parsedValue = parseFloat(slider.min);
-        } else if (parsedValue > parseFloat(slider.max)) {
-            parsedValue = parseFloat(slider.max);
+      var groupDiv = document.createElement('div');
+      groupDiv.className = 'form-group';
+
+      for(const field of group.fields) {
+        var label = document.createElement('label');
+        label.setAttribute('for', field.name);
+        label.className = 'label';
+        label.innerHTML = field.label;
+        groupDiv.appendChild(label);
+
+        const dataDefinition = getDataDefinition(field.name);
+        if(field.type == 'select') {
+          var select = document.createElement('select');
+          select.id = field.name;
+          select.className = 'input';
+          for(let i = 0; i < field.labels.length; i++) {
+            var option = document.createElement('option');
+            option.text = field.labels[i];
+            option.value = dataDefinition.categories[i];
+          }
+          groupDiv.appendChild(select);
         }
-        slider.value = parsedValue;
-    });
+        else if(field.type == 'radio') {
+          var div = document.createElement('div');
+          div.classList.add('input');
+          div.classList.add('radio-group');
+          for(let i = 0; i < field.labels.length; i++) {
+            var input = document.createElement('input');
+            input.type = 'radio';
+            input.id = field.name + i;
+            input.name = field.name;
+            input.value = dataDefinition.categories[i];
+            div.appendChild(input);
+
+            var label = document.createElement('label');
+            label.setAttribute('for', input.id);
+            label.innerHTML = field.labels[i].label;
+            div.appendChild(input);
+          }
+          groupDiv.appendChild(div);
+        }
+        else if(field.type == 'toggle') {
+          var div = document.createElement('div');
+          div.classList.add('input');
+          div.classList.add('radio-group');
+          for(let i = 1; i >= 0; i--) {
+            var input = document.createElement('input');
+            input.type = 'radio';
+            input.id = field.name + i;
+            input.name = field.name;
+            input.value = i;
+            div.appendChild(input);
+
+            var label = document.createElement('label');
+            label.setAttribute('for', input.id);
+            label.innerHTML = field.labels[i].label;
+            div.appendChild(input);
+          }
+          groupDiv.appendChild(div);
+        }
+        else if(field.type == 'slider') {
+          var valueElement = document.createElement('input');
+          valueElement.type = 'text';
+          valueElement.id = name + '-value';
+          valueElement.className = 'input';
+
+          var slider = document.createElement('input');
+          slider.type = 'number';
+          slider.id = field.name;
+          slider.min = field.range.min;
+          slider.max = field.range.max;
+          slider.max = 1;
+          slider.className = 'input';
+          slider.addEventListener('input', () => {
+              valueElement.value = slider.value;
+          });
+
+          valueElement.addEventListener('input', () => {
+              let parsedValue = parseFloat(valueElement.value);
+              if (parsedValue < minValue) {
+                  parsedValue = minValue;
+              } else if (parsedValue > maxValue) {
+                  parsedValue = maxValue;
+              }
+              slider.value = parsedValue;
+          });
+
+          groupDiv.appendChild(valueElement);
+          groupDiv.appendChild(slider);
+        }
+      }
+
+      tabDiv.appendChild(groupDiv);
+    }
+
+    tabContent.appendChild(tabDiv);
+  }
 }
 
 function getScalarValueFromForm(varName) {
@@ -225,41 +371,6 @@ function updatePrediction(id, perc) {
   document.getElementById(`tab_prediction_${id}`).innerHTML = perc + '%';
   document.getElementById(`prediction_${id}`).innerHTML = perc + '%';
 }
-
-document.addEventListener('DOMContentLoaded', (event) => {
-  initializeTabs();
-  initializeRangeControl('EQ5DIndex');
-  initializeRangeControl('NRSLegPain');
-  initializeRangeControl('NRSBackPain');
-  initializeRangeControl('ODI');
-  setRandomValues();
-  initializeCollapsibles();
-
-  function handleInputChange(event) {
-    updatePredictionsAndLocalExplanations();
-  }
-
-  function updatePredictionsAndLocalExplanations() {
-    updateLogisticRegressionPrediction('satisfaction', satisfaction_disc_herniation_coefs);
-    plotBinaryProbabilitiesPieChart(
-      'satisfaction', satisfaction_disc_herniation_coefs, SATISFACTION_LEVELS, SATISFACTION_COLORS);
-
-    updateOrderedProbitPrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
-    plotOrderedProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
-  }
-
-  var formElements = document.querySelectorAll("input, select");
-  formElements.forEach(function(element) {
-      element.addEventListener("input", handleInputChange);
-  });
-
-  generateGlobalExplanationTable('satisfaction', satisfaction_disc_herniation_coefs, MAX_SLOPE_LOGISTIC_REGRESSION);
-  generateGlobalExplanationTable('outcome', outcome_disc_herniation_coefs, MAX_SLOPE_ORDERED_PROBIT);
-  updatePredictionsAndLocalExplanations();
-  for(const layer of document.getElementsByClassName('pielayer')) {
-    layer.style.cursor = 'pointer';
-  }
-});
 
 function initializeCollapsibles() {
   initializeCollapsible('global-explanation-satisfaction');
@@ -542,8 +653,8 @@ function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel, pos
 }
 
 function formElementRangeSize(name) {
-  var rangeElement = document.getElementById(name);
-  return rangeElement.max - rangeElement.min;
+  const dataDefinition = getDataDefinition(name);
+  return dataDefinition.range.max - dataDefinition.range.min;
 }
 
 function generateGlobalExplanationTable(id, coefs, maxSlope) {
@@ -601,8 +712,9 @@ function generateGlobalExplanationTable(id, coefs, maxSlope) {
   }
 
   function generateOptionNounPhrase(name, optionIndex) {
+    const field = getLayoutField(name);
     if(name == 'AbilityWalking') {
-      let optionText = document.getElementById(name).options[optionIndex].innerHTML;
+      let optionText = field.labels[optionIndex];
       return 'Patienter som kan gå ' + toLeadingLowercase(optionText);
     }
     if(name == 'DurationLegPain' || name == 'DurationBackPain') {
@@ -610,7 +722,7 @@ function generateGlobalExplanationTable(id, coefs, maxSlope) {
         return 'Patienter utan smärta';
       }
       else {
-        let optionText = document.getElementById(name).options[optionIndex].innerHTML;
+        let optionText = field.labels[optionIndex];
         return 'Patienter som upplevt smärta i ' + toLeadingLowercase(optionText);
       }
     }
