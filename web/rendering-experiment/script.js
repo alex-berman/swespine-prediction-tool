@@ -1,23 +1,63 @@
 function renderDeltas(initialValue, deltas) {
-    // Calculate the target value as the sum of the initial value and all deltas
     const targetValue = initialValue + deltas.reduce((acc, delta) => acc + delta, 0);
-
-    // Get the table body where rows will be added
     const tableBody = document.getElementById('table-body');
-
-    // Clear the table body before rendering
     tableBody.innerHTML = '';
-
-    // Create a row for the initial value
-    addRow(tableBody, 'Initial Value', initialValue, true); // Light gray bar
-
-    // Create rows for each delta
+    addAxisTicks(tableBody, 400);
+    addRow(tableBody, 'Initial Value', initialValue, true);
     deltas.forEach((delta, index) => {
-        addRow(tableBody, `Delta ${index + 1}`, delta, false); // Arrows for deltas
+        addRow(tableBody, `Delta ${index + 1}`, delta, false);
+    });
+    addRow(tableBody, 'Sum', targetValue, true);
+}
+
+function addAxisTicks(tableBody, containerWidth) {
+  const row = document.createElement('tr');
+  const emptyCell = document.createElement('td');
+  row.appendChild(emptyCell);
+  const ticksCell = document.createElement('td');
+  ticksCell.className = 'ticksCell';
+
+  function addTicks(texts) {
+    // Append all text elements to the container first
+    texts.forEach(({ text }) => {
+      const textElement = document.createElement("span");
+      textElement.textContent = text;
+      textElement.style.position = "absolute";
+      textElement.style.left = '0px'; // Set temporarily for width calculation
+      ticksCell.appendChild(textElement);
     });
 
-    // Create a row for the sum
-    addRow(tableBody, 'Sum', targetValue, true); // Light gray bar
+    // After all elements are in the DOM, measure and position them inside a single requestAnimationFrame
+    window.requestAnimationFrame(() => {
+      const containerWidth = ticksCell.offsetWidth;  // Get container width
+
+      // Get all the child elements inside ticksCell (these are the spans we added)
+      const children = ticksCell.querySelectorAll('span');
+
+      texts.forEach(({ align, position }, index) => {
+        const textElement = children[index];
+        const xPos = position * containerWidth;
+        const textWidth = textElement.offsetWidth;  // Get the actual width of the text
+
+        // Align the text (left, middle, right)
+        if (align === "left") {
+          textElement.style.left = `${xPos}px`;
+        } else if (align === "middle") {
+          textElement.style.left = `${xPos - textWidth / 2}px`;
+        } else if (align === "right") {
+          textElement.style.left = `${Math.min(xPos - textWidth, containerWidth - textWidth)}px`;
+        }
+      });
+    });
+  }
+
+  addTicks([
+    { text: "Tveksam/missnöjd", align: "left", position: 0 },
+    { text: "Nöjd", align: "right", position: 1 }
+  ]);
+
+  row.appendChild(ticksCell);
+  tableBody.appendChild(row);
 }
 
 function addRow(tableBody, label, value, isBar) {
@@ -26,11 +66,13 @@ function addRow(tableBody, label, value, isBar) {
 
     // Create the label cell
     const labelCell = document.createElement('td');
+    labelCell.className = 'labelCell';
     labelCell.textContent = label;
     row.appendChild(labelCell);
 
     // Create the value cell
     const valueCell = document.createElement('td');
+    valueCell.className = 'graphicalCell';
 
     if (isBar) {
         // Create a div for the light gray bar
@@ -98,3 +140,4 @@ function addRow(tableBody, label, value, isBar) {
 document.addEventListener("DOMContentLoaded", () => {
     renderDeltas(0.7, [0.2, -0.15, 0.05]); // Delta values
 });
+

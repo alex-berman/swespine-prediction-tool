@@ -20,11 +20,18 @@ td {
     vertical-align: left; /* Center content vertically in each cell */
 }
 
-td:first-child {
+.ticksCell {
+    width: 400px;
+    position: relative;
+    padding-bottom: 5px;
+    font-size: small;
+}
+
+.labelCell {
     width: 200px; /* Width for the label column */
 }
 
-td:last-child {
+.graphicalCell {
     width: 400px; /* Width for the value column */
     position: relative; /* Position relative to allow absolute positioning of inner elements */
     background: linear-gradient(to right, rgba(243, 126, 119, 0.7), rgba(77, 200, 129, 0.7)); /* Gradient background */
