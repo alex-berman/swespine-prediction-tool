@@ -76,8 +76,8 @@ function addRow(tableBody, label, value, isBar) {
 
         arrowLine.setAttribute("d", arrowPath);
         arrowLine.setAttribute("class", "arrow");
-        arrowLine.setAttribute("stroke", "black");
-        arrowLine.setAttribute("stroke-width", "2");
+        arrowLine.setAttribute("stroke", "white");
+        arrowLine.setAttribute("stroke-width", "1.5");
         arrowLine.setAttribute("fill", "none");
 
         // Append the arrow line to the SVG

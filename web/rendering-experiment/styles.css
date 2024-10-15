@@ -27,16 +27,12 @@ td:first-child {
 td:last-child {
     width: 400px; /* Width for the value column */
     position: relative; /* Position relative to allow absolute positioning of inner elements */
-    background: linear-gradient(to right, rgb(243, 126, 119), rgb(77, 200, 129)); /* Gradient background */
+    background: linear-gradient(to right, rgba(243, 126, 119, 0.7), rgba(77, 200, 129, 0.7)); /* Gradient background */
     text-align: center; /* Center align text in the right column */
 }
 
 .bar {
     height: 20px; /* Set height of the bar to 20px */
     transition: width 0.3s ease; /* Smooth transition for width changes */
-    background-color: lightgray; /* Set light gray for bars */
-}
-
-.arrow {
-    fill: currentColor; /* Use current color for arrows */
+    background: #eee;
 }
