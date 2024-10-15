@@ -9,15 +9,15 @@ body, html {
     font-family: Arial, sans-serif;
 }
 
-table {
-    width: 600px; /* Total width for the table */
-    border-collapse: collapse; /* Merge borders */
-    margin: 20px auto; /* Center the table */
+.localExplanationsTable {
+    width: 600px;
+    border-collapse: collapse;
+    margin: 20px auto;
 }
 
 td {
-    height: 30px; /* Set height for table cells */
-    vertical-align: left; /* Center content vertically in each cell */
+    height: 30px;
+    vertical-align: left;
 }
 
 .ticksCell {
@@ -28,19 +28,17 @@ td {
 }
 
 .labelCell {
-    width: 200px; /* Width for the label column */
+    width: 200px;
 }
 
 .graphicalCell {
-    width: 400px; /* Width for the value column */
-    position: relative; /* Position relative to allow absolute positioning of inner elements */
-    background: linear-gradient(to right, rgba(243, 126, 119, 0.7), rgba(77, 200, 129, 0.7)); /* Gradient background */
-    text-align: center; /* Center align text in the right column */
+    width: 400px;
+    position: relative;
+    text-align: center;
 }
 
 .bar {
-    height: 20px; /* Set height of the bar to 20px */
-    transition: width 0.3s ease; /* Smooth transition for width changes */
+    height: 20px;
     background: #eee6;
     border: 1px solid white; border-left: none;
 }
