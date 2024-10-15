@@ -78,10 +78,10 @@ function renderDeltas(initialValue, deltas, ticks, colors, colorSteps) {
           arrowSVG.setAttribute("width", "100%");
           arrowSVG.setAttribute("height", arrowHeight);
           const endX = 400 * Math.abs(value);
-          const startX = (400 - endX) / 2;
+          const isNegative = value < 0;
+          const startX = isNegative ? 400/2 - endX : 400/2;
 
           const arrowLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          const isNegative = value < 0;
           const arrowPath = isNegative
               ? `M ${startX + endX},${arrowHeight / 2}
                  L ${startX},${arrowHeight / 2}
