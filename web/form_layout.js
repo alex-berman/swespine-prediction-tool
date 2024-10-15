@@ -8,11 +8,13 @@ export const tabs = [
         "fields": [
           {
             "name": "diagnosis",
+            "label": "Diagnosgrupp",
             "type": "select",
             "labels": ["Diskbråck"]
           },
           {
             "name": "nivaer",
+            "label": "Opererade nivåer",
             "type": "radio",
             "labels": [1, 2, 3, 4, 5]
           },
