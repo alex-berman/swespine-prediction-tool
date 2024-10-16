@@ -16,7 +16,7 @@ export const tabs = [
             "name": "OperatedLevels",
             "label": "Opererade nivåer",
             "type": "radio",
-            "labels": ["1", "2", "3", "4", "5"]
+            "labels": ["1", "2", "3", "4", "5+"]
           },
           {
             "name": "kliniktyp",
@@ -38,25 +38,25 @@ export const tabs = [
             "name": "Female",
             "label": "Kön",
             "type": "toggle",
-            "labels": ["Kvinna", "Man"]
+            "labels": ["Man", "Kvinna"]
           },
           {
             "name": "IsUnemployed",
             "label": "Arbetslös",
             "type": "toggle",
-            "labels": ["Ja", "Nej"]
+            "labels": ["Nej", "Ja"]
           },
           {
             "name": "HasSickPension",
             "label": "Sjukpension",
             "type": "toggle",
-            "labels": ["Ja, heltid / deltid", "Nej"]
+            "labels": ["Nej", "Ja, heltid / deltid"]
           },
           {
             "name": "HasAgePension",
             "label": "Ålderspension",
             "type": "toggle",
-            "labels": ["Ja, heltid / deltid", "Nej"]
+            "labels": ["Nej", "Ja, heltid / deltid"]
           }
         ]
       },
@@ -67,19 +67,19 @@ export const tabs = [
             "name": "IsSmoker",
             "label": "Rökare",
             "type": "toggle",
-            "labels": ["Ja", "Nej"]
+            "labels": ["Nej", "Ja"]
           },
           {
             "name": "IsPreviouslyOperated",
             "label": "Tidigare ryggopererad",
             "type": "toggle",
-            "labels": ["Ja", "Nej"]
+            "labels": ["Nej", "Ja"]
           },
           {
             "name": "HasOtherIllness",
             "label": "Samsjuklighet",
             "type": "toggle",
-            "labels": ["Ja", "Nej"]
+            "labels": ["Nej", "Ja"]
           },
           {
             "name": "EQ5DIndex",
