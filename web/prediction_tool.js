@@ -3,6 +3,7 @@ import { tabs, getLayoutField } from "./form_layout.js";
 import { mean_disc_herniation } from "./models/mean_disc_herniation.js";
 import { outcome_disc_herniation_coefs } from "./models/outcome_disc_herniation_coefs.js";
 import { satisfaction_disc_herniation_coefs } from "./models/satisfaction_disc_herniation_coefs.js";
+import { presets } from "./presets.js";
 
 const SATISFACTION_LEVELS = [
   "Nöjd",
@@ -45,15 +46,27 @@ const QUESTIONNAIRE_CONTENT = {
     },
   }
 }
-console.log(QUESTIONNAIRE_CONTENT);
 
 const MAX_SLOPE_LOGISTIC_REGRESSION = 0.25;
 const MAX_SLOPE_ORDERED_PROBIT = -1 / Math.sqrt(2 * Math.PI);
 
+var values;
+
 export function initializePredictionTool() {
   initializeTabs();
   initializeForm();
-  setRandomValues();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const preset = urlParams.get('preset');
+  if(preset) {
+    values = presets[preset];
+  }
+  else {
+    values = randomValues();
+  }
+
+  updateFormFieldsFromValues();
+
   initializeCollapsibles();
 
   function handleInputChange(event) {
@@ -95,12 +108,6 @@ function getRandomFloat(min, max, precision) {
     return (Math.random() * (max - min) + min).toFixed(precision);
 }
 
-function setRandomValues() {
-  const values = randomValues();
-  console.log(values);
-  setValues(values);
-}
-
 function randomValues() {
   function randomValue(dataDefinition) {
     if(dataDefinition.type == 'categorical') {
@@ -127,17 +134,17 @@ function randomValues() {
   return result;
 }
 
-function setValues(values) {
+function updateFormFieldsFromValues() {
   for(const tab of tabs) {
     for(const group of tab.groups) {
       for(const field of group.fields) {
-        setValue(field, values[field.name]);
+        updateFormFieldFromValue(field, values[field.name]);
       }
     }
   }
 }
 
-function setValue(field, value) {
+function updateFormFieldFromValue(field, value) {
   if(field.type == 'select') {
     var input = document.getElementById(field.name);
     input.selectedIndex = value;
@@ -910,4 +917,8 @@ function plotPieChart(id, values, levels, colors) {
           responsive: true
       }
     });
+}
+
+export function getValues() {
+  return values;
 }
