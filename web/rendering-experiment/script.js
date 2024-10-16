@@ -1,4 +1,4 @@
-function renderDeltas(initialValue, deltas, ticks, colors, colorSteps) {
+function plotFeatureContributions(tableBodyID, initialValue, deltas, ticks, colors, colorSteps) {
   function generateGradient() {
     var result = 'linear-gradient(to right';
     for(let i = 0; i < colors.length; i++) {
@@ -12,7 +12,7 @@ function renderDeltas(initialValue, deltas, ticks, colors, colorSteps) {
 
   const targetValue = initialValue + deltas.reduce((acc, delta) => acc + delta, 0);
   const gradient = generateGradient();
-  const tableBody = document.getElementById('localExplanationsTableBody');
+  const tableBody = document.getElementById(tableBodyID);
 
   function addAxisTicks() {
     const row = document.createElement('tr');
@@ -24,7 +24,7 @@ function renderDeltas(initialValue, deltas, ticks, colors, colorSteps) {
     function addTicks(texts) {
       texts.forEach(({ text }) => {
         const textElement = document.createElement("span");
-        textElement.textContent = text;
+        textElement.innerHTML = text;
         textElement.style.position = "absolute";
         textElement.style.left = '0px';
         ticksCell.appendChild(textElement);
@@ -107,8 +107,7 @@ function renderDeltas(initialValue, deltas, ticks, colors, colorSteps) {
   addRow('Sum', targetValue, true);
 }
 
-// Call the function with the initial value and an array of deltas
-document.addEventListener("DOMContentLoaded", () => {
+function plotOutcomeContributions() {
   const ticks = [
     { text: "Tveksam/missnöjd", align: "left", position: 0 },
     { text: "Nöjd", align: "right", position: 1 },
@@ -121,6 +120,37 @@ document.addEventListener("DOMContentLoaded", () => {
     0,
     1,
   ];
-  renderDeltas(0.7, [0.2, -0.15, 0.05], ticks, colors, colorSteps);
+  plotFeatureContributions('localExplanationsTableBody_outcome', 0.7, [0.2, -0.15, 0.05], ticks, colors, colorSteps);
+}
+
+function plotSatisfactionContributions() {
+  const ticks = [
+    { text: "Försämrad", align: "left", position: 0 },
+    { text: "", align: null, position: null },
+    { text: "", align: null, position: null },
+    { text: "", align: null, position: null },
+    { text: "Helt&nbsp;försvunnen", align: "right", position: 1 },
+  ];
+  const colors = [
+    [243, 126, 119],
+    [255, 210, 107],
+    [255, 234, 118],
+    [197, 229, 209],
+    [77, 200, 129]
+  ];
+  colorSteps = [
+    0,
+    0.2,
+    0.4,
+    0.7,
+    1
+  ];
+  plotFeatureContributions('localExplanationsTableBody_satisfaction', 0.7, [0.2, -0.15, 0.05], ticks, colors, colorSteps);
+}
+
+// Call the function with the initial value and an array of deltas
+document.addEventListener("DOMContentLoaded", () => {
+  plotOutcomeContributions();
+  plotSatisfactionContributions();
 });
 

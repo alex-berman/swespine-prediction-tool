@@ -23,8 +23,7 @@ td {
 .ticksCell {
     width: 400px;
     position: relative;
-    padding-bottom: 5px;
-    font-size: small;
+    font-size: x-small;
 }
 
 .labelCell {
