@@ -37,7 +37,7 @@ td {
     text-align: center;
 }
 
-.bar {
+.probabilityMarker {
     height: 30px;
     background: #eee8;
     border: 1px solid white;
@@ -45,4 +45,21 @@ td {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.verticalLine {
+  position: absolute;
+  height: 100%;
+  width: 1px;
+  background-color: #ccc;
+  top: 0px;
+  left: 50%; /* Middle line at 50% of container */
+}
+
+.bar {
+  position: absolute;
+  height: 20px;
+  top: calc(50% - 10px); /* Center vertically */
+  background-color: #eee;
+  border: 1px solid #ccc;
 }

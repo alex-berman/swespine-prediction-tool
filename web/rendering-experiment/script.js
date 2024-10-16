@@ -56,7 +56,7 @@ function renderDeltas(initialValue, deltas, ticks, colors, colorSteps) {
     tableBody.appendChild(row);
   }
 
-  function addRow(label, value, isBar) {
+  function addRow(label, value, isProbability) {
       const row = document.createElement('tr');
       const labelCell = document.createElement('td');
       labelCell.className = 'labelCell';
@@ -65,10 +65,10 @@ function renderDeltas(initialValue, deltas, ticks, colors, colorSteps) {
       const contentCell = document.createElement('td');
       contentCell.className = 'contentCell';
 
-      if (isBar) {
+      if (isProbability) {
           contentCell.style.background = gradient;
           const valueDiv = document.createElement('div');
-          valueDiv.className = 'bar';
+          valueDiv.className = 'probabilityMarker';
           const relativeWidth = 0.1;
           valueDiv.style.width = `${Math.round(relativeWidth * 100)}%`;
           valueDiv.style.position = 'relative';
@@ -76,38 +76,22 @@ function renderDeltas(initialValue, deltas, ticks, colors, colorSteps) {
           valueDiv.innerHTML = `${Math.round(value * 100)}%`;
           contentCell.appendChild(valueDiv);
       } else {
-          const arrowSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-          const arrowHeight = 30;
-          arrowSVG.setAttribute("width", "100%");
-          arrowSVG.setAttribute("height", arrowHeight);
-          const endX = 400 * Math.abs(value);
-          const isNegative = value < 0;
-          const startX = isNegative ? 400/2 - endX : 400/2;
+        const line = document.createElement('div');
+        line.className = 'verticalLine';
+        contentCell.appendChild(line);
 
-          const arrowLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          const arrowPath = isNegative
-              ? `M ${startX + endX},${arrowHeight / 2}
-                 L ${startX},${arrowHeight / 2}
-                 M ${startX},${arrowHeight / 2}
-                 L ${startX + 10},${(arrowHeight / 2) - 5}
-                 M ${startX},${arrowHeight / 2}
-                 L ${startX + 10},${(arrowHeight / 2) + 5}`
-              : `M ${startX},${arrowHeight / 2}
-                 L ${startX + endX},${arrowHeight / 2}
-                 M ${startX + endX},${arrowHeight / 2}
-                 L ${startX + endX - 10},${(arrowHeight / 2) - 5}
-                 M ${startX + endX},${arrowHeight / 2}
-                 L ${startX + endX - 10},${(arrowHeight / 2) + 5}`;
-
-          arrowLine.setAttribute("d", arrowPath);
-          arrowLine.setAttribute("class", "arrow");
-          arrowLine.setAttribute("stroke", "#000");
-          arrowLine.setAttribute("stroke-width", "3");
-          arrowLine.setAttribute("fill", "none");
-
-          arrowSVG.appendChild(arrowLine);
-
-          contentCell.appendChild(arrowSVG);
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        const containerWidth = 400;
+        const halfWidth = containerWidth / 2;
+        const barWidth = Math.abs(value) * halfWidth;
+        bar.style.width = `${barWidth}px`;
+        if(value < 0) {
+          bar.style.left = `${halfWidth - barWidth}px`;
+        } else {
+          bar.style.left = `${halfWidth}px`;
+        }
+        contentCell.appendChild(bar);
       }
 
       row.appendChild(contentCell);
