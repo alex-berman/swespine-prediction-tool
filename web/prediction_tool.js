@@ -13,6 +13,7 @@ const SATISFACTION_COLORS = [
   'rgb(77, 200, 129)',
   'rgb(243, 126, 119)',
 ];
+const POSITIVE_COLOR = SATISFACTION_COLORS[0];
 
 const OUTCOME_LEVELS = [
   "Helt försvunnen",
@@ -61,11 +62,11 @@ export function initializePredictionTool() {
 
   function updatePredictionsAndLocalExplanations() {
     updateLogisticRegressionPrediction('satisfaction', satisfaction_disc_herniation_coefs);
-    plotBinaryProbabilitiesPieChart(
-      'satisfaction', satisfaction_disc_herniation_coefs, SATISFACTION_LEVELS, SATISFACTION_COLORS);
+    plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs);
 
     updateOrderedProbitPrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
     plotOrderedProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
+    plotLocalFeatureContributions('outcome', outcome_disc_herniation_coefs);
   }
 
   var formElements = document.querySelectorAll("input, select");
@@ -76,9 +77,6 @@ export function initializePredictionTool() {
   generateGlobalExplanationTable('satisfaction', satisfaction_disc_herniation_coefs, MAX_SLOPE_LOGISTIC_REGRESSION);
   generateGlobalExplanationTable('outcome', outcome_disc_herniation_coefs, MAX_SLOPE_ORDERED_PROBIT);
   updatePredictionsAndLocalExplanations();
-  for(const layer of document.getElementsByClassName('pielayer')) {
-    layer.style.cursor = 'pointer';
-  }
 
   const diagnosis = document.getElementById('Diagnosis').value;
   for(const task of ['satisfaction', 'outcome']) {
@@ -87,7 +85,6 @@ export function initializePredictionTool() {
     document.getElementById(`swespine_definition_${task}`).innerHTML = QUESTIONNAIRE_CONTENT[
       diagnosis][task].definition;
   }
-  document.getElementById('overlay').addEventListener('click', closePopup);
 }
 
 function getRandomInt(min, max) {
@@ -521,7 +518,7 @@ const sortByValue = (obj) => {
   return Object.fromEntries(entries);
 };
 
-function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel, positiveColor) {
+function plotLocalFeatureContributions(id, coefs) {
   const logOddsThreshold = 0.1; // Factors below this log odds delta get grouped under "Other factors"
   var meanLogOdds = getProductSum(mean_disc_herniation, coefs);
   var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
@@ -579,8 +576,8 @@ function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel, pos
   const predictedLogOdds = getProductSum(regressorValues, coefs);
   const predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
 
-  var colors = [positiveColor];
-  var y = ['Sammanlagd sannolikhet för <i>' + positiveLabel + '</i>: <b>' + predictedProbPerc + '%</b>'];
+  var colors = [POSITIVE_COLOR];
+  var y = ['Sammanlagd sannolikhet: <b>' + predictedProbPerc + '%</b>'];
   var x = [predictedLogOdds];
   var hovertext = [''];
 
@@ -601,7 +598,7 @@ function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel, pos
   }
   y.push('Genomsnittlig diskbråckspatient: ' + meanProbPerc + '%');
   x.push(meanLogOdds);
-  colors.push(positiveColor);
+  colors.push(POSITIVE_COLOR);
   hovertext.push('')
 
   const dividers = [
@@ -650,7 +647,7 @@ function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel, pos
       }
     )
   }
-  Plotly.newPlot('featureContributions', {
+  Plotly.newPlot(`featureContributions_${id}`, {
     data: [{
       y: y,
       x: x,
@@ -677,7 +674,7 @@ function plotLocalFeatureContributions(coefs, thresholdLevel, positiveLabel, pos
             l: 250,
             r: 50
         },
-        width: 600,
+        width: 500,
         xaxis: {
           showgrid: true,
           zeroline: true,
@@ -864,11 +861,6 @@ function plotOrderedProbabilitiesPieChart(id, coefs, levels, colors) {
   plotPieChart(id, values, levels, colors);
 }
 
-function plotBinaryProbabilitiesPieChart(id, coefs, levels, colors) {
-  const values = getLogisticRegressionProbabilityPercs(coefs);
-  plotPieChart(id, values, levels, colors);
-}
-
 function getLogisticRegressionProbabilityPercs(coefs) {
   const regressorValues = getRegressorValuesFromForm(coefs);
 
@@ -918,68 +910,4 @@ function plotPieChart(id, values, levels, colors) {
           responsive: true
       }
     });
-
-  const pieChart = document.getElementById(divID);
-  pieChart.on('plotly_click', function(eventData) {
-    const pointIndex = eventData.points[0].pointNumber;
-    openLocalExplanationPopup(id, pointIndex);
-  });
-}
-
-function openLocalExplanationPopup(id, level) {
-  var content;
-  var coefs;
-  var positiveLabel;
-  var positiveColor;
-  var plot;
-
-  if(id == 'satisfaction') {
-    coefs = satisfaction_disc_herniation_coefs;
-    if(level == 0) {
-      plot = true;
-      content = '<div id="featureContributions"></div>' +
-        '<div style="padding-top:10px">' +
-        'Diagrammet visar hur sannolikheten att bli nöjd med operation beräknas utifrån sannolikheten att bli nöjd för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med stapel som pekar åt höger påverkar beräknad sannolikhet att bli nöjd positivt, medan faktorer med stapel som pekar åt vänster påverkar beräknad sannolikhet att bli nöjd negativt.' +
-        '</div>';
-      positiveLabel = 'nöjd';
-      positiveColor = SATISFACTION_COLORS[0];
-    }
-    else {
-      const percs = getLogisticRegressionProbabilityPercs(coefs);
-      content = 'Sannolikheten att bli tveksam eller missnöjd</span> med operation beräknas som <ul><i>100% &minus; sannolikheten att bli nöjd</i></ul>För vald patientprofil: <ul><i>100% &minus; <span style="background-color:' + SATISFACTION_COLORS[0] + '">' + percs[0] + '%</span> = <b><span style="background-color:' + SATISFACTION_COLORS[1] + '">' + percs[1] + '%</span></b></i></ul>'
-    }
-  }
-  else if(id == 'outcome') {
-    if(level < (OUTCOME_LEVELS.length - 1)) {
-      plot = true;
-      content = '<div id="featureContributions"></div>' +
-        '<div style="padding-top:10px">' +
-        'Diagrammet visar hur sannolikheten för (ANPASSA) av operation beräknas utifrån sannolikheten för (ANPASSA) för en genomsnittlig patient samt faktorer avseende vald patientprofil. Faktorer med stapel som pekar åt höger påverkar beräknad sannolikhet att bli nöjd positivt, medan faktorer med stapel som pekar åt vänster påverkar beräknad sannolikhet att bli nöjd negativt.' +
-        '</div>';
-      coefs = outcome_disc_herniation_coefs;
-      positiveLabel = 'lyckat utfall';
-      positiveColor = OUTCOME_COLORS[level];
-    }
-    else {
-      content = 'TODO';
-    }
-  }
-
-  const popup = document.getElementById('popup');
-  popup.innerHTML = '<span id="close-button" class="close-button">×</span>' + content;
-  document.getElementById('close-button').addEventListener('click', closePopup);
-  if(plot) {
-    plotLocalFeatureContributions(coefs, level, positiveLabel, positiveColor);
-  }
-  openPopup();
-}
-
-function openPopup() {
-  document.getElementById('overlay').style.display = 'block';
-  document.getElementById('popup').style.display = 'block';
-}
-
-function closePopup() {
-  document.getElementById('overlay').style.display = 'none';
-  document.getElementById('popup').style.display = 'none';
 }
