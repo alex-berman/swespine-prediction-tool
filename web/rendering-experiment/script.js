@@ -62,16 +62,19 @@ function renderDeltas(initialValue, deltas, ticks, colors, colorSteps) {
       labelCell.className = 'labelCell';
       labelCell.textContent = label;
       row.appendChild(labelCell);
-      const graphicalCell = document.createElement('td');
-      graphicalCell.className = 'graphicalCell';
-      graphicalCell.style.background = gradient;
+      const contentCell = document.createElement('td');
+      contentCell.className = 'contentCell';
 
       if (isBar) {
+          contentCell.style.background = gradient;
           const valueDiv = document.createElement('div');
           valueDiv.className = 'bar';
-          const widthPercentage = Math.abs(value) * 100;
-          valueDiv.style.width = `${widthPercentage}%`;
-          graphicalCell.appendChild(valueDiv);
+          const relativeWidth = 0.1;
+          valueDiv.style.width = `${Math.round(relativeWidth * 100)}%`;
+          valueDiv.style.position = 'relative';
+          valueDiv.style.left = `${Math.round(value * (1 - relativeWidth) * 100)}%`;
+          valueDiv.innerHTML = `${Math.round(value * 100)}%`;
+          contentCell.appendChild(valueDiv);
       } else {
           const arrowSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
           const arrowHeight = 30;
@@ -98,16 +101,16 @@ function renderDeltas(initialValue, deltas, ticks, colors, colorSteps) {
 
           arrowLine.setAttribute("d", arrowPath);
           arrowLine.setAttribute("class", "arrow");
-          arrowLine.setAttribute("stroke", "#fff");
+          arrowLine.setAttribute("stroke", "#000");
           arrowLine.setAttribute("stroke-width", "3");
           arrowLine.setAttribute("fill", "none");
 
           arrowSVG.appendChild(arrowLine);
 
-          graphicalCell.appendChild(arrowSVG);
+          contentCell.appendChild(arrowSVG);
       }
 
-      row.appendChild(graphicalCell);
+      row.appendChild(contentCell);
       tableBody.appendChild(row);
   }
 

@@ -31,14 +31,18 @@ td {
     width: 200px;
 }
 
-.graphicalCell {
+.contentCell {
     width: 400px;
     position: relative;
     text-align: center;
 }
 
 .bar {
-    height: 20px;
-    background: #eee6;
-    border: 1px solid white; border-left: none;
+    height: 30px;
+    background: #eee8;
+    border: 1px solid white;
+    font-size: small;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
