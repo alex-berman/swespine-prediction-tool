@@ -1,23 +1,23 @@
 export const dataModel = [
   {
-    "name": "diagnosis",
+    "name": "Diagnosis",
     "type": "categorical",
-    "categories": ["disc_herniation"]
+    "num_categories": 1
   },
   {
-    "name": "nivaer",
-    "type": "ordinal",
-    "categories": [1, 2, 3, 4, 5]
+    "name": "OperatedLevels",
+    "type": "categorical",
+    "num_categories": 5
   },
   {
     "name": "kliniktyp",
     "type": "categorical",
-    "categories": ["Offentlig", "Privat", "Universitetssjukhus"]
+    "num_categories": 3
   },
   {
     "name": "AgeAtSurgery",
     "type": "numerical",
-    "range": { "min": 10, "max": 110 }
+    "range": { "min": 10, "max": 110, "step": 1 }
   },
   {
     "name": "Female",
@@ -50,37 +50,37 @@ export const dataModel = [
   {
     "name": "EQ5DIndex",
     "type": "numerical",
-    "range": { "min": -0.59, "max": 1 }
+    "range": { "min": -0.59, "max": 1, "step": 0.01 }
   },
   {
     "name": "AbilityWalking",
     "type": "categorical",
-    "categories": [1, 2, 3, 4]
+    "num_categories": 4
   },
   {
     "name": "DurationLegPain",
     "type": "categorical",
-    "categories": [0, 1, 2, 3, 4]
+    "num_categories": 5
   },
   {
     "name": "DurationBackPain",
     "type": "categorical",
-    "categories": [0, 1, 2, 3, 4]
+    "num_categories": 5
   },
   {
     "name": "NRSLegPain",
     "type": "numerical",
-    "range": { "min": 0, "max": 10 }
+    "range": { "min": 0, "max": 10, "step": 1 }
   },
   {
     "name": "NRSBackPain",
     "type": "numerical",
-    "range": { "min": 0, "max": 10 }
+    "range": { "min": 0, "max": 10, "step": 1 }
   },
   {
     "name": "ODI",
     "type": "numerical",
-    "range": { "min": 0, "max": 100 }
+    "range": { "min": 0, "max": 100, "step": 1 }
   }
 ];
 

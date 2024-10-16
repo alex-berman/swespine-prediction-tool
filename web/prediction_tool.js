@@ -30,8 +30,10 @@ const OUTCOME_COLORS = [
   'rgb(243, 126, 119)',
 ];
 
+const disc_herniation = 0;
+
 const QUESTIONNAIRE_CONTENT = {
-  disc_herniation: {
+  [disc_herniation]: {
     satisfaction: {
       question: "Hur är Din inställning till resultatet av Din genomgångna ryggoperation?",
       definition: "<li>Nöjd patient: <i>Nöjd</i><li>Missnöjd patient: <i>tveksam</i> eller <i>missnöjd</i>."
@@ -42,6 +44,7 @@ const QUESTIONNAIRE_CONTENT = {
     },
   }
 }
+console.log(QUESTIONNAIRE_CONTENT);
 
 const MAX_SLOPE_LOGISTIC_REGRESSION = 0.25;
 const MAX_SLOPE_ORDERED_PROBIT = -1 / Math.sqrt(2 * Math.PI);
@@ -77,7 +80,7 @@ export function initializePredictionTool() {
     layer.style.cursor = 'pointer';
   }
 
-  const diagnosis = document.getElementById('diagnosis').value;
+  const diagnosis = document.getElementById('Diagnosis').value;
   for(const task of ['satisfaction', 'outcome']) {
     document.getElementById(`swespine_question_${task}`).innerHTML = QUESTIONNAIRE_CONTENT[
       diagnosis][task].question;
@@ -96,30 +99,65 @@ function getRandomFloat(min, max, precision) {
 }
 
 function setRandomValues() {
-    document.querySelectorAll('select').forEach(select => {
-        const options = select.options;
-        const randomIndex = getRandomInt(0, options.length - 1);
-        select.selectedIndex = randomIndex;
-    });
+  const values = randomValues();
+  console.log(values);
+  setValues(values);
+}
 
-    document.querySelectorAll('.radio-group').forEach(group => {
-        const radios = group.querySelectorAll('input[type="radio"]');
-        const randomIndex = getRandomInt(0, radios.length - 1);
-        radios[randomIndex].checked = true;
-    });
+function randomValues() {
+  function randomValue(dataDefinition) {
+    if(dataDefinition.type == 'categorical') {
+      return Math.floor(Math.random() * dataDefinition.num_categories);
+    }
+    else if(dataDefinition.type == 'numerical') {
+      const range = dataDefinition.range.max - dataDefinition.range.min;
+      const numSteps = Math.floor(range / dataDefinition.range.step);
+      const randomStep = Math.floor(Math.random() * (numSteps + 1));
+      return dataDefinition.range.min + (randomStep * dataDefinition.range.step);
+    }
+    else if(dataDefinition.type == 'binary') {
+      return Math.floor(Math.random() * 2);
+    }
+    else {
+      throw new Error('Unsupported data type ' + dataDefinition.type);
+    }
+  }
 
-    document.querySelectorAll('input[type="number"]').forEach(input => {
-        let min = input.min ? parseInt(input.min) : 50;
-        let max = input.max ? parseInt(input.max) : 90;
-        input.value = getRandomInt(min, max);
-    });
+  var result = {};
+  for(const dataDefinition of dataModel) {
+    result[dataDefinition.name] = randomValue(dataDefinition);
+  }
+  return result;
+}
 
-    document.querySelectorAll('input[type="range"]').forEach(input => {
-        let min = parseFloat(input.min);
-        let max = parseFloat(input.max);
-        input.value = getRandomFloat(min, max, 2);
-        input.dispatchEvent(new Event('input'));
-    });
+function setValues(values) {
+  for(const tab of tabs) {
+    for(const group of tab.groups) {
+      for(const field of group.fields) {
+        setValue(field, values[field.name]);
+      }
+    }
+  }
+}
+
+function setValue(field, value) {
+  if(field.type == 'select') {
+    var input = document.getElementById(field.name);
+    input.selectedIndex = value;
+  }
+  else if(field.type == 'radio') {
+    var radio = document.getElementById(field.name + value);
+    radio.checked = true;
+  }
+  else if(field.type == 'toggle') {
+    var radio = document.getElementById(field.name + value);
+    radio.checked = true;
+  }
+  else if(field.type == 'number') {
+    var input = document.getElementById(field.name);
+    input.value = value;
+    input.dispatchEvent(new Event('input'));
+  }
 }
 
 function initializeTabs() {
@@ -161,10 +199,10 @@ function initializeTabs() {
 }
 
 function initializeForm() {
-  var tabContent = document.getElementById('tab-content');
+  const tabContent = document.getElementById('tab-content');
   var firstTab = true;
   for(const tab of tabs) {
-    var tabDiv = document.createElement('div');
+    const tabDiv = document.createElement('div');
     tabDiv.id = tab.name;
     tabDiv.classList.add('tab-pane');
     tabDiv.classList.add('tab-pane-patient-data');
@@ -174,85 +212,86 @@ function initializeForm() {
     }
 
     for(const group of tab.groups) {
-      var h = document.createElement('h2');
+      const h = document.createElement('h2');
       h.innerHTML = group.header;
       tabDiv.appendChild(h);
 
-      var groupDiv = document.createElement('div');
-      groupDiv.className = 'form-group';
-
       for(const field of group.fields) {
-        var label = document.createElement('label');
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'form-group';
+
+        const label = document.createElement('label');
         label.setAttribute('for', field.name);
         label.className = 'label';
         label.innerHTML = field.label;
         groupDiv.appendChild(label);
 
-        const dataDefinition = getDataDefinition(field.name);
         if(field.type == 'select') {
-          var select = document.createElement('select');
+          const select = document.createElement('select');
           select.id = field.name;
           select.className = 'input';
           for(let i = 0; i < field.labels.length; i++) {
-            var option = document.createElement('option');
+            const option = document.createElement('option');
             option.text = field.labels[i];
-            option.value = dataDefinition.categories[i];
+            option.value = i;
+            select.appendChild(option);
           }
           groupDiv.appendChild(select);
         }
         else if(field.type == 'radio') {
-          var div = document.createElement('div');
+          const div = document.createElement('div');
           div.classList.add('input');
           div.classList.add('radio-group');
           for(let i = 0; i < field.labels.length; i++) {
-            var input = document.createElement('input');
-            input.type = 'radio';
-            input.id = field.name + i;
-            input.name = field.name;
-            input.value = dataDefinition.categories[i];
-            div.appendChild(input);
-
-            var label = document.createElement('label');
-            label.setAttribute('for', input.id);
-            label.innerHTML = field.labels[i].label;
-            div.appendChild(input);
-          }
-          groupDiv.appendChild(div);
-        }
-        else if(field.type == 'toggle') {
-          var div = document.createElement('div');
-          div.classList.add('input');
-          div.classList.add('radio-group');
-          for(let i = 1; i >= 0; i--) {
-            var input = document.createElement('input');
+            const input = document.createElement('input');
             input.type = 'radio';
             input.id = field.name + i;
             input.name = field.name;
             input.value = i;
             div.appendChild(input);
 
-            var label = document.createElement('label');
+            const label = document.createElement('label');
             label.setAttribute('for', input.id);
-            label.innerHTML = field.labels[i].label;
-            div.appendChild(input);
+            label.innerHTML = field.labels[i];
+            div.appendChild(label);
           }
           groupDiv.appendChild(div);
         }
-        else if(field.type == 'slider') {
-          var valueElement = document.createElement('input');
+        else if(field.type == 'toggle') {
+          const div = document.createElement('div');
+          div.classList.add('input');
+          div.classList.add('radio-group');
+          for(let i = 1; i >= 0; i--) {
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.id = field.name + i;
+            input.name = field.name;
+            input.value = i;
+            div.appendChild(input);
+
+            const label = document.createElement('label');
+            label.setAttribute('for', input.id);
+            label.innerHTML = field.labels[i];
+            div.appendChild(label);
+          }
+          groupDiv.appendChild(div);
+        }
+        else if(field.type == 'number') {
+          const valueElement = document.createElement('input');
           valueElement.type = 'text';
-          valueElement.id = name + '-value';
+          valueElement.id = field.name + '-value';
           valueElement.className = 'input';
 
-          var slider = document.createElement('input');
-          slider.type = 'number';
-          slider.id = field.name;
-          slider.min = field.range.min;
-          slider.max = field.range.max;
-          slider.max = 1;
-          slider.className = 'input';
-          slider.addEventListener('input', () => {
-              valueElement.value = slider.value;
+          const rangeElement = document.createElement('input');
+          rangeElement.type = 'range';
+          rangeElement.id = field.name;
+          const dataDefinition = getDataDefinition(field.name);
+          rangeElement.min = dataDefinition.range.min;
+          rangeElement.max = dataDefinition.range.max;
+          rangeElement.step = dataDefinition.range.step;
+          rangeElement.className = 'input';
+          rangeElement.addEventListener('input', () => {
+              valueElement.value = rangeElement.value;
           });
 
           valueElement.addEventListener('input', () => {
@@ -262,15 +301,17 @@ function initializeForm() {
               } else if (parsedValue > maxValue) {
                   parsedValue = maxValue;
               }
-              slider.value = parsedValue;
+              rangeElement.value = parsedValue;
           });
 
           groupDiv.appendChild(valueElement);
-          groupDiv.appendChild(slider);
+          groupDiv.appendChild(rangeElement);
         }
+        else {
+          throw new Error('Unsupported field type ' + field.type);
+        }
+        tabDiv.appendChild(groupDiv);
       }
-
-      tabDiv.appendChild(groupDiv);
     }
 
     tabContent.appendChild(tabDiv);

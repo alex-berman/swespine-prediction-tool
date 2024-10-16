@@ -7,22 +7,23 @@ export const tabs = [
         "header": "Undergrupp",
         "fields": [
           {
-            "name": "diagnosis",
+            "name": "Diagnosis",
             "label": "Diagnosgrupp",
             "type": "select",
             "labels": ["Diskbråck"]
           },
           {
-            "name": "nivaer",
+            "name": "OperatedLevels",
             "label": "Opererade nivåer",
             "type": "radio",
-            "labels": [1, 2, 3, 4, 5]
+            "labels": ["1", "2", "3", "4", "5"]
           },
           {
             "name": "kliniktyp",
+            "label": "Kliniktyp",
             "type": "select",
             "labels": ["Offentlig", "Privat", "Universitetssjukhus"]
-          },
+          }
         ]
       },
       {
@@ -30,28 +31,33 @@ export const tabs = [
         "fields": [
           {
             "name": "AgeAtSurgery",
+            "label": "Ålder",
             "type": "number"
           },
           {
             "name": "Female",
+            "label": "Kön",
             "type": "toggle",
             "labels": ["Kvinna", "Man"]
           },
           {
             "name": "IsUnemployed",
+            "label": "Arbetslös",
             "type": "toggle",
             "labels": ["Ja", "Nej"]
           },
           {
             "name": "HasSickPension",
+            "label": "Sjukpension",
             "type": "toggle",
             "labels": ["Ja, heltid / deltid", "Nej"]
           },
           {
             "name": "HasAgePension",
+            "label": "Ålderspension",
             "type": "toggle",
             "labels": ["Ja, heltid / deltid", "Nej"]
-          },
+          }
         ]
       },
       {
@@ -59,23 +65,27 @@ export const tabs = [
         "fields": [
           {
             "name": "IsSmoker",
+            "label": "Rökare",
             "type": "toggle",
             "labels": ["Ja", "Nej"]
           },
           {
             "name": "IsPreviouslyOperated",
+            "label": "Tidigare ryggopererad",
             "type": "toggle",
             "labels": ["Ja", "Nej"]
           },
           {
             "name": "HasOtherIllness",
+            "label": "Samsjuklighet",
             "type": "toggle",
             "labels": ["Ja", "Nej"]
           },
           {
             "name": "EQ5DIndex",
+            "label": "EQ5D",
             "type": "number"
-          },
+          }
         ]
       }
     ]
@@ -89,19 +99,22 @@ export const tabs = [
         "fields": [
           {
             "name": "AbilityWalking",
+            "label": "Promenadsträcka",
             "type": "select",
             "labels": ["0-100 meter", "100-500 meter", "0,5-1 kilometer", "Mer än 1 kilometer"]
           },
           {
             "name": "DurationLegPain",
+            "label": "Smärtduration i ben",
             "type": "select",
             "labels": ["Ingen smärta", "Mindre än 3 månader", "3 till 12 månader", "1 till 2 år", "Mer än 2 år"]
           },
           {
             "name": "DurationBackPain",
+            "label": "Smärtduration i rygg",
             "type": "select",
             "labels": ["Ingen smärta", "Mindre än 3 månader", "3 till 12 månader", "1 till 2 år", "Mer än 2 år"]
-          },
+          }
         ]
       },
       {
@@ -109,12 +122,14 @@ export const tabs = [
         "fields": [
           {
             "name": "NRSLegPain",
+            "label": "Smärta i ben",
             "type": "number"
           },
           {
             "name": "NRSBackPain",
+            "label": "Smärta i rygg",
             "type": "number"
-          },
+          }
         ]
       },
       {
@@ -122,6 +137,7 @@ export const tabs = [
         "fields": [
           {
             "name": "ODI",
+            "label": "Funktionsnedsättning",
             "type": "number"
           }
         ]
