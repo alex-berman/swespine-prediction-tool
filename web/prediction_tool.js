@@ -300,10 +300,10 @@ function initializeForm() {
 
           valueElement.addEventListener('input', () => {
               let parsedValue = parseFloat(valueElement.value);
-              if (parsedValue < minValue) {
-                  parsedValue = minValue;
-              } else if (parsedValue > maxValue) {
-                  parsedValue = maxValue;
+              if (parsedValue < dataDefinition.range.min) {
+                  parsedValue = dataDefinition.range.min;
+              } else if (parsedValue > dataDefinition.range.max) {
+                  parsedValue = dataDefinition.range.max;
               }
               rangeElement.value = parsedValue;
           });
