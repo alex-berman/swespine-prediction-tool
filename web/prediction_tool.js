@@ -11,8 +11,8 @@ const SATISFACTION_LEVELS = [
 ];
 const SATISFACTION_BINARIZATION_THRESHOLD = 3;
 const SATISFACTION_COLORS = [
-  'rgb(77, 200, 129)',
-  'rgb(243, 126, 119)',
+  [77, 200, 129],
+  [243, 126, 119],
 ];
 const POSITIVE_COLOR = SATISFACTION_COLORS[0];
 
@@ -25,11 +25,11 @@ const OUTCOME_LEVELS = [
 ];
 const OUTCOME_BINARIZATION_THRESHOLD = 2;
 const OUTCOME_COLORS = [
-  'rgb(77, 200, 129)',
-  'rgb(197, 229, 209)',
-  'rgb(255, 234, 118)',
-  'rgb(255, 210, 107)',
-  'rgb(243, 126, 119)',
+  [77, 200, 129],
+  [197, 229, 209],
+  [255, 234, 118],
+  [255, 210, 107],
+  [243, 126, 119],
 ];
 
 const disc_herniation = 0;
@@ -583,7 +583,7 @@ function plotLocalFeatureContributions(id, coefs) {
   const predictedLogOdds = getProductSum(regressorValues, coefs);
   const predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
 
-  var colors = [POSITIVE_COLOR];
+  var colors = [cssColorString(POSITIVE_COLOR)];
   var y = ['Sammanlagd sannolikhet: <b>' + predictedProbPerc + '%</b>'];
   var x = [predictedLogOdds];
   var hovertext = [''];
@@ -605,7 +605,7 @@ function plotLocalFeatureContributions(id, coefs) {
   }
   y.push('Genomsnittlig diskbråckspatient: ' + meanProbPerc + '%');
   x.push(meanLogOdds);
-  colors.push(POSITIVE_COLOR);
+  colors.push(cssColorString(POSITIVE_COLOR));
   hovertext.push('')
 
   const dividers = [
@@ -886,7 +886,7 @@ function plotPieChart(id, values, levels, colors) {
     labels: levels,
     type: 'pie',
     marker: {
-      colors: colors,
+      colors: colors.map(cssColorString),
     },
   }];
 
@@ -917,6 +917,10 @@ function plotPieChart(id, values, levels, colors) {
           responsive: true
       }
     });
+}
+
+function cssColorString(rgbValues) {
+  return `rgb(${rgbValues[0]}, ${rgbValues[1]}, ${rgbValues[2]})`;
 }
 
 export function getValues() {

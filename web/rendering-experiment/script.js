@@ -1,4 +1,4 @@
-function plotFeatureContributions(tableBodyID, initialValue, deltas, ticks, colors, colorSteps) {
+function plotFeatureContributions(containerID, initialValue, deltas, ticks, colors, colorSteps) {
   function generateGradient() {
     var result = 'linear-gradient(to right';
     for(let i = 0; i < colors.length; i++) {
@@ -12,7 +12,9 @@ function plotFeatureContributions(tableBodyID, initialValue, deltas, ticks, colo
 
   const targetValue = initialValue + deltas.reduce((acc, delta) => acc + delta, 0);
   const gradient = generateGradient();
-  const tableBody = document.getElementById(tableBodyID);
+  const container = document.getElementById(containerID);
+  const table = document.createElement('table');
+  table.className = 'localExplanationsTable';
 
   function addAxisTicks() {
     const row = document.createElement('tr');
@@ -53,7 +55,7 @@ function plotFeatureContributions(tableBodyID, initialValue, deltas, ticks, colo
     addTicks(ticks);
 
     row.appendChild(ticksCell);
-    tableBody.appendChild(row);
+    table.appendChild(row);
   }
 
   function addRow(label, value, isProbability) {
@@ -95,16 +97,16 @@ function plotFeatureContributions(tableBodyID, initialValue, deltas, ticks, colo
       }
 
       row.appendChild(contentCell);
-      tableBody.appendChild(row);
+      table.appendChild(row);
   }
 
-  tableBody.innerHTML = '';
   addAxisTicks();
   addRow('Initial Value', initialValue, true);
   deltas.forEach((delta, index) => {
       addRow(`Delta ${index + 1}`, delta, false);
   });
   addRow('Sum', targetValue, true);
+  container.appendChild(table);
 }
 
 function plotOutcomeContributions() {
@@ -120,7 +122,7 @@ function plotOutcomeContributions() {
     0,
     1,
   ];
-  plotFeatureContributions('localExplanationsTableBody_outcome', 0.7, [0.2, -0.15, 0.05], ticks, colors, colorSteps);
+  plotFeatureContributions('localExplanations_outcome', 0.7, [0.2, -0.15, 0.05], ticks, colors, colorSteps);
 }
 
 function plotSatisfactionContributions() {
@@ -145,7 +147,7 @@ function plotSatisfactionContributions() {
     0.7,
     1
   ];
-  plotFeatureContributions('localExplanationsTableBody_satisfaction', 0.7, [0.2, -0.15, 0.05], ticks, colors, colorSteps);
+  plotFeatureContributions('localExplanations_satisfaction', 0.7, [0.2, -0.15, 0.05], ticks, colors, colorSteps);
 }
 
 // Call the function with the initial value and an array of deltas
