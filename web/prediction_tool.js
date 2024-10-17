@@ -5,31 +5,27 @@ import { outcome_disc_herniation_coefs } from "./models/outcome_disc_herniation_
 import { satisfaction_disc_herniation_coefs } from "./models/satisfaction_disc_herniation_coefs.js";
 import { presets } from "./presets.js";
 
-const SATISFACTION_LEVELS = [
-  "Nöjd",
-  "Tveksam eller missnöjd",
-];
 const SATISFACTION_BINARIZATION_THRESHOLD = 3;
 const SATISFACTION_COLORS = [
-  [77, 200, 129],
   [243, 126, 119],
+  [77, 200, 129],
 ];
 const POSITIVE_COLOR = SATISFACTION_COLORS[0];
 
 const OUTCOME_LEVELS = [
-  "Helt försvunnen",
-  "Mycket förbättrad",
-  "Något förbättrad",
-  "Oförändrad",
   "Försämrad",
+  "Oförändrad",
+  "Något förbättrad",
+  "Mycket förbättrad",
+  "Helt försvunnen",
 ];
 const OUTCOME_BINARIZATION_THRESHOLD = 2;
 const OUTCOME_COLORS = [
-  [77, 200, 129],
-  [197, 229, 209],
-  [255, 234, 118],
-  [255, 210, 107],
   [243, 126, 119],
+  [255, 210, 107],
+  [255, 234, 118],
+  [197, 229, 209],
+  [77, 200, 129],
 ];
 
 const disc_herniation = 0;
@@ -75,11 +71,35 @@ export function initializePredictionTool() {
 
   function updatePredictionsAndLocalExplanations() {
     updateLogisticRegressionPrediction('satisfaction', satisfaction_disc_herniation_coefs);
-    plotLocalFeatureContributions('satisfaction', satisfaction_disc_herniation_coefs);
+    plotLocalFeatureContributions(
+      'satisfaction',
+      satisfaction_disc_herniation_coefs,
+      [
+        { text: "Tveksam/missnöjd", align: "left" },
+        { text: "Nöjd", align: "right" },
+      ],
+      SATISFACTION_COLORS,
+      [ 0, 1 ]
+    );
 
     updateOrderedProbitPrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
     plotOrderedProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
-    plotLocalFeatureContributions('outcome', outcome_disc_herniation_coefs);
+    plotLocalFeatureContributions(
+      'outcome',
+      outcome_disc_herniation_coefs,
+      [
+        { text: "Försämrad", align: "left" },
+        { text: "Helt försvunnen", align: "right" },
+      ],
+      OUTCOME_COLORS,
+      [ // Note: Mock values for color steps!
+        0,
+        0.2,
+        0.4,
+        0.7,
+        1
+      ]
+    );
   }
 
   var formElements = document.querySelectorAll("input, select");
@@ -521,16 +541,33 @@ function generateAdjective(isLow, name) {
 
 const sortByValue = (obj) => {
   const entries = Object.entries(obj);
-  entries.sort((a, b) => Math.abs(a[1]) - Math.abs(b[1]));
+  entries.sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
   return Object.fromEntries(entries);
 };
 
-function plotLocalFeatureContributions(id, coefs) {
+function plotLocalFeatureContributions(id, coefs, ticks, colors, colorSteps) {
+  function generateGradient() {
+    var result = 'linear-gradient(to right';
+    for(let i = 0; i < colors.length; i++) {
+      const color = colors[i];
+      result += `, rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.7)`;
+      result += ` ${Math.round(100 * colorSteps[i])}%`;
+    }
+    result += ')';
+    return result;
+  }
+
   const logOddsThreshold = 0.1; // Factors below this log odds delta get grouped under "Other factors"
-  var meanLogOdds = getProductSum(mean_disc_herniation, coefs);
-  var meanProbPerc = Math.round(logOddsToProb(meanLogOdds) * 100);
-  var regressorValues = getRegressorValuesFromForm(coefs);
-  var logOddsDeltas = sortByValue(getProductSumDeltas(mean_disc_herniation, regressorValues, coefs));
+  const meanLogOdds = getProductSum(mean_disc_herniation, coefs);
+  const meanProb = logOddsToProb(meanLogOdds);
+  const regressorValues = getRegressorValuesFromForm(coefs);
+  const logOddsDeltas = sortByValue(getProductSumDeltas(mean_disc_herniation, regressorValues, coefs));
+
+  const gradient = generateGradient();
+  const container = document.getElementById(`featureContributions_${id}`);
+  container.innerHTML = '';
+  const table = document.createElement('table');
+  table.className = 'localExplanationsTable';
 
   function filterLogOddsDeltas(f) {
     return Object.fromEntries(Object.entries(logOddsDeltas).filter(f));
@@ -581,120 +618,85 @@ function plotLocalFeatureContributions(id, coefs) {
   const logOddsDeltasAboveThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) >= logOddsThreshold);
   const logOddsDeltasBelowThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) < logOddsThreshold);
   const predictedLogOdds = getProductSum(regressorValues, coefs);
-  const predictedProbPerc = Math.round(logOddsToProb(predictedLogOdds) * 100);
+  const predictedProb = logOddsToProb(predictedLogOdds);
 
-  var colors = [cssColorString(POSITIVE_COLOR)];
-  var y = ['Sammanlagd sannolikhet: <b>' + predictedProbPerc + '%</b>'];
-  var x = [predictedLogOdds];
-  var hovertext = [''];
+  function addAxisTicks() {
+    const row = document.createElement('tr');
+    const emptyCell = document.createElement('td');
+    row.appendChild(emptyCell);
 
-  if(Object.values(logOddsDeltasBelowThreshold).length > 0) {
-    var delta = Object.values(logOddsDeltasBelowThreshold).reduce((acc, curr) => acc + curr, 0);
-    y.push('Övriga faktorer');
-    x.push(delta);
-    colors.push('#eee');
-    hovertext.push(
-      Object.keys(logOddsDeltasBelowThreshold).map(generateFeatureDescription).join('<br>'));
+    const ticksCell = document.createElement('td');
+    const innerTable = document.createElement('table');
+    innerTable.style.width = '100%';
+    const innerRow = document.createElement('tr');
+    for(const tick of ticks) {
+      const innerCell = document.createElement('td')
+      innerCell.align = tick.align;
+      innerCell.className = 'tick';
+      innerCell.innerHTML = tick.text;
+      innerRow.appendChild(innerCell);
+    }
+    innerTable.appendChild(innerRow);
+    ticksCell.appendChild(innerTable);
+    row.appendChild(ticksCell);
+    table.appendChild(row);
   }
+
+  function addRow(label, value, isProbability) {
+      const row = document.createElement('tr');
+      const labelCell = document.createElement('td');
+      labelCell.className = 'labelCell';
+      labelCell.textContent = label;
+      row.appendChild(labelCell);
+      const contentCell = document.createElement('td');
+      contentCell.className = 'contentCell';
+
+      if (isProbability) {
+          contentCell.style.background = gradient;
+          const valueDiv = document.createElement('div');
+          valueDiv.className = 'probabilityMarker';
+          const relativeWidth = 0.1;
+          valueDiv.style.width = `${Math.round(relativeWidth * 100)}%`;
+          valueDiv.style.position = 'relative';
+          valueDiv.style.left = `${Math.round(value * (1 - relativeWidth) * 100)}%`;
+          valueDiv.innerHTML = `${Math.round(value * 100)}%`;
+          contentCell.appendChild(valueDiv);
+      } else {
+        const line = document.createElement('div');
+        line.className = 'verticalLine';
+        contentCell.appendChild(line);
+
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        const containerWidth = 400;
+        const halfWidth = containerWidth / 2;
+        const barWidth = Math.abs(value) * halfWidth;
+        bar.style.width = `${barWidth}px`;
+        if(value < 0) {
+          bar.style.left = `${halfWidth - barWidth}px`;
+        } else {
+          bar.style.left = `${halfWidth}px`;
+        }
+        contentCell.appendChild(bar);
+      }
+
+      row.appendChild(contentCell);
+      table.appendChild(row);
+  }
+
+  addAxisTicks();
+  addRow('Genomsnittlig diskbråckspatient', meanProb, true);
   for(const regressor in logOddsDeltasAboveThreshold) {
-    var delta = logOddsDeltas[regressor];
-    y.push(generateFeatureDescription(regressor));
-    x.push(delta);
-    colors.push('#eee');
-    hovertext.push('')
+    const delta = logOddsDeltas[regressor];
+    addRow(generateFeatureDescription(regressor), delta, false)
   }
-  y.push('Genomsnittlig diskbråckspatient: ' + meanProbPerc + '%');
-  x.push(meanLogOdds);
-  colors.push(cssColorString(POSITIVE_COLOR));
-  hovertext.push('')
-
-  const dividers = [
-    {
-      type: 'line',
-      x0: 0,
-      x1: 0,
-      y0: 0,
-      y1: 1,
-      xref: 'x',
-      yref: 'paper',
-      line: {
-        color: 'black',
-        width: 1
-      },
-      layer: 'below'
-    },
-    {
-      type: 'line',
-      x0: -2,
-      y0: 0.5,
-      x1: 2,
-      y1: 0.5,
-      yref: 'y',
-      xref: 'paper',
-      line: {
-        color: 'lightgray',
-        width: 1
-      }
-    }
-  ];
-  if(y.length > 2) {
-    dividers.push(
-      {
-        type: 'line',
-        x0: -2,
-        y0: y.length - 2 + 0.5,
-        x1: 2,
-        y1: y.length - 2 + 0.5,
-        yref: 'y',
-        xref: 'paper',
-        line: {
-          color: 'lightgray',
-          width: 1
-        }
-      }
-    )
+  if(Object.values(logOddsDeltasBelowThreshold).length > 0) {
+    const delta = Object.values(logOddsDeltasBelowThreshold).reduce((acc, curr) => acc + curr, 0);
+    addRow('Övriga faktorer', delta, false)
+    // Previously shown on hover: Object.keys(logOddsDeltasBelowThreshold).map(generateFeatureDescription).join('<br>')
   }
-  Plotly.newPlot(`featureContributions_${id}`, {
-    data: [{
-      y: y,
-      x: x,
-      type: 'bar',
-      orientation: 'h',
-      hovertext: hovertext,
-      hoverinfo: 'text',
-      hoverlabel: {
-        bgcolor: 'lightgray',
-        bordercolor: 'black',
-      },
-      marker: {
-        color: colors,
-        line: {
-          width: 2.5
-        }
-      }
-    }],
-    layout: {
-        shapes: dividers,
-        margin: {
-            t: 50,
-            b: 20,
-            l: 250,
-            r: 50
-        },
-        width: 500,
-        xaxis: {
-          showgrid: true,
-          zeroline: true,
-          visible: false,
-          range: [probToLogOdds(0.05), probToLogOdds(0.95)],
-        },
-        showlegend: false
-    },
-    config: {
-        displayModeBar: false,
-        responsive: true
-    }
-  });
+  addRow('Sammanlagd sannolikhet', predictedProb, true);
+  container.appendChild(table);
 }
 
 function formElementRangeSize(name) {

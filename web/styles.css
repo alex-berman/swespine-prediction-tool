@@ -141,6 +141,9 @@ body {
   font-weight: bold;
 }
 
+h3 {
+}
+
 .header-container {
   display: flex;
   align-items: center;
@@ -178,4 +181,57 @@ body {
   padding: 10px;
   vertical-align: top;
   text-align: left;
+}
+
+td {
+  padding: 0;
+}
+
+.localExplanationsTable {
+    width: 600px;
+    border-collapse: collapse;
+}
+
+.tick {
+    font-size: x-small;
+}
+
+.labelCell {
+    height: 30px;
+    vertical-align: left;
+    width: 200px;
+    font-size: small;
+}
+
+.contentCell {
+    width: 400px;
+    position: relative;
+    text-align: center;
+}
+
+.probabilityMarker {
+    height: 30px;
+    background: #eee8;
+    border: 1px solid white;
+    font-size: small;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.verticalLine {
+  position: absolute;
+  height: 100%;
+  width: 1px;
+  background-color: #ccc;
+  top: 0px;
+  left: 50%; /* Middle line at 50% of container */
+}
+
+.bar {
+  position: absolute;
+  height: 20px;
+  top: calc(50% - 10px); /* Center vertically */
+  background-color: #eee;
+  border: 1px solid #ccc;
 }
