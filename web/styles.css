@@ -223,15 +223,14 @@ td {
   position: absolute;
   height: 100%;
   width: 1px;
-  background-color: #ccc;
+  background-color: #ddd;
   top: 0px;
-  left: 50%; /* Middle line at 50% of container */
+  left: 50%;
 }
 
 .bar {
   position: absolute;
   height: 20px;
-  top: calc(50% - 10px); /* Center vertically */
-  background-color: #eee;
-  border: 1px solid #ccc;
+  top: calc(50% - 10px);
+  background-color: #ddd;
 }
