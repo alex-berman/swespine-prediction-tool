@@ -5,7 +5,7 @@ export const outcome_disc_herniation_coefs = {
       1.10661659309414,
       2.24957715814063,
       2.87950171782969,
-      3.35447893227348
+      3.35447893227348,
     ],
     "AgeAtSurgery": 0.00175642679228849,
     "HasOtherIllness": [

@@ -40,3 +40,6 @@ function linearPrediction(coefs, featureValues) {
   return result;
 }
 
+function linearPredictionGivenThresholdAndProbability(threshold, probability) {
+  return threshold - jStat.normal.inv(probability, 0, 1);
+}

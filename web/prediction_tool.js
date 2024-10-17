@@ -5,7 +5,10 @@ import { outcome_disc_herniation_coefs } from "./models/outcome_disc_herniation_
 import { satisfaction_disc_herniation_coefs } from "./models/satisfaction_disc_herniation_coefs.js";
 import { presets } from "./presets.js";
 
-const SATISFACTION_BINARIZATION_THRESHOLD = 3;
+const SATISFACTION_LEVELS = [
+  "Tveksam/missnöjd",
+  "Nöjd",
+];
 const SATISFACTION_COLORS = [
   [243, 126, 119],
   [77, 200, 129],
@@ -71,35 +74,13 @@ export function initializePredictionTool() {
 
   function updatePredictionsAndLocalExplanations() {
     updateLogisticRegressionPrediction('satisfaction', satisfaction_disc_herniation_coefs);
-    plotLocalFeatureContributions(
-      'satisfaction',
-      satisfaction_disc_herniation_coefs,
-      [
-        { text: "Tveksam/missnöjd", align: "left" },
-        { text: "Nöjd", align: "right" },
-      ],
-      SATISFACTION_COLORS,
-      [ 0, 1 ]
-    );
+    updateLogisticRegressionExplanation(
+      'satisfaction', satisfaction_disc_herniation_coefs, SATISFACTION_LEVELS, SATISFACTION_COLORS);
 
     updateOrderedProbitPrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
     plotOrderedProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
-    plotLocalFeatureContributions(
-      'outcome',
-      outcome_disc_herniation_coefs,
-      [
-        { text: "Försämrad", align: "left" },
-        { text: "Helt försvunnen", align: "right" },
-      ],
-      OUTCOME_COLORS,
-      [ // Note: Mock values for color steps!
-        0,
-        0.2,
-        0.4,
-        0.7,
-        1
-      ]
-    );
+    updateOrderedProbitExplanation(
+      'outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
   }
 
   var formElements = document.querySelectorAll("input, select");
@@ -414,6 +395,10 @@ function updateLogisticRegressionPrediction(id, coefs) {
   updatePrediction(id, percs[0]);
 }
 
+function updateLogisticRegressionExplanation(id, coefs, levels, colors) {
+  plotLocalFeatureContributions(id, coefs, levels, colors, [0, 1]);
+}
+
 function updateOrderedProbitPrediction(id, coefs, binarizationThreshold) {
   const probs = getOrderedProbitProbabilities(coefs);
 
@@ -430,6 +415,27 @@ function getOrderedProbitProbabilities(coefs) {
   const productSum = getProductSum(regressorValues, coefs);
   const thresholds = [-Infinity, ...coefs.Thresholds, Infinity];
   return probabilitiesGivenLatentVariableAndThresholds(productSum, thresholds);
+}
+
+function updateOrderedProbitExplanation(id, coefs, levels, colors) {
+  const minProb = 0.001;
+  const maxProb = 0.999;
+  const minProductSum = linearPredictionGivenThresholdAndProbability(
+    coefs.Thresholds[0], minProb);
+  const maxProductSum = linearPredictionGivenThresholdAndProbability(
+    coefs.Thresholds[coefs.Thresholds.length - 1], maxProb);
+
+  function toRelativePosition(threshold) {
+    return (threshold - minProductSum) / (maxProductSum - minProductSum);
+  }
+
+  plotLocalFeatureContributions(
+    id,
+    coefs,
+    levels,
+    colors,
+    [0, ...coefs.Thresholds.reverse().map(toRelativePosition), 1]
+  );
 }
 
 function updatePrediction(id, perc) {
@@ -545,7 +551,7 @@ const sortByValue = (obj) => {
   return Object.fromEntries(entries);
 };
 
-function plotLocalFeatureContributions(id, coefs, ticks, colors, colorSteps) {
+function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps) {
   function generateGradient() {
     var result = 'linear-gradient(to right';
     for(let i = 0; i < colors.length; i++) {
@@ -629,13 +635,19 @@ function plotLocalFeatureContributions(id, coefs, ticks, colors, colorSteps) {
     const innerTable = document.createElement('table');
     innerTable.style.width = '100%';
     const innerRow = document.createElement('tr');
-    for(const tick of ticks) {
-      const innerCell = document.createElement('td')
-      innerCell.align = tick.align;
-      innerCell.className = 'tick';
-      innerCell.innerHTML = tick.text;
-      innerRow.appendChild(innerCell);
-    }
+
+    const leftCell = document.createElement('td')
+    leftCell.align = 'left';
+    leftCell.className = 'tick';
+    leftCell.innerHTML = levels[0];
+    innerRow.appendChild(leftCell);
+
+    const rightCell = document.createElement('td')
+    rightCell.align = 'right';
+    rightCell.className = 'tick';
+    rightCell.innerHTML = levels[levels.length - 1];
+    innerRow.appendChild(rightCell);
+
     innerTable.appendChild(innerRow);
     ticksCell.appendChild(innerTable);
     row.appendChild(ticksCell);
