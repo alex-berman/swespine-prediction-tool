@@ -23,17 +23,20 @@ export const satisfaction_disc_herniation_coefs = {
         -0.36066
     ],
     "AbilityWalking": [
+        0,
         -0.08214,
         -0.09474,
         0.0296
     ],
     "DurationBackPain": [
+        0,
         0.60621,
         0.39161,
         -0.01405,
         0.04897
     ],
     "DurationLegPain": [
+        0,
         -0.33736,
         -0.35186,
         -0.52956,

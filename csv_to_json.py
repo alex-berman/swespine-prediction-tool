@@ -23,6 +23,9 @@ def csv_to_js(csv_file_path, js_file_path):
         js_file.write(';')
 
 if __name__ == "__main__":
+    raise Exception("It is not recommended to use this script since it treats nominal features differently "
+                    "than the actual tool expects. Specifically, it does not add a zero-valued regressor for "
+                    "the first level, which the tool expects.")
     if len(sys.argv) != 3 and len(sys.argv) != 4:
         print("Usage: python csv_to_js.py <input_csv_file> <output_js_file>")
         sys.exit(1)

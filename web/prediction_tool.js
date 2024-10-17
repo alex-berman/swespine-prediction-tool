@@ -16,19 +16,18 @@ const SATISFACTION_COLORS = [
 const POSITIVE_COLOR = SATISFACTION_COLORS[0];
 
 const OUTCOME_LEVELS = [
-  "Försämrad",
-  "Oförändrad",
-  "Något förbättrad",
-  "Mycket förbättrad",
   "Helt försvunnen",
+  "Mycket förbättrad",
+  "Något förbättrad",
+  "Oförändrad",
+  "Försämrad",
 ];
-const OUTCOME_BINARIZATION_THRESHOLD = 2;
 const OUTCOME_COLORS = [
-  [243, 126, 119],
-  [255, 210, 107],
-  [255, 234, 118],
-  [197, 229, 209],
   [77, 200, 129],
+  [197, 229, 209],
+  [255, 234, 118],
+  [255, 210, 107],
+  [243, 126, 119],
 ];
 
 const disc_herniation = 0;
@@ -77,7 +76,7 @@ export function initializePredictionTool() {
     updateLogisticRegressionExplanation(
       'satisfaction', satisfaction_disc_herniation_coefs, SATISFACTION_LEVELS, SATISFACTION_COLORS);
 
-    updateOrderedProbitPrediction('outcome', outcome_disc_herniation_coefs, OUTCOME_BINARIZATION_THRESHOLD);
+    updateOrderedProbitPrediction('outcome', outcome_disc_herniation_coefs);
     plotOrderedProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
     updateOrderedProbitExplanation(
       'outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
@@ -341,7 +340,7 @@ function getNominalValuesFromForm(varName, n) {
   }
   else if(n > 1) {
     var element = document.getElementById(varName);
-    return range(n).map(function(i) { return element.options[i + 1].selected ? 1 : 0; })
+    return range(n).map(function(i) { return element.options[i].selected ? 1 : 0; })
   }
 }
 
@@ -361,25 +360,37 @@ function getRegressorValuesFromForm(coefs) {
   return result;
 }
 
-function getProductSum(regressorValues, coefs) {
+function getProductSum(regressorValues, coefs, log) {
   var result = 0;
   for(const key in coefs) {
-    var coef = coefs[key];
-    if(key == 'Intercept') {
-      result += coef[0];
+    const coef = coefs[key];
+    const delta = getDelta(key, regressorValues, coef);
+    if(log) {
+      console.log(`delta for ${key}: ${delta}`);
     }
-    else if(key != 'Thresholds') {
-      if(Array.isArray(coef)) {
-        for(var i = 0; i < coef.length; i++) {
-          result += coef[i] * regressorValues[key][i];
-        }
-      }
-      else {
-        result += coef * regressorValues[key];
-      }
+    if(delta) {
+      result += delta;
     }
   }
   return result;
+}
+
+function getDelta(key, regressorValues, coef) {
+  if(key == 'Intercept') {
+    return coef[0];
+  }
+  else if(key != 'Thresholds') {
+    if(Array.isArray(coef)) {
+      var result = 0;
+      for(let i = 0; i < coef.length; i++) {
+        result += coef[i] * regressorValues[key][i];
+      }
+      return result;
+    }
+    else {
+      return coef * regressorValues[key];
+    }
+  }
 }
 
 function logOddsToProb(logOdds) {
@@ -396,23 +407,26 @@ function updateLogisticRegressionPrediction(id, coefs) {
 }
 
 function updateLogisticRegressionExplanation(id, coefs, levels, colors) {
-  plotLocalFeatureContributions(id, coefs, levels, colors, [0, 1]);
+  plotLocalFeatureContributions(id, coefs, levels, colors, [0, 1], logOddsToProb, 'positive');
 }
 
-function updateOrderedProbitPrediction(id, coefs, binarizationThreshold) {
-  const probs = getOrderedProbitProbabilities(coefs);
-
-  var positiveProbability = 0;
-  for(var y = 0; y < binarizationThreshold; y++) {
-    positiveProbability += probs[y];
-  }
-
+function updateOrderedProbitPrediction(id, coefs) {
+  const regressorValues = getRegressorValuesFromForm(coefs);
+  console.log('updateOrderedProbitPrediction: regressor values: '); console.log(regressorValues);
+  console.log('calculating product sum for ordered probit');
+  const productSum = getProductSum(regressorValues, coefs);
+  const positiveProbability = orderedProbitProbabilityOfPositiveOutcome(coefs, productSum);
   updatePrediction(id, Math.round(positiveProbability * 100));
 }
 
-function getOrderedProbitProbabilities(coefs) {
-  const regressorValues = getRegressorValuesFromForm(coefs);
-  const productSum = getProductSum(regressorValues, coefs);
+function orderedProbitProbabilityOfPositiveOutcome(coefs, productSum) {
+  const probs = getOrderedProbitProbabilities(coefs, productSum);
+  console.log('orderedProbitProbabilityOfPositiveOutcome: productSum='); console.log(productSum);
+  console.log('orderedProbitProbabilityOfPositiveOutcome: probs='); console.log(probs);
+  return probs[0] + probs[1]; // Helt försvunnen + Mycket förbättrad
+}
+
+function getOrderedProbitProbabilities(coefs, productSum) {
   const thresholds = [-Infinity, ...coefs.Thresholds, Infinity];
   return probabilitiesGivenLatentVariableAndThresholds(productSum, thresholds);
 }
@@ -429,12 +443,18 @@ function updateOrderedProbitExplanation(id, coefs, levels, colors) {
     return (threshold - minProductSum) / (maxProductSum - minProductSum);
   }
 
+  function probabilityOfPositiveOutcome(productSum) {
+    return orderedProbitProbabilityOfPositiveOutcome(coefs, productSum);
+  }
+
   plotLocalFeatureContributions(
     id,
     coefs,
     levels,
     colors,
-    [0, ...coefs.Thresholds.reverse().map(toRelativePosition), 1]
+    [0, ...coefs.Thresholds.toReversed().map(toRelativePosition), 1],
+    probabilityOfPositiveOutcome,
+    'negative'
   );
 }
 
@@ -475,7 +495,7 @@ function getProductSumDeltas(reference, comparison, coefs) {
     if(key != 'Intercept' && key != 'Thresholds') {
       var coef = coefs[key];
       if(Array.isArray(coef)) {
-        for(var i = 0; i < coef.length; i++) {
+        for(let i = 0; i < coef.length; i++) {
           delta += coef[i] * (comparison[key][i] - reference[key][i]);
         }
       }
@@ -551,9 +571,9 @@ const sortByValue = (obj) => {
   return Object.fromEntries(entries);
 };
 
-function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps) {
+function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, productSumToProbability, polarity) {
   function generateGradient() {
-    var result = 'linear-gradient(to right';
+    var result = 'linear-gradient(to ' + (polarity == 'positive' ? 'right' : 'left');
     for(let i = 0; i < colors.length; i++) {
       const color = colors[i];
       result += `, rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.7)`;
@@ -563,11 +583,11 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps) {
     return result;
   }
 
-  const logOddsThreshold = 0.1; // Factors below this log odds delta get grouped under "Other factors"
-  const meanLogOdds = getProductSum(mean_disc_herniation, coefs);
-  const meanProb = logOddsToProb(meanLogOdds);
+  const deltaThreshold = 0.1; // Factors below this threshold get grouped under "Other factors"
+  const meanProductSum = getProductSum(mean_disc_herniation, coefs);
+  const meanProb = productSumToProbability(meanProductSum);
   const regressorValues = getRegressorValuesFromForm(coefs);
-  const logOddsDeltas = sortByValue(getProductSumDeltas(mean_disc_herniation, regressorValues, coefs));
+  const deltas = sortByValue(getProductSumDeltas(mean_disc_herniation, regressorValues, coefs));
 
   const gradient = generateGradient();
   const container = document.getElementById(`featureContributions_${id}`);
@@ -575,12 +595,12 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps) {
   const table = document.createElement('table');
   table.className = 'localExplanationsTable';
 
-  function filterLogOddsDeltas(f) {
-    return Object.fromEntries(Object.entries(logOddsDeltas).filter(f));
+  function filterDeltas(f) {
+    return Object.fromEntries(Object.entries(deltas).filter(f));
   }
 
   function generateFeatureDescription(regressor) {
-    const delta = logOddsDeltas[regressor];
+    const delta = deltas[regressor];
     const coef = coefs[regressor];
     if(Array.isArray(coef)) {
       if(coef.length == 1) {
@@ -605,26 +625,27 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps) {
       }
     }
     else {
-      const logOddsDelta = delta / coef;
       if(regressor == 'AgeAtSurgery') {
-        return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + ' ålder';
+        return 'Relativt ' + (delta < 0 ? 'låg' : 'hög') + ' ålder';
       }
       if(regressor == 'EQ5DIndex') {
-        return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + ' EQ5D';
+        return 'Relativt ' + (delta < 0 ? 'låg' : 'hög') + ' EQ5D';
       }
       if(regressor == 'ODI') {
-        return 'Relativt ' + (logOddsDelta < 0 ? 'låg' : 'hög') + ' funktionsnedsättning';
+        return 'Relativt ' + (delta < 0 ? 'låg' : 'hög') + ' funktionsnedsättning';
       }
       if(regressor == 'NRSBackPain') {
-        return 'Relativt ' + (logOddsDelta < 0 ? 'lite' : 'mycket') + ' ryggsmärta';
+        return 'Relativt ' + (delta < 0 ? 'lite' : 'mycket') + ' ryggsmärta';
       }
     }
   }
 
-  const logOddsDeltasAboveThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) >= logOddsThreshold);
-  const logOddsDeltasBelowThreshold = filterLogOddsDeltas(([_, x]) => Math.abs(x) < logOddsThreshold);
-  const predictedLogOdds = getProductSum(regressorValues, coefs);
-  const predictedProb = logOddsToProb(predictedLogOdds);
+  const deltasAboveThreshold = filterDeltas(([_, x]) => Math.abs(x) >= deltaThreshold);
+  const deltasBelowThreshold = filterDeltas(([_, x]) => Math.abs(x) < deltaThreshold);
+  const productSum = getProductSum(regressorValues, coefs);
+  console.log('plotLocalFeatureContributions: productSum=' + productSum);
+  const predictedProb = productSumToProbability(productSum);
+  console.log('plotLocalFeatureContributions: predictedProb=' + predictedProb);
 
   function addAxisTicks() {
     const row = document.createElement('tr');
@@ -639,13 +660,13 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps) {
     const leftCell = document.createElement('td')
     leftCell.align = 'left';
     leftCell.className = 'tick';
-    leftCell.innerHTML = levels[0];
+    leftCell.innerHTML = levels[polarity == 'positive' ? 0 : levels.length - 1];
     innerRow.appendChild(leftCell);
 
     const rightCell = document.createElement('td')
     rightCell.align = 'right';
     rightCell.className = 'tick';
-    rightCell.innerHTML = levels[levels.length - 1];
+    rightCell.innerHTML = levels[polarity == 'positive' ? levels.length - 1 : 0];
     innerRow.appendChild(rightCell);
 
     innerTable.appendChild(innerRow);
@@ -684,7 +705,7 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps) {
         const halfWidth = containerWidth / 2;
         const barWidth = Math.abs(value) * halfWidth;
         bar.style.width = `${barWidth}px`;
-        if(value < 0) {
+        if(value < 0 && polarity == 'positive' || value >= 0 && polarity == 'negative') {
           bar.style.left = `${halfWidth - barWidth}px`;
         } else {
           bar.style.left = `${halfWidth}px`;
@@ -698,14 +719,14 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps) {
 
   addAxisTicks();
   addRow('Genomsnittlig diskbråckspatient', meanProb, true);
-  for(const regressor in logOddsDeltasAboveThreshold) {
-    const delta = logOddsDeltas[regressor];
+  for(const regressor in deltasAboveThreshold) {
+    const delta = deltas[regressor];
     addRow(generateFeatureDescription(regressor), delta, false)
   }
-  if(Object.values(logOddsDeltasBelowThreshold).length > 0) {
-    const delta = Object.values(logOddsDeltasBelowThreshold).reduce((acc, curr) => acc + curr, 0);
+  if(Object.values(deltasBelowThreshold).length > 0) {
+    const delta = Object.values(deltasBelowThreshold).reduce((acc, curr) => acc + curr, 0);
     addRow('Övriga faktorer', delta, false)
-    // Previously shown on hover: Object.keys(logOddsDeltasBelowThreshold).map(generateFeatureDescription).join('<br>')
+    // Previously shown on hover: Object.keys(deltasBelowThreshold).map(generateFeatureDescription).join('<br>')
   }
   addRow('Sammanlagd sannolikhet', predictedProb, true);
   container.appendChild(table);
@@ -757,14 +778,14 @@ function generateGlobalExplanationTable(id, coefs, maxSlope) {
   }
 
   function getIndexOfMaxCoef(name) {
-    let coefsToCompare = [0].concat(coefs[name]);
+    let coefsToCompare = coefs[name];
     return coefsToCompare.reduce((maxIndex, currentValue, currentIndex, array) => {
       return currentValue * slopePolarity > array[maxIndex] * slopePolarity ? currentIndex : maxIndex;
     }, 0);
   }
 
   function getIndexOfMinCoef(name) {
-    let coefsToCompare = [0].concat(coefs[name]);
+    let coefsToCompare = coefs[name];
     return coefsToCompare.reduce((maxIndex, currentValue, currentIndex, array) => {
       return currentValue * slopePolarity < array[maxIndex] * slopePolarity ? currentIndex : maxIndex;
     }, 0);
@@ -876,8 +897,11 @@ function generateGlobalExplanationTable(id, coefs, maxSlope) {
 }
 
 function plotOrderedProbabilitiesPieChart(id, coefs, levels, colors) {
-  const probs = getOrderedProbitProbabilities(coefs);
-  console.log(probs);
+  const regressorValues = getRegressorValuesFromForm(coefs);
+  const productSum = getProductSum(regressorValues, coefs, true);
+  console.log('product sum for ordered probabilities: ' + productSum);
+  const probs = getOrderedProbitProbabilities(coefs, productSum);
+  console.log('probabilities:'); console.log(probs);
   const values = probs.map((prob, _) => Math.round(prob * 100));
   plotPieChart(id, values, levels, colors);
 }
