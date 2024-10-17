@@ -39,4 +39,24 @@ export const presets = {
       "NRSBackPain":8,
       "ODI":28
    },
+   "positive_example_disc_herniation": {
+      "Diagnosis":0,
+      "OperatedLevels":0,
+      "kliniktyp":0,
+      "AgeAtSurgery":60,
+      "Female":1,
+      "IsUnemployed":0,
+      "HasSickPension":1,
+      "HasAgePension":0,
+      "IsSmoker":0,
+      "IsPreviouslyOperated":0,
+      "HasOtherIllness":0,
+      "EQ5DIndex":0.69,
+      "AbilityWalking":1,
+      "DurationLegPain":0,
+      "DurationBackPain":0,
+      "NRSLegPain":7,
+      "NRSBackPain":8,
+      "ODI":28
+   }
 }
