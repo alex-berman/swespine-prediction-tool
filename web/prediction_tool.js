@@ -587,7 +587,7 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
   const meanProductSum = getProductSum(mean_disc_herniation, coefs);
   const meanProb = productSumToProbability(meanProductSum);
   const regressorValues = getRegressorValuesFromForm(coefs);
-  const deltas = sortByValue(getProductSumDeltas(mean_disc_herniation, regressorValues, coefs));
+  const deltas = getProductSumDeltas(mean_disc_herniation, regressorValues, coefs);
 
   const gradient = generateGradient();
   const container = document.getElementById(`featureContributions_${id}`);
@@ -595,7 +595,7 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
   const table = document.createElement('table');
   table.className = 'localExplanationsTable';
 
-  function filterDeltas(f) {
+  function filterDeltas(deltas, f) {
     return Object.fromEntries(Object.entries(deltas).filter(f));
   }
 
@@ -640,13 +640,6 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
     }
   }
 
-  const deltasAboveThreshold = filterDeltas(([_, x]) => Math.abs(x) >= deltaThreshold);
-  const deltasBelowThreshold = filterDeltas(([_, x]) => Math.abs(x) < deltaThreshold);
-  const productSum = getProductSum(regressorValues, coefs);
-  console.log('plotLocalFeatureContributions: productSum=' + productSum);
-  const predictedProb = productSumToProbability(productSum);
-  console.log('plotLocalFeatureContributions: predictedProb=' + predictedProb);
-
   function addAxisTicks() {
     const row = document.createElement('tr');
     const emptyCell = document.createElement('td');
@@ -675,11 +668,28 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
     table.appendChild(row);
   }
 
-  function addRow(label, value, isProbability) {
+  function addHeader(header) {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.className = 'featureContributionsHeader';
+    cell.innerHTML = header + ':';
+    row.appendChild(cell);
+
+    const contentCell = document.createElement('td');
+    contentCell.className = 'contentCell';
+    const line = document.createElement('div');
+    line.className = 'verticalLine';
+    contentCell.appendChild(line);
+    row.appendChild(contentCell);
+
+    table.appendChild(row);
+  }
+  
+  function addRow(label, value, labelClass, isProbability) {
       const row = document.createElement('tr');
       const labelCell = document.createElement('td');
-      labelCell.className = 'labelCell';
-      labelCell.textContent = label;
+      labelCell.className = labelClass;
+      labelCell.innerHTML = label;
       row.appendChild(labelCell);
       const contentCell = document.createElement('td');
       contentCell.className = 'contentCell';
@@ -717,18 +727,37 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
       table.appendChild(row);
   }
 
+  function addPotentialSection(deltas, header) {
+    if(Object.values(deltas).length > 0) {
+      addHeader(header);
+      const deltasAboveThreshold = filterDeltas(deltas, ([_, x]) => Math.abs(x) >= deltaThreshold);
+      const deltasBelowThreshold = filterDeltas(deltas, ([_, x]) => Math.abs(x) < deltaThreshold);
+      for(const regressor in deltasAboveThreshold) {
+        const delta = deltas[regressor];
+        addRow(generateFeatureDescription(regressor), delta, 'featureLabel', false)
+      }
+      if(Object.values(deltasBelowThreshold).length > 0) {
+        const delta = Object.values(deltasBelowThreshold).reduce((acc, curr) => acc + curr, 0);
+        addRow('Övriga faktorer', delta, 'featureLabel', false);
+      }
+    }
+  }
+
   addAxisTicks();
-  addRow('Genomsnittlig diskbråckspatient', meanProb, true);
-  for(const regressor in deltasAboveThreshold) {
-    const delta = deltas[regressor];
-    addRow(generateFeatureDescription(regressor), delta, false)
-  }
-  if(Object.values(deltasBelowThreshold).length > 0) {
-    const delta = Object.values(deltasBelowThreshold).reduce((acc, curr) => acc + curr, 0);
-    addRow('Övriga faktorer', delta, false)
-    // Previously shown on hover: Object.keys(deltasBelowThreshold).map(generateFeatureDescription).join('<br>')
-  }
-  addRow('Sammanlagd sannolikhet', predictedProb, true);
+  addRow('Genomsnittlig diskbråckspatient', meanProb, 'nonFeatureLabel', true);
+  const positiveDeltas = filterDeltas(deltas, ([_, x]) =>
+    (polarity == 'positive' && x >= 0) || (polarity == 'negative' && x < 0));
+  const negativeDeltas = filterDeltas(deltas, ([_, x]) =>
+    (polarity == 'positive' && x < 0) || (polarity == 'negative' && x >= 0));
+  addPotentialSection(positiveDeltas, 'Positiva faktorer');
+  addPotentialSection(negativeDeltas, 'Negativa faktorer');
+
+  const productSum = getProductSum(regressorValues, coefs);
+  console.log('plotLocalFeatureContributions: productSum=' + productSum);
+  const predictedProb = productSumToProbability(productSum);
+  console.log('plotLocalFeatureContributions: predictedProb=' + predictedProb);
+
+  addRow('Sammanlagd sannolikhet', predictedProb, 'nonFeatureLabel', true);
   container.appendChild(table);
 }
 
@@ -887,8 +916,8 @@ function generateGlobalExplanationTable(id, coefs, maxSlope) {
   items.sort((a, b) => b.coefMagnitude - a.coefMagnitude);
   for(const item of items) {
     content += '<tr>';
-    content += '<td class="tableHeader">' + item.header + '</td>';
-    content += '<td class="tableContent">' + item.cellContent + '</td>';
+    content += '<td class="globalExplanationsTableHeader">' + item.header + '</td>';
+    content += '<td class="globalExplanationsTableContent">' + item.cellContent + '</td>';
     content += '</tr>';
   }
   content += '</table>';

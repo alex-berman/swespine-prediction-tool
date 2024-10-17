@@ -170,14 +170,14 @@ h3 {
     transition: max-height 0.1s ease-out;
 }
 
-.tableHeader {
+.globalExplanationsTableHeader {
   padding: 10px;
   font-weight: bold;
   vertical-align: top;
   text-align: left;
 }
 
-.tableContent {
+.globalExplanationsTableContent {
   padding: 10px;
   vertical-align: top;
   text-align: left;
@@ -209,6 +209,17 @@ td {
     text-align: center;
 }
 
+.featureLabel {
+  font-size: small;
+  padding-left: 10px;
+  height: 30px;
+}
+
+.nonFeatureLabel {
+  font-size: small;
+  height: 30px;
+}
+
 .probabilityMarker {
     height: 30px;
     background: #eee8;
@@ -233,4 +244,9 @@ td {
   height: 20px;
   top: calc(50% - 10px);
   background-color: #ddd;
+}
+
+.featureContributionsHeader {
+  font-size: small;
+  padding-top: 20px;
 }
