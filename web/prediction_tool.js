@@ -612,7 +612,6 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
     return result;
   }
 
-  const deltaThreshold = 0.005; // Factors below this threshold get grouped under "Other factors"
   const meanProductSum = getProductSum(mean_disc_herniation, coefs);
   const meanProb = productSumToProbability(meanProductSum);
   const regressorValues = getRegressorValues(coefs);
@@ -767,16 +766,23 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
   }
 
   function addPotentialSection(deltas, header) {
-    if(Object.values(deltas).length > 0) {
+    const numDeltas = Object.values(deltas).length;
+    const maxShownDeltas = 5;
+    if(numDeltas > 0) {
+      const sortedDeltas = sortByValue(deltas);
+      const shownDeltas = Object.fromEntries(
+        Object.entries(sortedDeltas).slice(0, maxShownDeltas)
+      );
       addHeader(header);
-      const deltasAboveThreshold = filterDeltas(deltas, ([_, x]) => Math.abs(x) >= deltaThreshold);
-      const deltasBelowThreshold = filterDeltas(deltas, ([_, x]) => Math.abs(x) < deltaThreshold);
-      for(const regressor in sortByValue(deltasAboveThreshold)) {
-        const delta = deltas[regressor];
+      for(const regressor in shownDeltas) {
+        const delta = shownDeltas[regressor];
         addRow(generateFeatureDescription(regressor), delta, 'featureLabel', 'delta')
       }
-      if(Object.values(deltasBelowThreshold).length > 0) {
-        const delta = Object.values(deltasBelowThreshold).reduce((acc, curr) => acc + curr, 0);
+      if(numDeltas > maxShownDeltas) {
+        const notShownDeltas = Object.fromEntries(
+          Object.entries(sortedDeltas).slice(maxShownDeltas)
+        );
+        const delta = Object.values(notShownDeltas).reduce((acc, curr) => acc + curr, 0);
         addRow('Övriga faktorer', delta, 'featureLabel', 'delta');
       }
     }
