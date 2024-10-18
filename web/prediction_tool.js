@@ -771,7 +771,7 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
       addHeader(header);
       const deltasAboveThreshold = filterDeltas(deltas, ([_, x]) => Math.abs(x) >= deltaThreshold);
       const deltasBelowThreshold = filterDeltas(deltas, ([_, x]) => Math.abs(x) < deltaThreshold);
-      for(const regressor in deltasAboveThreshold) {
+      for(const regressor in sortByValue(deltasAboveThreshold)) {
         const delta = deltas[regressor];
         addRow(generateFeatureDescription(regressor), delta, 'featureLabel', 'delta')
       }
