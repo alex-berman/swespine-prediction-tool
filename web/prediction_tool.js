@@ -285,6 +285,7 @@ function initializeForm() {
         else if(field.type == 'number') {
           const valueElement = document.createElement('input');
           valueElement.type = 'text';
+          valueElement.inputmode = 'numeric';
           valueElement.id = field.name + '-value';
           valueElement.className = 'input';
 
