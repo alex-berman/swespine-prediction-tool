@@ -1,5 +1,6 @@
 body {
     font-family: Arial, sans-serif;
+    font-size: 12px;
     background-color: #f0f0f0;
     margin: 0;
     padding: 0;
@@ -40,7 +41,6 @@ body {
 }
 
 .tab-button {
-    font-size: large;
     flex: 1;
     padding: 15px;
     color: white;
@@ -90,6 +90,14 @@ body {
     flex: 1;
 }
 
+.formHeader {
+  font-size: 14px;
+  margin-top: 20px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 10px;
+}
+
 .input[type="number"],
 .input select,
 .input[type="range"] {
@@ -137,7 +145,7 @@ body {
 }
 
 .prediction {
-  font-size: x-large;
+  font-size: 18px;
   font-weight: bold;
 }
 
@@ -193,14 +201,13 @@ td {
 }
 
 .tick {
-    font-size: x-small;
+    font-size: 11px;
 }
 
 .labelCell {
     height: 30px;
     vertical-align: left;
     width: 200px;
-    font-size: small;
 }
 
 .contentCell {
@@ -210,13 +217,11 @@ td {
 }
 
 .featureLabel {
-  font-size: small;
   padding-left: 10px;
   height: 30px;
 }
 
 .nonFeatureLabel {
-  font-size: small;
   height: 30px;
 }
 
@@ -224,7 +229,6 @@ td {
     height: 30px;
     background: #eee8;
     border: 1px solid white;
-    font-size: small;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -247,6 +251,5 @@ td {
 }
 
 .featureContributionsHeader {
-  font-size: small;
   padding-top: 20px;
 }

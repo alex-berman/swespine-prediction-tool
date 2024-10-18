@@ -217,7 +217,8 @@ function initializeForm() {
     }
 
     for(const group of tab.groups) {
-      const h = document.createElement('h2');
+      const h = document.createElement('div');
+      h.className = 'formHeader';
       h.innerHTML = group.header;
       tabDiv.appendChild(h);
 
