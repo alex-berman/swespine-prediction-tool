@@ -1,9 +1,9 @@
-import { dataModel, getDataDefinition } from "./data_model.js";
-import { tabs, getLayoutField } from "./form_layout.js";
-import { mean_disc_herniation } from "./models/mean_disc_herniation.js";
-import { outcome_disc_herniation_coefs } from "./models/outcome_disc_herniation_coefs.js";
-import { satisfaction_disc_herniation_coefs } from "./models/satisfaction_disc_herniation_coefs.js";
-import { presets } from "./presets.js";
+import { dataModel, getDataDefinition } from "./assets/data_model.js";
+import { tabs, getLayoutField } from "./assets/tool_form_layout.js";
+import { mean_disc_herniation } from "./assets/models/mean_disc_herniation.js";
+import { outcome_disc_herniation_coefs } from "./assets/models/outcome_disc_herniation_coefs.js";
+import { satisfaction_disc_herniation_coefs } from "./assets/models/satisfaction_disc_herniation_coefs.js";
+import { presets } from "./assets/presets.js";
 
 const SATISFACTION_LEVELS = [
   "Tveksam/missnöjd",
