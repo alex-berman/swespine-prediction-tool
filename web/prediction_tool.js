@@ -1024,7 +1024,7 @@ function plotPieChart(id, values, levels, colors) {
       layout: layout,
       config: {
           displayModeBar: false,
-          responsive: true
+          responsive: false
       }
     });
 }
