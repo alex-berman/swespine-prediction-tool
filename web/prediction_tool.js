@@ -955,7 +955,11 @@ function plotPieChart(id, values, levels, colors) {
     marker: {
       colors: colors.map(cssColorString),
     },
+    sort: false,
+    rotation: 0,
+    direction: 'clockwise',
   }];
+  console.log(data);
 
   var layout = {
     margin: {
