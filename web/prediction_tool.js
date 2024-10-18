@@ -48,7 +48,7 @@ const QUESTIONNAIRE_CONTENT = {
 const MAX_SLOPE_LOGISTIC_REGRESSION = 0.25;
 const MAX_SLOPE_ORDERED_PROBIT = -1 / Math.sqrt(2 * Math.PI);
 
-var values;
+var profileValues;
 
 export function initializePredictionTool() {
   initializeTabs();
@@ -57,17 +57,18 @@ export function initializePredictionTool() {
   const urlParams = new URLSearchParams(window.location.search);
   const preset = urlParams.get('preset');
   if(preset) {
-    values = presets[preset];
+    profileValues = presets[preset];
   }
   else {
-    values = randomValues();
+    profileValues = randomProfileValues();
   }
 
-  updateFormFieldsFromValues();
+  updateFormFieldsFromProfileValues();
 
   initializeCollapsibles();
 
   function handleInputChange(event) {
+    profileValues = getProfileValuesFromForm();
     updatePredictionsAndLocalExplanations();
   }
 
@@ -108,7 +109,7 @@ function getRandomFloat(min, max, precision) {
     return (Math.random() * (max - min) + min).toFixed(precision);
 }
 
-function randomValues() {
+function randomProfileValues() {
   function randomValue(dataDefinition) {
     if(dataDefinition.type == 'categorical') {
       return Math.floor(Math.random() * dataDefinition.num_categories);
@@ -134,11 +135,11 @@ function randomValues() {
   return result;
 }
 
-function updateFormFieldsFromValues() {
+function updateFormFieldsFromProfileValues() {
   for(const tab of tabs) {
     for(const group of tab.groups) {
       for(const field of group.fields) {
-        updateFormFieldFromValue(field, values[field.name]);
+        updateFormFieldFromValue(field, profileValues[field.name]);
       }
     }
   }
@@ -322,43 +323,66 @@ function initializeForm() {
   }
 }
 
-function getScalarValueFromForm(varName) {
-  return parseFloat(document.getElementById(varName).value);
-}
-
 function range(size, startAt = 0) {
     return [...Array(size).keys()].map(i => i + startAt);
 }
 
-function getNominalValuesFromForm(varName, n) {
+function getNominalRegressorValues(varName, n) {
   if(n == 1) {
-    if(document.getElementById(varName + '1').checked) {
+    if(profileValues[varName]) {
       return [1];
     } else {
       return [0];
     }
   }
   else if(n > 1) {
-    var element = document.getElementById(varName);
-    return range(n).map(function(i) { return element.options[i].selected ? 1 : 0; })
+    return range(n).map(function(i) { return profileValues[varName] == i ? 1 : 0; })
   }
 }
 
-function getRegressorValuesFromForm(coefs) {
-  var result = {}
-  for(const key in coefs) {
-    if(key != 'Intercept' && key != 'Thresholds') {
-      var coef = coefs[key];
-      if(Array.isArray(coef)) {
-        result[key] = getNominalValuesFromForm(key, coef.length);
-      }
-      else {
-        result[key] = getScalarValueFromForm(key);
+function getProfileValuesFromForm() {
+  var result = {};
+  for(const tab of tabs) {
+    for(const group of tab.groups) {
+      for(const field of group.fields) {
+        if(field.type == 'select') {
+          const element = document.getElementById(field.name);
+          result[field.name] = element.selectedIndex;
+        }
+        else if(field.type == 'number') {
+          const element = document.getElementById(field.name);
+          result[field.name] = parseFloat(element.value);
+        }
+        else if(field.type == 'radio' || field.type == 'toggle') {
+          for(let i = 0; i < field.labels.length; i++) {
+            const element = document.getElementById(field.name + i);
+            if(element.checked) {
+              result[field.name] = i;
+            }
+          }
+        }
       }
     }
   }
   return result;
 }
+
+function getRegressorValues(coefs) {
+  var result = {}
+  for(const key in coefs) {
+    if(key != 'Intercept' && key != 'Thresholds') {
+      var coef = coefs[key];
+      if(Array.isArray(coef)) {
+        result[key] = getNominalRegressorValues(key, coef.length);
+      }
+      else {
+        result[key] = profileValues[key];
+      }
+    }
+  }
+  return result;
+}
+
 
 function getProductSum(regressorValues, coefs, log) {
   var result = 0;
@@ -380,17 +404,20 @@ function getDelta(key, regressorValues, coef) {
     return coef[0];
   }
   else if(key != 'Thresholds') {
-    if(Array.isArray(coef)) {
-      var result = 0;
-      for(let i = 0; i < coef.length; i++) {
-        result += coef[i] * regressorValues[key][i];
+    if(regressorValues[key]) {
+      if(Array.isArray(coef)) {
+        var result = 0;
+        for(let i = 0; i < coef.length; i++) {
+          result += coef[i] * regressorValues[key][i];
+        }
+        return result;
       }
-      return result;
-    }
-    else {
-      return coef * regressorValues[key];
+      else {
+        return coef * regressorValues[key];
+      }
     }
   }
+  return 0;
 }
 
 function logOddsToProb(logOdds) {
@@ -411,7 +438,7 @@ function updateLogisticRegressionExplanation(id, coefs, levels, colors) {
 }
 
 function updateOrderedProbitPrediction(id, coefs) {
-  const regressorValues = getRegressorValuesFromForm(coefs);
+  const regressorValues = getRegressorValues(coefs);
   console.log('updateOrderedProbitPrediction: regressor values: '); console.log(regressorValues);
   console.log('calculating product sum for ordered probit');
   const productSum = getProductSum(regressorValues, coefs);
@@ -493,18 +520,20 @@ function getProductSumDeltas(reference, comparison, coefs) {
   for(const key in coefs) {
     var delta = 0;
     if(key != 'Intercept' && key != 'Thresholds') {
-      var coef = coefs[key];
-      if(Array.isArray(coef)) {
-        for(let i = 0; i < coef.length; i++) {
-          delta += coef[i] * (comparison[key][i] - reference[key][i]);
+      if(comparison[key] && reference[key]) {
+        var coef = coefs[key];
+        if(Array.isArray(coef)) {
+          for(let i = 0; i < coef.length; i++) {
+            delta += coef[i] * (comparison[key][i] - reference[key][i]);
+          }
+        }
+        else {
+          delta = coef * (comparison[key] - reference[key]);
         }
       }
-      else {
-        delta = coef * (comparison[key] - reference[key]);
+      if(delta != 0) {
+        result[key] = delta;
       }
-    }
-    if(delta != 0) {
-      result[key] = delta;
     }
   }
   return result;
@@ -542,9 +571,9 @@ function getCheckedLabel(name) {
 }
 
 function getNominalValue(regressor, valuesForAllRegressors) {
-  const values = valuesForAllRegressors[regressor];
-  for(var i = 0; i < values.length; i++) {
-    if(values[i] == 1) {
+  const valuesForRegressor = valuesForAllRegressors[regressor];
+  for(var i = 0; i < valuesForRegressor.length; i++) {
+    if(valuesForRegressor[i] == 1) {
       return i + 1;
     }
   }
@@ -586,7 +615,7 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
   const deltaThreshold = 0.1; // Factors below this threshold get grouped under "Other factors"
   const meanProductSum = getProductSum(mean_disc_herniation, coefs);
   const meanProb = productSumToProbability(meanProductSum);
-  const regressorValues = getRegressorValuesFromForm(coefs);
+  const regressorValues = getRegressorValues(coefs);
   const deltas = getProductSumDeltas(mean_disc_herniation, regressorValues, coefs);
 
   const gradient = generateGradient();
@@ -746,9 +775,9 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
   addAxisTicks();
   addRow('Genomsnittlig diskbråckspatient', meanProb, 'nonFeatureLabel', true);
   const positiveDeltas = filterDeltas(deltas, ([_, x]) =>
-    (polarity == 'positive' && x >= 0) || (polarity == 'negative' && x < 0));
+    (polarity == 'positive' && x > 0) || (polarity == 'negative' && x < 0));
   const negativeDeltas = filterDeltas(deltas, ([_, x]) =>
-    (polarity == 'positive' && x < 0) || (polarity == 'negative' && x >= 0));
+    (polarity == 'positive' && x < 0) || (polarity == 'negative' && x > 0));
   addPotentialSection(positiveDeltas, 'Positiva faktorer');
   addPotentialSection(negativeDeltas, 'Negativa faktorer');
 
@@ -926,17 +955,17 @@ function generateGlobalExplanationTable(id, coefs, maxSlope) {
 }
 
 function plotOrderedProbabilitiesPieChart(id, coefs, levels, colors) {
-  const regressorValues = getRegressorValuesFromForm(coefs);
+  const regressorValues = getRegressorValues(coefs);
   const productSum = getProductSum(regressorValues, coefs, true);
   console.log('product sum for ordered probabilities: ' + productSum);
   const probs = getOrderedProbitProbabilities(coefs, productSum);
   console.log('probabilities:'); console.log(probs);
-  const values = probs.map((prob, _) => Math.round(prob * 100));
-  plotPieChart(id, values, levels, colors);
+  const percentages = probs.map((prob, _) => Math.round(prob * 100));
+  plotPieChart(id, percentages, levels, colors);
 }
 
 function getLogisticRegressionProbabilityPercs(coefs) {
-  const regressorValues = getRegressorValuesFromForm(coefs);
+  const regressorValues = getRegressorValues(coefs);
 
   const positivePredictedLogOdds = getProductSum(regressorValues, coefs);
   const positiveProbability = logOddsToProb(positivePredictedLogOdds);
@@ -994,6 +1023,6 @@ function cssColorString(rgbValues) {
   return `rgb(${rgbValues[0]}, ${rgbValues[1]}, ${rgbValues[2]})`;
 }
 
-export function getValues() {
-  return values;
+export function getProfileValues() {
+  return profileValues;
 }
