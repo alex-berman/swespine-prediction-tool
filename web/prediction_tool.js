@@ -638,7 +638,7 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
   }
 
   function generateFeatureDescription(regressor) {
-    const delta = deltas[regressor];
+    const delta = productSumDeltas[regressor];
     const coef = coefs[regressor];
     if(Array.isArray(coef)) {
       if(coef.length == 1) {
@@ -664,16 +664,16 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
     }
     else {
       if(regressor == 'AgeAtSurgery') {
-        return 'Relativt ' + (delta < 0 ? 'låg' : 'hög') + ' ålder';
+        return 'Relativt ' + (delta * coef < 0 ? 'låg' : 'hög') + ' ålder';
       }
       if(regressor == 'EQ5DIndex') {
-        return 'Relativt ' + (delta < 0 ? 'låg' : 'hög') + ' EQ5D';
+        return 'Relativt ' + (delta * coef < 0 ? 'låg' : 'hög') + ' EQ5D';
       }
       if(regressor == 'ODI') {
-        return 'Relativt ' + (delta < 0 ? 'låg' : 'hög') + ' funktionsnedsättning';
+        return 'Relativt ' + (delta * coef < 0 ? 'låg' : 'hög') + ' funktionsnedsättning';
       }
       if(regressor == 'NRSBackPain') {
-        return 'Relativt ' + (delta < 0 ? 'lite' : 'mycket') + ' ryggsmärta';
+        return 'Relativt ' + (delta * coef < 0 ? 'lite' : 'mycket') + ' ryggsmärta';
       }
     }
   }
