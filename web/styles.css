@@ -225,8 +225,14 @@ td {
   height: 30px;
 }
 
+.probabilityRange {
+  width: 100%;
+  height: 20px;
+  border-radius: 4px;
+}
+
 .probabilityMarker {
-    height: 30px;
+    height: 20px;
     background: #eee8;
     border: 1px solid white;
     display: flex;

@@ -734,7 +734,9 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
       contentCell.className = 'contentCell';
 
       if(type == 'probability') {
-        contentCell.style.background = gradient;
+        const probabilityRangeDiv = document.createElement('div');
+        probabilityRangeDiv.className = 'probabilityRange';
+        probabilityRangeDiv.style.background = gradient;
         const valueDiv = document.createElement('div');
         valueDiv.className = 'probabilityMarker';
         const relativeWidth = 0.1;
@@ -742,7 +744,8 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
         valueDiv.style.position = 'relative';
         valueDiv.style.left = `${Math.round(value * (1 - relativeWidth) * 100)}%`;
         valueDiv.innerHTML = `${Math.round(value * 100)}%`;
-        contentCell.appendChild(valueDiv);
+        probabilityRangeDiv.appendChild(valueDiv);
+        contentCell.appendChild(probabilityRangeDiv);
       }
       else if(type == 'delta') {
         const line = document.createElement('div');
