@@ -239,6 +239,10 @@ td {
   height: 30px;
 }
 
+.toggleMoreLessCell {
+  padding-left: 10px;
+}
+
 .nonFeatureLabel {
   height: 30px;
 }

@@ -35,6 +35,7 @@ const OUTCOME_COLORS = [
 ];
 
 const disc_herniation = 0;
+const NUM_SHOWN_DELTAS = 3;
 
 const QUESTIONNAIRE_CONTENT = {
   [disc_herniation]: {
@@ -744,7 +745,7 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
     table.appendChild(row);
   }
 
-  function addRow(label, value, labelClass, type) {
+  function addRow(label, value, labelClass, type, index) {
       const row = document.createElement('tr');
       const labelCell = document.createElement('td');
       labelCell.className = labelClass;
@@ -786,28 +787,61 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
 
       row.appendChild(contentCell);
       table.appendChild(row);
+      return row;
+  }
+
+  function addToggleMoreLess(rows) {
+    var showAll = false;
+
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.className = 'toggleMoreLessCell';
+    cell.colspan = 2;
+    const button = document.createElement('input');
+    button.type = 'button';
+    button.value = 'Visa fler';
+
+    function toggle() {
+      showAll = !showAll;
+      update();
+    }
+    
+    function update() {
+      if(showAll) {
+        for(const row of rows) {
+          row.style.display = 'table-row';
+        }
+        button.value = 'Visa färre';
+      }
+      else {
+        for(var i = NUM_SHOWN_DELTAS; i < rows.length; i++) {
+          rows[i].style.display = 'none';
+        }
+        button.value = 'Visa fler';
+      }
+    }
+
+    button.addEventListener('click', toggle);
+    update();
+    cell.appendChild(button);
+    row.appendChild(cell);
+    table.appendChild(row);
   }
 
   function addPotentialSection(deltas, header) {
     const numDeltas = Object.values(deltas).length;
-    const maxShownDeltas = 5;
     if(numDeltas > 0) {
+      var rows = [];
       const sortedDeltas = sortByValue(deltas);
-      const shownDeltas = Object.fromEntries(
-        Object.entries(sortedDeltas).slice(0, maxShownDeltas)
-      );
       addVerticalSpace();
       addHeader(header);
-      for(const regressor in shownDeltas) {
-        const delta = shownDeltas[regressor];
-        addRow(generateFeatureDescription(regressor), delta, 'featureLabel', 'delta')
+      for(const regressor in sortedDeltas) {
+        const delta = sortedDeltas[regressor];
+        const row = addRow(generateFeatureDescription(regressor), delta, 'featureLabel', 'delta');
+        rows.push(row);
       }
-      if(numDeltas > maxShownDeltas) {
-        const notShownDeltas = Object.fromEntries(
-          Object.entries(sortedDeltas).slice(maxShownDeltas)
-        );
-        const delta = Object.values(notShownDeltas).reduce((acc, curr) => acc + curr, 0);
-        addRow('Övriga faktorer', delta, 'featureLabel', 'delta');
+      if(numDeltas > NUM_SHOWN_DELTAS) {
+        addToggleMoreLess(rows);
       }
     }
   }
