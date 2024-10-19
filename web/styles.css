@@ -218,6 +218,10 @@ td {
     font-size: 11px;
 }
 
+.featureContributionsHeader {
+  padding-bottom: 5px;
+}
+
 .labelCell {
     height: 30px;
     vertical-align: left;
@@ -263,13 +267,13 @@ td {
   left: 50%;
 }
 
+.verticalSpace {
+  padding-top: 15px;
+}
+
 .bar {
   position: absolute;
   height: 20px;
   top: calc(50% - 10px);
   background-color: #ddd;
-}
-
-.featureContributionsHeader {
-  padding-top: 20px;
 }

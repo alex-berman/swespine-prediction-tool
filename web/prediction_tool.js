@@ -710,6 +710,15 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
     table.appendChild(row);
   }
 
+  function addVerticalSpace() {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colspan = 2;
+    cell.className = 'verticalSpace';
+    row.appendChild(cell);
+    table.appendChild(row);
+  }
+
   function addHeader(header) {
     const row = document.createElement('tr');
     const cell = document.createElement('td');
@@ -781,6 +790,7 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
       const shownDeltas = Object.fromEntries(
         Object.entries(sortedDeltas).slice(0, maxShownDeltas)
       );
+      addVerticalSpace();
       addHeader(header);
       for(const regressor in shownDeltas) {
         const delta = shownDeltas[regressor];
