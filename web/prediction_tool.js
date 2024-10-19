@@ -1025,6 +1025,7 @@ function plotPieChart(id, values, levels, colors) {
         r: 50
     },
     width: 500,
+    height: 400,
     legend: {
       traceorder: 'normal',
       x: 1,
