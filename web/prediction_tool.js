@@ -637,6 +637,14 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
   const table = document.createElement('table');
   table.className = 'localExplanationsTable';
 
+  const probabilityBarContainerWidth = 400;
+  const probabilityBarContainerHalfWidth = probabilityBarContainerWidth / 2;
+  const minShownDelta = 2 / probabilityBarContainerHalfWidth;
+
+  function probabilityBarWidth(probability) {
+    return Math.abs(probability) * probabilityBarContainerHalfWidth;
+  }
+
   function filterDeltas(deltas, f) {
     return Object.fromEntries(Object.entries(deltas).filter(f));
   }
@@ -735,7 +743,7 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
 
     table.appendChild(row);
   }
-  
+
   function addRow(label, value, labelClass, type) {
       const row = document.createElement('tr');
       const labelCell = document.createElement('td');
@@ -766,14 +774,12 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
 
         const bar = document.createElement('div');
         bar.className = 'bar';
-        const containerWidth = 400;
-        const halfWidth = containerWidth / 2;
-        const barWidth = Math.abs(value) * halfWidth;
+        const barWidth = probabilityBarWidth(value);
         bar.style.width = `${barWidth}px`;
         if(value < 0) {
-          bar.style.left = `${halfWidth - barWidth}px`;
+          bar.style.left = `${probabilityBarContainerHalfWidth - barWidth}px`;
         } else {
-          bar.style.left = `${halfWidth}px`;
+          bar.style.left = `${probabilityBarContainerHalfWidth}px`;
         }
         contentCell.appendChild(bar);
       }
@@ -808,8 +814,8 @@ function plotLocalFeatureContributions(id, coefs, levels, colors, colorSteps, pr
 
   addAxisTicks();
   addRow('Genomsnittlig diskbråckspatient', meanProb, 'nonFeatureLabel', 'probability');
-  const positiveDeltas = filterDeltas(deltas, ([_, x]) => x > 0);
-  const negativeDeltas = filterDeltas(deltas, ([_, x]) => x < 0);
+  const positiveDeltas = filterDeltas(deltas, ([_, x]) => x > minShownDelta);
+  const negativeDeltas = filterDeltas(deltas, ([_, x]) => x < -minShownDelta);
   addPotentialSection(positiveDeltas, 'Positiva faktorer');
   addPotentialSection(negativeDeltas, 'Negativa faktorer');
 
