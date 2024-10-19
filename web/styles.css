@@ -90,7 +90,7 @@ body {
     flex: 1;
 }
 
-.formHeader {
+.formHeader, .explanationHeader {
   font-size: 14px;
   margin-top: 20px;
   padding-bottom: 4px;
@@ -144,18 +144,32 @@ body {
     margin-bottom: 10px;
 }
 
+.predictionHeader {
+  font-size: 18px;
+  font-weight: bold;
+  padding-bottom: 10px;
+}
+
+.predictionSubHeader {
+  font-size: 16px;
+  padding-bottom: 10px;
+}
+
 .prediction {
   font-size: 18px;
   font-weight: bold;
-}
-
-h3 {
 }
 
 .header-container {
   display: flex;
   align-items: center;
   cursor: pointer;
+
+  font-size: 14px;
+  margin-top: 20px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 10px;
 }
 
 .square {

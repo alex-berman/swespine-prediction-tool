@@ -24,17 +24,17 @@
             <div class="tab-content">
                 <div id="satisfaction" class="tab-pane tab-pane-prediction active">
                     <div class="box" style="text-align: center;">
-                        <h2>Sannolikhet att bli nöjd med operation</h2>
+                        <div class="predictionHeader">Sannolikhet att bli nöjd med operation</div>
                         <div id="prediction_satisfaction" class="prediction"></div>
                     </div>
                     <div class="explanation-section">
-                        <h3>Förklaring</h3>
+                        <div class="explanationHeader">Förklaring</div>
                         <div id="featureContributions_satisfaction"></div>
                         <div style="padding-top:10px">
                             Diagrammet visar hur sannolikheten att bli nöjd med operation beräknas utifrån sannolikheten att bli nöjd för en genomsnittlig patient samt faktorer avseende vald patientprofil.
                         </div>
-                        <h3 class="header-container" id="toggle-clickable-global-explanation-satisfaction">
-                            <div class="square" id="toggle-button-global-explanation-satisfaction">+</div> Mer information</h3>
+                        <div class="header-container" id="toggle-clickable-global-explanation-satisfaction">
+                            <div class="square" id="toggle-button-global-explanation-satisfaction">+</div> Mer information</div>
                         <div id="collapsible-container-global-explanation-satisfaction" class="collapsible-container">
                             <div id="collapsible-content-global-explanation-satisfaction">
                                 <div class="box" style="text-align: left;">
@@ -51,8 +51,8 @@
 
                 <div id="outcome" class="tab-pane tab-pane-prediction">
                     <div class="box" style="text-align: center;">
-                        <h2>Sannolikhet för lyckat utfall<br />
-                            <span style="font-weight:normal; font-size:80%;">(smärtan helt försvunnen eller mycket förbättrad efter 1 år)</span></h2>
+                        <div class="predictionHeader">Sannolikhet för lyckat utfall</div>
+                        <div class="predictionSubHeader">(smärtan helt försvunnen eller mycket förbättrad efter 1 år)</div>
                         <div id="prediction_outcome" class="prediction"></div>
                     </div>
                     <div id="probabilitiesPieChart_outcome"></div>
@@ -60,13 +60,13 @@
                         Pajdiagrammet visar sannolikheten för olika smärtnivåer efter en hypotetisk operation, baserat på vald patientprofil.
                     </div>
                     <div class="explanation-section">
-                        <h3>Förklaring</h3>
+                        <div class="explanationHeader">Förklaring</div>
                         <div id="featureContributions_outcome"></div>
                         <div style="padding-top:10px">
                             Diagrammet visar hur sannolikheten för lyckat utfall av operation beräknas utifrån sannolikheten för lyckat utfall för en genomsnittlig patient samt faktorer avseende vald patientprofil.
                         </div>
-                        <h3 class="header-container" id="toggle-clickable-global-explanation-outcome">
-                            <div class="square" id="toggle-button-global-explanation-outcome">+</div> Mer information</h3>
+                        <div class="header-container" id="toggle-clickable-global-explanation-outcome">
+                            <div class="square" id="toggle-button-global-explanation-outcome">+</div> Mer information</div>
                         <div id="collapsible-container-global-explanation-outcome" class="collapsible-container">
                             <div id="collapsible-content-global-explanation-outcome">
                                 <div class="box" style="text-align: left;">
