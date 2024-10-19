@@ -5,7 +5,7 @@ import { outcome_disc_herniation_coefs } from "./assets/models/outcome_disc_hern
 import { satisfaction_disc_herniation_coefs } from "./assets/models/satisfaction_disc_herniation_coefs.js";
 import { presets } from "./assets/presets.js";
 
-const SATISFACTION_LEVELS = [
+const SATISFACTION_POLES = [
   "Tveksam/missnöjd",
   "Nöjd",
 ];
@@ -15,6 +15,10 @@ const SATISFACTION_COLORS = [
 ];
 const POSITIVE_COLOR = SATISFACTION_COLORS[0];
 
+const OUTCOME_POLES = [
+  "Lyckat utfall",
+  "Ej lyckat utfall",
+];
 const OUTCOME_LEVELS = [
   "Helt försvunnen",
   "Mycket förbättrad",
@@ -75,12 +79,11 @@ export function initializePredictionTool() {
   function updatePredictionsAndLocalExplanations() {
     updateLogisticRegressionPrediction('satisfaction', satisfaction_disc_herniation_coefs);
     updateLogisticRegressionExplanation(
-      'satisfaction', satisfaction_disc_herniation_coefs, SATISFACTION_LEVELS, SATISFACTION_COLORS);
+      'satisfaction', satisfaction_disc_herniation_coefs, SATISFACTION_POLES, SATISFACTION_COLORS);
 
     updateOrderedProbitPrediction('outcome', outcome_disc_herniation_coefs);
     plotOrderedProbabilitiesPieChart('outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
-    updateOrderedProbitExplanation(
-      'outcome', outcome_disc_herniation_coefs, OUTCOME_LEVELS, OUTCOME_COLORS);
+    updateOrderedProbitExplanation('outcome', outcome_disc_herniation_coefs, OUTCOME_POLES, OUTCOME_COLORS);
   }
 
   var formElements = document.querySelectorAll("input, select");
