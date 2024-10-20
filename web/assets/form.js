@@ -1,4 +1,5 @@
 import { formStructure } from "./form_structure.js";
+import { getDataDefinition } from "./data_model.js";
 
 export function createFormFieldWidget(field) {
   const groupDiv = document.createElement('div');
