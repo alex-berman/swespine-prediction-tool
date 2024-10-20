@@ -57,7 +57,7 @@ export const tabs = [
             "label": "Ålderspension",
             "type": "toggle",
             "labels": ["Nej", "Ja, heltid / deltid"]
-          }
+          },
         ]
       },
       {

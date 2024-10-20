@@ -1,5 +1,4 @@
-import { dataModel, getDataDefinition } from "./data_model.js";
-import { tabs, getLayoutField } from "./tool_form_layout.js";
+import { formStructure } from "./form_structure.js";
 
 export function createFormFieldWidget(field) {
   const groupDiv = document.createElement('div');
@@ -102,12 +101,8 @@ export function createFormFieldWidget(field) {
 export function initializeForm(id) {
   const container = document.getElementById(id);
 
-  for(const tab of tabs) {
-    for(const group of tab.groups) {
-      for(const field of group.fields) {
-        const widget = createFormFieldWidget(field);
-        container.appendChild(widget);
-      }
-    }
+  for(const field of formStructure) {
+    const widget = createFormFieldWidget(field);
+    container.appendChild(widget);
   }
 }
