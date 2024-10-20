@@ -128,7 +128,7 @@ body {
 
 .radio-group input[type="radio"] + label {
     background-color: #f0f0f0;
-    color: #333;
+    color: #555;
 }
 
 .radio-group input[type="radio"]:checked + label {
