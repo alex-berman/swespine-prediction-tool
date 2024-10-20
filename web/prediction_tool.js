@@ -88,7 +88,7 @@ export function initializePredictionTool() {
     updateOrderedProbitExplanation('outcome', outcome_disc_herniation_coefs, OUTCOME_POLES, OUTCOME_COLORS);
   }
 
-  var formElements = document.querySelectorAll("input, select");
+  const formElements = document.querySelectorAll("input, select");
   formElements.forEach(function(element) {
       element.addEventListener("input", handleInputChange);
   });

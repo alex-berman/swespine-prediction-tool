@@ -105,4 +105,22 @@ export function initializeForm(id) {
     const widget = createFormFieldWidget(field);
     container.appendChild(widget);
   }
+
+  function handleInputChange(event) {
+    localStorage.setItem(event.originalTarget.name, event.originalTarget.value);
+  }
+
+  for(const element of document.forms[0].elements) {
+    const value = localStorage.getItem(element.name);
+    if(value) {
+      if(element.type == 'radio' && element.value == value) {
+        element.checked = true;
+      }
+    }
+  }
+
+  const formElements = document.querySelectorAll("input, select");
+  formElements.forEach(function(element) {
+    element.addEventListener("input", handleInputChange);
+  });
 }
