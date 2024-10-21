@@ -6,7 +6,7 @@ from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.metrics import roc_auc_score, accuracy_score
 
 from features import FEATURE_SETS
-from tasks import TASKS, SELECTION
+from tasks import TASKS, SELECTION, ESTIMATOR_PARAMS
 from util import get_model_paths, load_model
 from preprocess import name_combiner
 
@@ -43,10 +43,10 @@ def train_batch():
         df = pd.read_pickle(f'{DATA_FOLDER}/{diagnosis}.pkl')
         print(f'{diagnosis}: {df.shape[0]} rows')
         for task, feature_set in feature_sets_for_diagnosis.items():
-            task_config = TASKS[task]
+            task_config = TASKS[diagnosis][task]
             target = task_config['target']
             estimator = task_config['estimator']
-            params = task_config['params']
+            params = ESTIMATOR_PARAMS[estimator]
             preprocessing_asset = pkl.load(open(f'{DATA_FOLDER}/{diagnosis}_{task}.pkl', 'rb'))
             preprocessed_data = preprocessing_asset['preprocessed_data']
             cols = preprocessed_data.columns

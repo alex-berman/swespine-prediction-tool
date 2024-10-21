@@ -151,6 +151,21 @@ FEATURE_SETS = {
             'IsPreviouslyOperated',
             'HasAgePension',
         ],
+        # 'ga': [
+        #     'IsUnemployed',
+        #     'ODI',
+        #     'EQ5DIndex',
+        #     'NRSBackPain',
+        #     'AbilityWalking',
+        #     'IsSmoker',
+        #     'HasOtherIllness',
+        #     'HasSickPension',
+        #     'DurationLegPain',
+        #     'DurationBackPain',
+        #     'IsPreviouslyOperated',
+        #     'AgeAtSurgery',
+        #     'HasAgePension',
+        # ],
     },
 }
 

@@ -91,7 +91,7 @@ def preprocess_batch():
         df = pd.read_pickle(f'{DATA_FOLDER}/{diagnosis}.pkl')
         print(f'{diagnosis}: {df.shape[0]} rows')
         for task, feature_set in feature_sets_for_diagnosis.items():
-            target = TASKS[task]['target']
+            target = TASKS[diagnosis][task]['target']
             columns = feature_set + [target]
             df_complete_case = df[columns].dropna()
             print(f'  {task}: {df_complete_case.shape[0]} complete cases')
