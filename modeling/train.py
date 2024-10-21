@@ -1,14 +1,12 @@
 import os
 import pickle as pkl
 
-import pandas as pd
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.metrics import roc_auc_score, accuracy_score
 
-from features import FEATURE_SETS
 from tasks import TASKS, SELECTION, ESTIMATOR_PARAMS
 from util import get_model_paths, load_model
-from preprocess import name_combiner
+from preprocess import name_combiner # noqa
 
 DATA_FOLDER = 'data'
 
@@ -39,11 +37,8 @@ def fit_model(diagnosis, task, model, params, data, selection_config, output_dir
 
 
 def train_batch():
-    for diagnosis, feature_sets_for_diagnosis in FEATURE_SETS.items():
-        df = pd.read_pickle(f'{DATA_FOLDER}/{diagnosis}.pkl')
-        print(f'{diagnosis}: {df.shape[0]} rows')
-        for task, feature_set in feature_sets_for_diagnosis.items():
-            task_config = TASKS[diagnosis][task]
+    for diagnosis, tasks in TASKS.items():
+        for task, task_config in tasks.items():
             target = task_config['target']
             estimator = task_config['estimator']
             params = ESTIMATOR_PARAMS[estimator]

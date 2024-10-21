@@ -16,9 +16,9 @@ sklearn.set_config(transform_output='pandas')
 DATA_FOLDER = 'data'
 
 FILES = [
-    ('SWESPINE SPINAL STENOSIS ML VS REG.xlsx', 'spinal_stenosis.pkl'),
-    ('SWESPINE RHIZOPATHY ML VS REG.xlsx', 'rhizopathy.pkl'),
-    ('SWESPINE SEGMENT-RELATED BACK PAIN ML VS REG.xlsx', 'srbp.pkl'),
+    # ('SWESPINE SPINAL STENOSIS ML VS REG.xlsx', 'spinal_stenosis.pkl'),
+    # ('SWESPINE RHIZOPATHY ML VS REG.xlsx', 'rhizopathy.pkl'),
+    # ('SWESPINE SEGMENT-RELATED BACK PAIN ML VS REG.xlsx', 'srbp.pkl'),
     ('SWESPINE DISC HERNIATION ML VS REG.xlsx', 'disc_herniation.pkl')
 ]
 
