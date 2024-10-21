@@ -6,6 +6,15 @@ body {
     padding: 0;
 }
 
+.disclaimer {
+  font-size: 12px;
+  width: 100%;
+  text-align: center;
+  background-color: black;
+  color: white;
+  padding: 5px;
+}
+
 .container {
     display: flex;
     width: 95%;
