@@ -24,13 +24,13 @@ COVARIATES = {
     },
     'DurationBackPain': {
         'label': 'Duration of pain in back',
-        'type': 'continuous',
+        'type': 'categorical',
         'description': 'Duration of pain in back',
         'values': [0, 1, 2, 3, 4],
     },
     'DurationLegPain': {
         'label': 'Duration of pain in legs',
-        'type': 'continuous',
+        'type': 'categorical',
         'description': 'Duration of pain in legs',
         'values': [0, 1, 2, 3, 4, 5],
     },
@@ -52,7 +52,7 @@ COVARIATES = {
     },
     'OpLevel': {
         'label': 'Operated levels',
-        'type': 'continuous',
+        'type': 'categorical',
         'description': 'Operated levels',
         'values': [1, 2, 3, 4, 5],
     },
