@@ -22,14 +22,16 @@ FILES = [
     ('SWESPINE DISC HERNIATION ML VS REG.xlsx', 'disc_herniation.pkl')
 ]
 
-for fi, fo in FILES:
-    fname = os.path.join(DATA_FOLDER, fo)
-    if not os.path.exists(fname):
-        print('Converting %s...' % fi)
-        D = pd.read_excel(os.path.join(DATA_FOLDER, fi))
-        D = D.replace('#NULL!', np.nan)
-        D.to_pickle(fname)
-        print('Saved to %s' % fname)
+
+def convert_xslx_to_pandas():
+    for fi, fo in FILES:
+        fname = os.path.join(DATA_FOLDER, fo)
+        if not os.path.exists(fname):
+            print('Converting %s...' % fi)
+            D = pd.read_excel(os.path.join(DATA_FOLDER, fi))
+            D = D.replace('#NULL!', np.nan)
+            D.to_pickle(fname)
+            print('Saved to %s' % fname)
 
 
 def name_combiner(x,y):
@@ -84,22 +86,28 @@ def preprocess(df, covs, nan_category=True, drop_first_binary=True):
     return df_pre, preprocessor, cat_map
 
 
-for diagnosis, feature_sets_for_diagnosis in FEATURE_SETS.items():
-    df = pd.read_pickle(f'{DATA_FOLDER}/{diagnosis}.pkl')
-    print(f'{diagnosis}: {df.shape[0]} rows')
-    for task, feature_set in feature_sets_for_diagnosis.items():
-        target = TASKS[task]['target']
-        columns = feature_set + [target]
-        df_complete_case = df[columns].dropna()
-        print(f'  {task}: {df_complete_case.shape[0]} complete cases')
-        covariates = dict([(k,v) for k,v in COVARIATES.items() if k in columns])
-        df_pre, clf_pre, cat_map = preprocess(df_complete_case, covariates, nan_category=False, drop_first_binary=True)
+def preprocess_batch():
+    for diagnosis, feature_sets_for_diagnosis in FEATURE_SETS.items():
+        df = pd.read_pickle(f'{DATA_FOLDER}/{diagnosis}.pkl')
+        print(f'{diagnosis}: {df.shape[0]} rows')
+        for task, feature_set in feature_sets_for_diagnosis.items():
+            target = TASKS[task]['target']
+            columns = feature_set + [target]
+            df_complete_case = df[columns].dropna()
+            print(f'  {task}: {df_complete_case.shape[0]} complete cases')
+            covariates = dict([(k,v) for k,v in COVARIATES.items() if k in columns])
+            df_pre, clf_pre, cat_map = preprocess(df_complete_case, covariates, nan_category=False, drop_first_binary=True)
 
-        print('  fitted min-max scalers:')
-        fitted_min_max_scaler = clf_pre.named_transformers_['num'].named_steps['scaler']
-        print(f'    min:   {fitted_min_max_scaler.min_}')
-        print(f'    scale: {fitted_min_max_scaler.scale_}')
+            print('  fitted min-max scalers:')
+            fitted_min_max_scaler = clf_pre.named_transformers_['num'].named_steps['scaler']
+            print(f'    min:   {fitted_min_max_scaler.min_}')
+            print(f'    scale: {fitted_min_max_scaler.scale_}')
 
-        pickle.dump(
-            {'preprocessed_data': df_pre, 'preprocessor': clf_pre},
-            open(f'{DATA_FOLDER}/{diagnosis}_{task}.pkl', 'wb'))
+            pickle.dump(
+                {'preprocessed_data': df_pre, 'preprocessor': clf_pre},
+                open(f'{DATA_FOLDER}/{diagnosis}_{task}.pkl', 'wb'))
+
+
+if __name__ == '__main__':
+    convert_xslx_to_pandas()
+    preprocess_batch()
